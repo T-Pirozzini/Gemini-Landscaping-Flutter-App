@@ -20,10 +20,10 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Student report",
+      title: "Gemini Landscaping",
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Color.fromARGB(255, 0, 11, 133),
+        primaryColor: Color.fromARGB(255, 31, 182, 77),
       ),
       home: Home(),
     );
@@ -36,13 +36,15 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final Stream<QuerySnapshot> _usersStream =
-      FirebaseFirestore.instance.collection('report').snapshots();
+  // final Stream<QuerySnapshot> _usersStream =
+  //     FirebaseFirestore.instance.collection('report').snapshots();
+  final Stream<QuerySnapshot> _reportStream2023 =
+      FirebaseFirestore.instance.collection('SiteReports2023').snapshots();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color.fromARGB(255, 0, 11, 133),
+        backgroundColor: Color.fromARGB(255, 31, 182, 77),
         onPressed: () {
           Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (_) => addnote()));
@@ -52,11 +54,11 @@ class _HomeState extends State<Home> {
         ),
       ),
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 0, 11, 133),
-        title: Text('Students'),
+        backgroundColor: Color.fromARGB(255, 31, 182, 77),
+        title: Text('Site Reports 2023'),
       ),
       body: StreamBuilder(
-        stream: _usersStream,
+        stream: _reportStream2023,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
             return Text("something is wrong");
@@ -102,7 +104,7 @@ class _HomeState extends State<Home> {
                             ),
                           ),
                           title: Text(
-                            snapshot.data!.docChanges[index].doc['name'],
+                            snapshot.data!.docChanges[index].doc['date'],
                             style: TextStyle(
                               fontSize: 20,
                             ),

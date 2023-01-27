@@ -62,7 +62,7 @@ class _editnoteState extends State<editnote> {
               });
             },
             child: Text(
-              "save",
+              "Save",
               style: TextStyle(
                 fontSize: 20,
                 color: Color.fromARGB(255, 251, 251, 251),
@@ -77,7 +77,7 @@ class _editnoteState extends State<editnote> {
               });
             },
             child: Text(
-              "delete",
+              "Delete",
               style: TextStyle(
                 fontSize: 20,
                 color: Color.fromARGB(255, 251, 251, 251),

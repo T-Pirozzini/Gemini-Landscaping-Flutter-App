@@ -4,33 +4,55 @@ import 'package:flutter/material.dart';
 import 'main.dart';
 
 class addnote extends StatelessWidget {
-  TextEditingController name = TextEditingController();
-  TextEditingController subject1 = TextEditingController();
-  TextEditingController subject2 = TextEditingController();
-  TextEditingController subject3 = TextEditingController();
+  TextEditingController date = TextEditingController();
+  TextEditingController siteName = TextEditingController();
+  TextEditingController team1 = TextEditingController();
+  TextEditingController team2 = TextEditingController();
+  TextEditingController team3 = TextEditingController();
+  TextEditingController team4 = TextEditingController();
 
-  CollectionReference ref = FirebaseFirestore.instance.collection('report');
+  TextEditingController timeOn1 = TextEditingController();
+  TextEditingController timeOff1 = TextEditingController();
+  TextEditingController timeOn2 = TextEditingController();
+  TextEditingController timeOff2 = TextEditingController();
+  TextEditingController timeOn3 = TextEditingController();
+  TextEditingController timeOff3 = TextEditingController();
+  TextEditingController timeOn4 = TextEditingController();
+  TextEditingController timeOff4 = TextEditingController();
+
+  CollectionReference ref =
+      FirebaseFirestore.instance.collection('SiteReports2023');
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 0, 11, 133),
+        backgroundColor: Color.fromARGB(255, 31, 182, 77),
         actions: [
           MaterialButton(
             onPressed: () {
               ref.add({
-                'name': name.text,
-                'Maths': subject1.text,
-                'Science': subject2.text,
-                'History': subject3.text
+                'date': date.text,
+                'site name': siteName.text,
+                'team1': team1.text,
+                'team2': team1.text,
+                'team3': team1.text,
+                'team4': team1.text,
+                'timeOn1': timeOn1.text,
+                'timeOff1': timeOff1.text,
+                'timeOn2': timeOn2.text,
+                'timeOff2': timeOff2.text,
+                'timeOn3': timeOn3.text,
+                'timeOff3': timeOff3.text,
+                'timeOn4': timeOn4.text,
+                'timeOff4': timeOff4.text,
               }).whenComplete(() {
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (_) => Home()));
               });
             },
             child: Text(
-              "save",
+              "Save",
               style: TextStyle(
                 fontSize: 20,
                 color: Color.fromARGB(255, 251, 251, 251),
@@ -58,9 +80,9 @@ class addnote extends StatelessWidget {
             Container(
               decoration: BoxDecoration(border: Border.all()),
               child: TextField(
-                controller: name,
+                controller: date,
                 decoration: InputDecoration(
-                  hintText: 'name',
+                  hintText: 'Enter date',
                 ),
               ),
             ),
@@ -70,11 +92,11 @@ class addnote extends StatelessWidget {
             Container(
               decoration: BoxDecoration(border: Border.all()),
               child: TextField(
-                controller: subject1,
+                controller: siteName,
                 maxLines: null,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.text,
                 decoration: InputDecoration(
-                  hintText: 'Maths',
+                  hintText: 'Enter site name',
                 ),
               ),
             ),
@@ -84,11 +106,11 @@ class addnote extends StatelessWidget {
             Container(
               decoration: BoxDecoration(border: Border.all()),
               child: TextField(
-                controller: subject2,
+                controller: team1,
                 maxLines: null,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.text,
                 decoration: InputDecoration(
-                  hintText: 'Science',
+                  hintText: 'Enter crew leader name',
                 ),
               ),
             ),
@@ -98,11 +120,142 @@ class addnote extends StatelessWidget {
             Container(
               decoration: BoxDecoration(border: Border.all()),
               child: TextField(
-                controller: subject3,
+                controller: timeOn1,
                 maxLines: null,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  hintText: 'History',
+                  hintText: 'Enter time On',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOff1,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time Off',
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: team2,
+                maxLines: null,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  hintText: 'Enter name',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOn2,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time On',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOff2,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time Off',
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: team3,
+                maxLines: null,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  hintText: 'Enter name',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOn3,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time On',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOff3,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time Off',
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: team4,
+                maxLines: null,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  hintText: 'Enter name',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOn4,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time On',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOff4,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time Off',
                 ),
               ),
             ),
