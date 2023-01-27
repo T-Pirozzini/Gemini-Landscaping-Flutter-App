@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'main.dart';
 import 'report.dart';
+import 'sitereport.dart';
 
 class editnote extends StatefulWidget {
   DocumentSnapshot docid;
@@ -15,17 +16,38 @@ class editnote extends StatefulWidget {
 class _editnoteState extends State<editnote> {
   DocumentSnapshot docid;
   _editnoteState({required this.docid});
-  TextEditingController name = TextEditingController();
-  TextEditingController subject1 = TextEditingController();
-  TextEditingController subject2 = TextEditingController();
-  TextEditingController subject3 = TextEditingController();
+  TextEditingController date = TextEditingController();
+  TextEditingController siteName = TextEditingController();
+  TextEditingController team1 = TextEditingController();
+  TextEditingController team2 = TextEditingController();
+  TextEditingController team3 = TextEditingController();
+  TextEditingController team4 = TextEditingController();
+
+  TextEditingController timeOn1 = TextEditingController();
+  TextEditingController timeOff1 = TextEditingController();
+  TextEditingController timeOn2 = TextEditingController();
+  TextEditingController timeOff2 = TextEditingController();
+  TextEditingController timeOn3 = TextEditingController();
+  TextEditingController timeOff3 = TextEditingController();
+  TextEditingController timeOn4 = TextEditingController();
+  TextEditingController timeOff4 = TextEditingController();
 
   @override
   void initState() {
-    name = TextEditingController(text: widget.docid.get('name'));
-    subject1 = TextEditingController(text: widget.docid.get('Maths'));
-    subject2 = TextEditingController(text: widget.docid.get('Science'));
-    subject3 = TextEditingController(text: widget.docid.get('History'));
+    date = widget.docid.get('date');
+    siteName = widget.docid.get('site name');
+    team1 = widget.docid.get('team1');
+    timeOn1 = widget.docid.get('timeOn1');
+    timeOff1 = widget.docid.get('timeOff1');
+    team2 = widget.docid.get('team2');
+    timeOn2 = widget.docid.get('timeOn2');
+    timeOff2 = widget.docid.get('timeOff2');
+    team3 = widget.docid.get('team3');
+    timeOn3 = widget.docid.get('timeOn3');
+    timeOff3 = widget.docid.get('timeOff3');
+    team4 = widget.docid.get('team4');
+    timeOn4 = widget.docid.get('timeOn4');
+    timeOff4 = widget.docid.get('timeOff4');
 
     super.initState();
   }
@@ -52,10 +74,20 @@ class _editnoteState extends State<editnote> {
           MaterialButton(
             onPressed: () {
               widget.docid.reference.update({
-                'name': name.text,
-                'Maths': subject1.text,
-                'Science': subject2.text,
-                'History': subject3.text
+                'date': date.text,
+                'site name': siteName.text,
+                'team1': team1.text,
+                'team2': team1.text,
+                'team3': team1.text,
+                'team4': team1.text,
+                'timeOn1': timeOn1.text,
+                'timeOff1': timeOff1.text,
+                'timeOn2': timeOn2.text,
+                'timeOff2': timeOff2.text,
+                'timeOn3': timeOn3.text,
+                'timeOff3': timeOff3.text,
+                'timeOn4': timeOn4.text,
+                'timeOff4': timeOff4.text,
               }).whenComplete(() {
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (_) => Home()));
@@ -93,57 +125,188 @@ class _editnoteState extends State<editnote> {
               SizedBox(
                 height: 20,
               ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: name,
-                  decoration: InputDecoration(
-                    hintText: 'name',
-                  ),
+             Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: date,
+                decoration: InputDecoration(
+                  hintText: 'Enter date',
                 ),
               ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: subject1,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'Maths',
-                  ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: siteName,
+                maxLines: null,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  hintText: 'Enter site name',
                 ),
               ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: subject2,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'Science',
-                  ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: team1,
+                maxLines: null,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  hintText: 'Enter crew leader name',
                 ),
               ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: subject3,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'History',
-                  ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOn1,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time On',
                 ),
               ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOff1,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time Off',
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: team2,
+                maxLines: null,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  hintText: 'Enter name',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOn2,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time On',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOff2,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time Off',
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: team3,
+                maxLines: null,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  hintText: 'Enter name',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOn3,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time On',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOff3,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time Off',
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: team4,
+                maxLines: null,
+                keyboardType: TextInputType.text,
+                decoration: InputDecoration(
+                  hintText: 'Enter name',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOn4,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time On',
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Container(
+              decoration: BoxDecoration(border: Border.all()),
+              child: TextField(
+                controller: timeOff4,
+                maxLines: null,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Enter time Off',
+                ),
+              ),
+            ),
               SizedBox(
                 height: 20,
               ),
@@ -153,7 +316,7 @@ class _editnoteState extends State<editnote> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => reportt(
+                      builder: (_) => SiteReport(
                         docid: docid,
                       ),
                     ),

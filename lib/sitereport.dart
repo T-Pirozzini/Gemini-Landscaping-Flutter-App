@@ -85,6 +85,8 @@ class _SiteReportState extends State<SiteReport> {
 
     String? _logo = await rootBundle.loadString('assets/r2.svg');
 
+    final _gemini = await rootBundle.load('assets/gemini-logo.png');
+
     doc.addPage(
       pw.Page(
         pageTheme: pw.PageTheme(
@@ -136,7 +138,7 @@ class _SiteReportState extends State<SiteReport> {
                     ),
                   ),
                   pw.Text(
-                    name,
+                    siteName,
                     style: pw.TextStyle(
                       fontSize: 50,
                     ),
@@ -153,7 +155,7 @@ class _SiteReportState extends State<SiteReport> {
                     ),
                   ),
                   pw.Text(
-                    subject1,
+                    team1,
                     style: pw.TextStyle(
                       fontSize: 50,
                     ),
@@ -170,7 +172,7 @@ class _SiteReportState extends State<SiteReport> {
                     ),
                   ),
                   pw.Text(
-                    subject2,
+                    team2,
                     style: pw.TextStyle(
                       fontSize: 50,
                     ),
@@ -187,7 +189,7 @@ class _SiteReportState extends State<SiteReport> {
                     ),
                   ),
                   pw.Text(
-                    subject3,
+                    team3,
                     style: pw.TextStyle(
                       fontSize: 50,
                     ),
@@ -205,7 +207,7 @@ class _SiteReportState extends State<SiteReport> {
                     ),
                   ),
                   pw.Text(
-                    marks.toString(),
+                    timeTotal.toString(),
                     style: pw.TextStyle(
                       fontSize: 50,
                     ),
