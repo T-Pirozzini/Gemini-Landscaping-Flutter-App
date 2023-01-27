@@ -60,7 +60,7 @@ class _reporttState extends State<reportt> {
     final font2 = await PdfGoogleFonts.openSansBold();
     // final image = await imageFromAssetBundle('assets/r2.svg');
 
-    String? _logo = await rootBundle.loadString('assets/r2.svg');
+    String? _logo = await rootBundle.loadString('assets/gemini_logo.svg');
 
     doc.addPage(
       pw.Page(

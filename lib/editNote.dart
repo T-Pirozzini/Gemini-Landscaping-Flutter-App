@@ -33,21 +33,21 @@ class _editnoteState extends State<editnote> {
   TextEditingController timeOff4 = TextEditingController();
 
   @override
-  void initState() {
-    date = widget.docid.get('date');
-    siteName = widget.docid.get('site name');
-    team1 = widget.docid.get('team1');
-    timeOn1 = widget.docid.get('timeOn1');
-    timeOff1 = widget.docid.get('timeOff1');
-    team2 = widget.docid.get('team2');
-    timeOn2 = widget.docid.get('timeOn2');
-    timeOff2 = widget.docid.get('timeOff2');
-    team3 = widget.docid.get('team3');
-    timeOn3 = widget.docid.get('timeOn3');
-    timeOff3 = widget.docid.get('timeOff3');
-    team4 = widget.docid.get('team4');
-    timeOn4 = widget.docid.get('timeOn4');
-    timeOff4 = widget.docid.get('timeOff4');
+  void initState() {   
+    date = TextEditingController(text: widget.docid.get('date'));
+    siteName = TextEditingController(text: widget.docid.get('site name'));
+    team1 = TextEditingController(text: widget.docid.get('team1'));
+    timeOn1 = TextEditingController(text: widget.docid.get('timeOn1'));
+    timeOff1 = TextEditingController(text: widget.docid.get('timeOff1'));
+    team2 = TextEditingController(text: widget.docid.get('team2'));
+    timeOn2 = TextEditingController(text: widget.docid.get('timeOn2'));
+    timeOff2 = TextEditingController(text: widget.docid.get('timeOff2'));
+    team3 = TextEditingController(text: widget.docid.get('team3'));
+    timeOn3 = TextEditingController(text: widget.docid.get('timeOn3'));
+    timeOff3 = TextEditingController(text: widget.docid.get('timeOff3'));
+    team4 = TextEditingController(text: widget.docid.get('team4'));
+    timeOn4 = TextEditingController(text: widget.docid.get('timeOn4'));
+    timeOff4 = TextEditingController(text: widget.docid.get('timeOff4'));
 
     super.initState();
   }

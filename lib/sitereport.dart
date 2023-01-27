@@ -81,11 +81,9 @@ class _SiteReportState extends State<SiteReport> {
 
     final font1 = await PdfGoogleFonts.openSansRegular();
     final font2 = await PdfGoogleFonts.openSansBold();
-    // final image = await imageFromAssetBundle('assets/r2.svg');
 
-    String? _logo = await rootBundle.loadString('assets/r2.svg');
-
-    final _gemini = await rootBundle.load('assets/gemini-logo.png');
+    String? _gemini_logo =
+        await rootBundle.loadString('assets/gemini_logo.svg');
 
     doc.addPage(
       pw.Page(
@@ -109,8 +107,8 @@ class _SiteReportState extends State<SiteReport> {
             children: [
               pw.Flexible(
                 child: pw.SvgImage(
-                  svg: _logo,
-                  height: 100,
+                  svg: _gemini_logo,
+                  height: 200,
                 ),
               ),
               pw.SizedBox(
@@ -118,7 +116,7 @@ class _SiteReportState extends State<SiteReport> {
               ),
               pw.Center(
                 child: pw.Text(
-                  'Final Report card',
+                  'Site Report 2023',
                   style: pw.TextStyle(
                     fontSize: 50,
                   ),
@@ -132,7 +130,7 @@ class _SiteReportState extends State<SiteReport> {
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
                   pw.Text(
-                    'name : ',
+                    'Site Name: ',
                     style: pw.TextStyle(
                       fontSize: 50,
                     ),
@@ -149,15 +147,15 @@ class _SiteReportState extends State<SiteReport> {
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
                   pw.Text(
-                    'Maths : ',
+                    'Name#1: ',
                     style: pw.TextStyle(
-                      fontSize: 50,
+                      fontSize: 20,
                     ),
                   ),
                   pw.Text(
                     team1,
                     style: pw.TextStyle(
-                      fontSize: 50,
+                      fontSize: 20,
                     ),
                   ),
                 ],
@@ -166,15 +164,15 @@ class _SiteReportState extends State<SiteReport> {
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
                   pw.Text(
-                    'Science : ',
+                    'Name#2: ',
                     style: pw.TextStyle(
-                      fontSize: 50,
+                      fontSize: 20,
                     ),
                   ),
                   pw.Text(
                     team2,
                     style: pw.TextStyle(
-                      fontSize: 50,
+                      fontSize: 20,
                     ),
                   ),
                 ],
@@ -183,15 +181,27 @@ class _SiteReportState extends State<SiteReport> {
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
                   pw.Text(
-                    'History : ',
+                    'Name#3: ',
                     style: pw.TextStyle(
-                      fontSize: 50,
+                      fontSize: 20,
                     ),
                   ),
                   pw.Text(
                     team3,
                     style: pw.TextStyle(
-                      fontSize: 50,
+                      fontSize: 20,
+                    ),
+                  ),
+                  pw.Text(
+                    'On:',
+                    style: pw.TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                  pw.Text(
+                    timeOn1,
+                    style: pw.TextStyle(
+                      fontSize: 20,
                     ),
                   ),
                 ],
@@ -201,7 +211,7 @@ class _SiteReportState extends State<SiteReport> {
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
                   pw.Text(
-                    'Total : ',
+                    'Total Time: ',
                     style: pw.TextStyle(
                       fontSize: 50,
                     ),
