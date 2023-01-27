@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "556393416525",
+    "project_id": "gemini-landscaping-flutter",
+    "storage_bucket": "gemini-landscaping-flutter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:556393416525:android:685bb456eca8659ee29904",
+        "android_client_info": {
+          "package_name": "com.example.gemini_landscaping_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "556393416525-0gg83cskmrcucgd2b6rb39kub5slhuel.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwHxHLvrknwnSkhS3w8hCQEntUejX2nkY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "556393416525-0gg83cskmrcucgd2b6rb39kub5slhuel.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
