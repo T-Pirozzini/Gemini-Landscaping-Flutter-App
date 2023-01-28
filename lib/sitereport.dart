@@ -102,150 +102,164 @@ class _SiteReportState extends State<SiteReport> {
         ),
         build: (context) {
           return pw.Center(
-              child: pw.Column(
-            mainAxisAlignment: pw.MainAxisAlignment.center,
-            children: [
-              pw.Flexible(
-                child: pw.SvgImage(
-                  svg: _gemini_logo,
-                  height: 200,
-                ),
-              ),
-              pw.SizedBox(
-                height: 20,
-              ),
-              pw.Center(
-                child: pw.Text(
-                  'Site Report 2023',
-                  style: pw.TextStyle(
-                    fontSize: 30,
+            child: pw.Column(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
+              children: [
+                pw.Flexible(
+                  child: pw.SvgImage(
+                    svg: _gemini_logo,
+                    height: 200,
                   ),
                 ),
-              ),
-              pw.SizedBox(
-                height: 20,
-              ),
-              pw.Divider(),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
-                children: [
-                  pw.Row(
-                    children: [
-                      pw.Text(
-                        'Date: ',
-                        style: pw.TextStyle(
-                          fontSize: 20,
+                pw.SizedBox(
+                  height: 20,
+                ),
+                pw.Center(
+                  child: pw.Text(
+                    'Site Report 2023',
+                    style: pw.TextStyle(
+                      fontSize: 30,
+                    ),
+                  ),
+                ),
+                pw.SizedBox(
+                  height: 20,
+                ),
+                pw.Divider(),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
+                  children: [
+                    pw.Row(
+                      children: [
+                        pw.Text(
+                          'Date: ',
+                          style: pw.TextStyle(
+                            fontSize: 20,
+                          ),
                         ),
-                      ),
-                      pw.Text(
-                        date,
-                        style: pw.TextStyle(
-                          fontSize: 20,
+                        pw.Text(
+                          date,
+                          style: pw.TextStyle(
+                            fontSize: 20,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  pw.Row(
-                    children: [
-                      pw.Text(
-                        'Site Name: ',
-                        style: pw.TextStyle(
-                          fontSize: 20,
+                      ],
+                    ),
+                    pw.Table(
+                      border: pw.TableBorder.all(),
+                      children: [
+                        pw.TableRow(children: [
+                          pw.Text('hi'),
+                          pw.Text('hello'),
+                        ]),
+                        pw.TableRow(children: [
+                          pw.Text('au revoir'),
+                          pw.Text('bye bye'),
+                        ]),
+                      ],
+                    ),
+                    pw.Row(
+                      children: [
+                        pw.Text(
+                          'Site Name: ',
+                          style: pw.TextStyle(
+                            fontSize: 20,
+                          ),
                         ),
-                      ),
-                      pw.Text(
-                        siteName,
-                        style: pw.TextStyle(
-                          fontSize: 20,
+                        pw.Text(
+                          siteName,
+                          style: pw.TextStyle(
+                            fontSize: 20,
+                          ),
                         ),
+                      ],
+                    ),
+                  ],
+                ),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.center,
+                  children: [
+                    pw.Text(
+                      'Name#1: ',
+                      style: pw.TextStyle(
+                        fontSize: 20,
                       ),
-                    ],
-                  ),
-                ],
-              ),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.center,
-                children: [
-                  pw.Text(
-                    'Name#1: ',
-                    style: pw.TextStyle(
-                      fontSize: 20,
                     ),
-                  ),
-                  pw.Text(
-                    team1,
-                    style: pw.TextStyle(
-                      fontSize: 20,
+                    pw.Text(
+                      team1,
+                      style: pw.TextStyle(
+                        fontSize: 20,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.center,
-                children: [
-                  pw.Text(
-                    'Name#2: ',
-                    style: pw.TextStyle(
-                      fontSize: 20,
+                  ],
+                ),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.center,
+                  children: [
+                    pw.Text(
+                      'Name#2: ',
+                      style: pw.TextStyle(
+                        fontSize: 20,
+                      ),
                     ),
-                  ),
-                  pw.Text(
-                    team2,
-                    style: pw.TextStyle(
-                      fontSize: 20,
+                    pw.Text(
+                      team2,
+                      style: pw.TextStyle(
+                        fontSize: 20,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.center,
-                children: [
-                  pw.Text(
-                    'Name#3: ',
-                    style: pw.TextStyle(
-                      fontSize: 20,
+                  ],
+                ),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.center,
+                  children: [
+                    pw.Text(
+                      'Name#3: ',
+                      style: pw.TextStyle(
+                        fontSize: 20,
+                      ),
                     ),
-                  ),
-                  pw.Text(
-                    team3,
-                    style: pw.TextStyle(
-                      fontSize: 20,
+                    pw.Text(
+                      team3,
+                      style: pw.TextStyle(
+                        fontSize: 20,
+                      ),
                     ),
-                  ),
-                  pw.Text(
-                    'On:',
-                    style: pw.TextStyle(
-                      fontSize: 20,
+                    pw.Text(
+                      'On:',
+                      style: pw.TextStyle(
+                        fontSize: 20,
+                      ),
                     ),
-                  ),
-                  pw.Text(
-                    timeOn1,
-                    style: pw.TextStyle(
-                      fontSize: 20,
+                    pw.Text(
+                      timeOn1,
+                      style: pw.TextStyle(
+                        fontSize: 20,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              pw.Divider(),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.center,
-                children: [
-                  pw.Text(
-                    'Total Time: ',
-                    style: pw.TextStyle(
-                      fontSize: 50,
+                  ],
+                ),
+                pw.Divider(),
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.center,
+                  children: [
+                    pw.Text(
+                      'Total Time: ',
+                      style: pw.TextStyle(
+                        fontSize: 50,
+                      ),
                     ),
-                  ),
-                  pw.Text(
-                    timeTotal.toString(),
-                    style: pw.TextStyle(
-                      fontSize: 50,
+                    pw.Text(
+                      timeTotal.toString(),
+                      style: pw.TextStyle(
+                        fontSize: 50,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ));
+                  ],
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
