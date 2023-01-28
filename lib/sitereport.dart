@@ -118,7 +118,7 @@ class _SiteReportState extends State<SiteReport> {
                 child: pw.Text(
                   'Site Report 2023',
                   style: pw.TextStyle(
-                    fontSize: 50,
+                    fontSize: 30,
                   ),
                 ),
               ),
@@ -127,19 +127,39 @@ class _SiteReportState extends State<SiteReport> {
               ),
               pw.Divider(),
               pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.center,
+                mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
                 children: [
-                  pw.Text(
-                    'Site Name: ',
-                    style: pw.TextStyle(
-                      fontSize: 50,
-                    ),
+                  pw.Row(
+                    children: [
+                      pw.Text(
+                        'Date: ',
+                        style: pw.TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                      pw.Text(
+                        date,
+                        style: pw.TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
                   ),
-                  pw.Text(
-                    siteName,
-                    style: pw.TextStyle(
-                      fontSize: 50,
-                    ),
+                  pw.Row(
+                    children: [
+                      pw.Text(
+                        'Site Name: ',
+                        style: pw.TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                      pw.Text(
+                        siteName,
+                        style: pw.TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
