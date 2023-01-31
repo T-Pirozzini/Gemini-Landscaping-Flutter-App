@@ -90,8 +90,8 @@ class _SiteReportState extends State<SiteReport> {
         pageTheme: pw.PageTheme(
           pageFormat: format.copyWith(
             marginBottom: 0,
-            marginLeft: 0,
-            marginRight: 0,
+            marginLeft: 30,
+            marginRight: 30,
             marginTop: 0,
           ),
           orientation: pw.PageOrientation.portrait,
@@ -101,9 +101,9 @@ class _SiteReportState extends State<SiteReport> {
           ),
         ),
         build: (context) {
-          return pw.Center(
+          return pw.Container(
             child: pw.Column(
-              mainAxisAlignment: pw.MainAxisAlignment.center,
+              mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
               children: [
                 pw.Flexible(
                   child: pw.SvgImage(
@@ -145,19 +145,6 @@ class _SiteReportState extends State<SiteReport> {
                         ),
                       ],
                     ),
-                    pw.Table(
-                      border: pw.TableBorder.all(),
-                      children: [
-                        pw.TableRow(children: [
-                          pw.Text('hi'),
-                          pw.Text('hello'),
-                        ]),
-                        pw.TableRow(children: [
-                          pw.Text('au revoir'),
-                          pw.Text('bye bye'),
-                        ]),
-                      ],
-                    ),
                     pw.Row(
                       children: [
                         pw.Text(
@@ -176,6 +163,129 @@ class _SiteReportState extends State<SiteReport> {
                     ),
                   ],
                 ),
+                // Team & Time ON/OFF Table
+                pw.Table(
+                  border: pw.TableBorder.all(),
+                  children: [
+                    pw.TableRow(children: [
+                      pw.Text(''),
+                      pw.Container(
+                        alignment: pw.Alignment.center,
+                        child: pw.Text('Name'),
+                      ),
+                      pw.Container(
+                        alignment: pw.Alignment.center,
+                        child: pw.Text('On'),
+                      ),
+                      pw.Container(
+                        alignment: pw.Alignment.center,
+                        child: pw.Text('Off'),
+                      ),
+                      pw.Container(
+                        alignment: pw.Alignment.center,
+                        child: pw.Text('Hours'),
+                      ),
+                    ]),
+                    pw.TableRow(children: [
+                      pw.Text('Driver'),
+                    ]),
+                    pw.TableRow(children: [
+                      pw.Text('Team #1'),
+                      pw.Text(''),
+                    ]),
+                    pw.TableRow(children: [
+                      pw.Text('Team #2'),
+                      pw.Text(''),
+                    ]),
+                    pw.TableRow(children: [
+                      pw.Text('Team #3'),
+                      pw.Text(''),
+                    ]),
+                    pw.TableRow(children: [
+                      pw.Text('Team #4'),
+                      pw.Text(''),
+                    ]),
+                    pw.TableRow(children: [
+                      pw.Text(''),
+                      pw.Text(''),
+                      pw.Text(''),
+                      pw.Text('Total Hours:'),
+                      pw.Text(''), // Output total hours
+                    ]),
+                  ],
+                ),
+                // SERVICES TABLE
+                pw.Container(
+                  alignment: pw.Alignment.topLeft,
+                  child: pw.Text("Services Provided:"),
+                ),
+                pw.Table(
+                  border: pw.TableBorder.all(),
+                  children: [
+                    pw.TableRow(
+                      children: [
+                        pw.Text('Pick up loose garbage:'),
+                        pw.Text('grassed areas - '),
+                        pw.Text('garden beds - '),
+                        pw.Text('walkways'),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Text('Rake yard debris:'),
+                        pw.Text('grassed areas -'),
+                        pw.Text('garden beds -'),
+                        pw.Text('tree wells'),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Text('Lawn care:'),
+                        pw.Text('mow -'),
+                        pw.Text('trim -'),
+                        pw.Text('edge -'),
+                        pw.Text('lime -'),
+                        pw.Text('aerate -'),
+                        pw.Text('fertilize -'),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Text('Gardens:'),
+                        pw.Text('blow out debris -'),
+                        pw.Text('weed -'),
+                        pw.Text('prune -'),
+                        pw.Text('fertilize'),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Text('Trees:'),
+                        pw.Text('< 6ft -'),
+                        pw.Text('> 6ft -'),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Text('Blow dust/debris:'),
+                        pw.Text('parking lot curbs -'),
+                        pw.Text('drain basins -'),
+                        pw.Text('walkways'),
+                      ],
+                    ),
+                    pw.TableRow(
+                      children: [
+                        pw.Text('Pick up loose garbage:'),
+                        pw.Text('Rake yard debris:'),
+                        pw.Text('Lawn care:'),
+                        pw.Text('Gardens:'),
+                        pw.Text('Trees:'),
+                        pw.Text('Blow dust/debris:'),
+                      ],
+                    ),
+                  ],
+                ),
+
                 pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.center,
                   children: [
