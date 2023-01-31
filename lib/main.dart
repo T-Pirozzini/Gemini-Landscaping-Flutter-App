@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-import 'addnote.dart';
+import 'addReport.dart';
 import 'editnote.dart';
 
 void main() async {
@@ -47,7 +47,7 @@ class _HomeState extends State<Home> {
         backgroundColor: Color.fromARGB(255, 31, 182, 77),
         onPressed: () {
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => addnote()));
+              context, MaterialPageRoute(builder: (_) => AddReport()));
         },
         child: Icon(
           Icons.add,

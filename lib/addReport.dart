@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'main.dart';
 
-class addnote extends StatelessWidget {
+class AddReport extends StatelessWidget {
   TextEditingController date = TextEditingController();
   TextEditingController siteName = TextEditingController();
   TextEditingController team1 = TextEditingController();
@@ -28,6 +28,29 @@ class addnote extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromARGB(255, 31, 182, 77),
+        leading: MaterialButton(
+          onPressed: () {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => Home()));
+          },
+          child: Row(
+            children: [
+              Icon(Icons.arrow_circle_left_outlined,
+                  color: Colors.white, size: 18),
+              Text(
+                " Back",
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Color.fromARGB(255, 251, 251, 251),
+                ),
+              ),
+            ],
+          ),
+        ),
+        leadingWidth: 100,
+        title: Image.asset("assets/gemini-icon-transparent.png",
+            color: Colors.white, fit: BoxFit.contain, height: 50),
+        centerTitle: true,
         actions: [
           MaterialButton(
             onPressed: () {
@@ -51,25 +74,21 @@ class addnote extends StatelessWidget {
                     context, MaterialPageRoute(builder: (_) => Home()));
               });
             },
-            child: Text(
-              "Save",
-              style: TextStyle(
-                fontSize: 20,
-                color: Color.fromARGB(255, 251, 251, 251),
-              ),
-            ),
-          ),
-          MaterialButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (_) => Home()));
-            },
-            child: Text(
-              "Back",
-              style: TextStyle(
-                fontSize: 20,
-                color: Color.fromARGB(255, 251, 251, 251),
-              ),
+            child: Row(
+              children: [
+                Text(
+                  "Submit ",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Color.fromARGB(255, 251, 251, 251),
+                  ),
+                ),
+                Icon(
+                  Icons.send,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ],
             ),
           ),
         ],
