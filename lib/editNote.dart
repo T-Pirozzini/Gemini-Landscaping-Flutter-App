@@ -33,9 +33,9 @@ class _editnoteState extends State<editnote> {
   TextEditingController timeOff4 = TextEditingController();
 
   @override
-  void initState() {   
+  void initState() {
     date = TextEditingController(text: widget.docid.get('date'));
-    siteName = TextEditingController(text: widget.docid.get('site name'));
+    siteName = TextEditingController(text: widget.docid.get('siteName'));
     team1 = TextEditingController(text: widget.docid.get('team1'));
     timeOn1 = TextEditingController(text: widget.docid.get('timeOn1'));
     timeOff1 = TextEditingController(text: widget.docid.get('timeOff1'));
@@ -75,7 +75,7 @@ class _editnoteState extends State<editnote> {
             onPressed: () {
               widget.docid.reference.update({
                 'date': date.text,
-                'site name': siteName.text,
+                'siteName': siteName.text,
                 'team1': team1.text,
                 'team2': team1.text,
                 'team3': team1.text,
@@ -125,188 +125,188 @@ class _editnoteState extends State<editnote> {
               SizedBox(
                 height: 20,
               ),
-             Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: date,
-                decoration: InputDecoration(
-                  hintText: 'Enter date',
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: date,
+                  decoration: InputDecoration(
+                    hintText: 'Enter date',
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: siteName,
-                maxLines: null,
-                keyboardType: TextInputType.text,
-                decoration: InputDecoration(
-                  hintText: 'Enter site name',
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: siteName,
+                  maxLines: null,
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    hintText: 'Enter site name',
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: team1,
-                maxLines: null,
-                keyboardType: TextInputType.text,
-                decoration: InputDecoration(
-                  hintText: 'Enter crew leader name',
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: team1,
+                  maxLines: null,
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    hintText: 'Enter crew leader name',
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: timeOn1,
-                maxLines: null,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Enter time On',
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: timeOn1,
+                  maxLines: null,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Enter time On',
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: timeOff1,
-                maxLines: null,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Enter time Off',
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: timeOff1,
+                  maxLines: null,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Enter time Off',
+                  ),
                 ),
               ),
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: team2,
-                maxLines: null,
-                keyboardType: TextInputType.text,
-                decoration: InputDecoration(
-                  hintText: 'Enter name',
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: team2,
+                  maxLines: null,
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    hintText: 'Enter name',
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: timeOn2,
-                maxLines: null,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Enter time On',
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: timeOn2,
+                  maxLines: null,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Enter time On',
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: timeOff2,
-                maxLines: null,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Enter time Off',
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: timeOff2,
+                  maxLines: null,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Enter time Off',
+                  ),
                 ),
               ),
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: team3,
-                maxLines: null,
-                keyboardType: TextInputType.text,
-                decoration: InputDecoration(
-                  hintText: 'Enter name',
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: team3,
+                  maxLines: null,
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    hintText: 'Enter name',
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: timeOn3,
-                maxLines: null,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Enter time On',
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: timeOn3,
+                  maxLines: null,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Enter time On',
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: timeOff3,
-                maxLines: null,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Enter time Off',
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: timeOff3,
+                  maxLines: null,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Enter time Off',
+                  ),
                 ),
               ),
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: team4,
-                maxLines: null,
-                keyboardType: TextInputType.text,
-                decoration: InputDecoration(
-                  hintText: 'Enter name',
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: team4,
+                  maxLines: null,
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                    hintText: 'Enter name',
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: timeOn4,
-                maxLines: null,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Enter time On',
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: timeOn4,
+                  maxLines: null,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Enter time On',
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-              decoration: BoxDecoration(border: Border.all()),
-              child: TextField(
-                controller: timeOff4,
-                maxLines: null,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Enter time Off',
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                decoration: BoxDecoration(border: Border.all()),
+                child: TextField(
+                  controller: timeOff4,
+                  maxLines: null,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Enter time Off',
+                  ),
                 ),
               ),
-            ),
               SizedBox(
                 height: 20,
               ),

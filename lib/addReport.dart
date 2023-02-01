@@ -4,6 +4,13 @@ import 'package:intl/intl.dart';
 
 import 'main.dart';
 
+List<String> siteList = [
+  'Merewood Apartments',
+  'Uplands Terrace',
+  'North Point Apartments',
+  'Country Grocer'
+];
+
 class AddReport extends StatefulWidget {
   @override
   State<AddReport> createState() => _AddReportState();
@@ -41,6 +48,17 @@ class _AddReportState extends State<AddReport> {
   CollectionReference ref =
       FirebaseFirestore.instance.collection('SiteReports2023');
 
+  Future<void> getData() async {
+    // Get docs from collection reference
+    QuerySnapshot querySnapshot = await ref.get();
+
+    // Get data from docs and convert map to List
+    final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
+    print(allData);
+  }
+
+  String dropdownValue = siteList.first;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +92,7 @@ class _AddReportState extends State<AddReport> {
             onPressed: () {
               ref.add({
                 'date': dateController.text,
-                'site name': siteName.text,
+                'siteName': dropdownValue,
                 'team1': team1.text,
                 'team2': team1.text,
                 'team3': team1.text,
@@ -116,6 +134,7 @@ class _AddReportState extends State<AddReport> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
+              // date picker
               Container(
                 decoration: BoxDecoration(border: Border.all()),
                 child: TextField(
@@ -130,8 +149,7 @@ class _AddReportState extends State<AddReport> {
                     DateTime? pickedDate = await showDatePicker(
                       context: context,
                       initialDate: DateTime.now(),
-                      firstDate: DateTime(
-                          2000), 
+                      firstDate: DateTime(2000),
                       lastDate: DateTime(2101),
                     );
                     if (pickedDate != null) {
@@ -149,16 +167,21 @@ class _AddReportState extends State<AddReport> {
               const SizedBox(
                 height: 10,
               ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: siteName,
-                  maxLines: null,
-                  keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter site name',
-                  ),
-                ),
+              // site list drop down
+              DropdownButtonFormField<String>(
+                value: dropdownValue,
+                items: siteList.map((site) {
+                  return DropdownMenuItem<String>(                    
+                    value: site,
+                    child: Text('$site'),
+                  );
+                }).toList(),
+                onChanged: (String? value) {
+                  setState(() {
+                    dropdownValue = value!;                    
+                  });
+                  getData();
+                },
               ),
               const SizedBox(
                 height: 10,
