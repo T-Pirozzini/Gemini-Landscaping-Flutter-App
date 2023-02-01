@@ -94,7 +94,7 @@ class _reporttState extends State<reportt> {
               pw.Center(
                 child: pw.Text(
                   'Final Report card',
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     fontSize: 50,
                   ),
                 ),
@@ -108,13 +108,13 @@ class _reporttState extends State<reportt> {
                 children: [
                   pw.Text(
                     'name : ',
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 50,
                     ),
                   ),
                   pw.Text(
                     name,
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 50,
                     ),
                   ),
@@ -125,13 +125,13 @@ class _reporttState extends State<reportt> {
                 children: [
                   pw.Text(
                     'Maths : ',
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 50,
                     ),
                   ),
                   pw.Text(
                     subject1,
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 50,
                     ),
                   ),
@@ -142,13 +142,13 @@ class _reporttState extends State<reportt> {
                 children: [
                   pw.Text(
                     'Science : ',
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 50,
                     ),
                   ),
                   pw.Text(
                     subject2,
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 50,
                     ),
                   ),
@@ -159,13 +159,13 @@ class _reporttState extends State<reportt> {
                 children: [
                   pw.Text(
                     'History : ',
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 50,
                     ),
                   ),
                   pw.Text(
                     subject3,
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 50,
                     ),
                   ),
@@ -177,13 +177,13 @@ class _reporttState extends State<reportt> {
                 children: [
                   pw.Text(
                     'Total : ',
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 50,
                     ),
                   ),
                   pw.Text(
                     marks.toString(),
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 50,
                     ),
                   ),

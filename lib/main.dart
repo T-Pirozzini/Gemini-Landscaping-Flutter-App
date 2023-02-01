@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-import 'addnote.dart';
+import 'addReport.dart';
 import 'editnote.dart';
 
 void main() async {
@@ -23,7 +23,7 @@ class _MyAppState extends State<MyApp> {
       title: "Gemini Landscaping",
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Color.fromARGB(255, 31, 182, 77),
+        primaryColor: const Color.fromARGB(255, 31, 182, 77),
       ),
       home: Home(),
     );
@@ -44,27 +44,27 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color.fromARGB(255, 31, 182, 77),
+        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         onPressed: () {
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => addnote()));
+              context, MaterialPageRoute(builder: (_) => AddReport()));
         },
-        child: Icon(
+        child: const Icon(
           Icons.add,
         ),
       ),
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 31, 182, 77),
-        title: Text('Site Reports 2023'),
+        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+        title: const Text('Site Reports 2023'),
       ),
       body: StreamBuilder(
         stream: _reportStream2023,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
-            return Text("something is wrong");
+            return const Text("something is wrong");
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           }
@@ -88,28 +88,34 @@ class _HomeState extends State<Home> {
                   },
                   child: Column(
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         height: 4,
                       ),
                       Padding(
-                        padding: EdgeInsets.only(
+                        padding: const EdgeInsets.only(
                           left: 3,
                           right: 3,
                         ),
                         child: ListTile(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(
+                            side: const BorderSide(
                               color: Colors.black,
                             ),
                           ),
                           title: Text(
                             snapshot.data!.docChanges[index].doc['date'],
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 20,
                             ),
                           ),
-                          contentPadding: EdgeInsets.symmetric(
+                          trailing: Text(
+                            snapshot.data!.docChanges[index].doc['siteName'],
+                            style: const TextStyle(
+                              fontSize: 20,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
                             vertical: 12,
                             horizontal: 16,
                           ),

@@ -1,81 +1,98 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'main.dart';
-import 'report.dart';
-import 'sitereport.dart';
 
-class editnote extends StatefulWidget {
-  DocumentSnapshot docid;
-  editnote({required this.docid});
+List<String> siteList = [
+  'Merewood Apartments',
+  'Uplands Terrace',
+  'North Point Apartments',
+  'Country Grocer'
+];
 
+class AddReport extends StatefulWidget {
   @override
-  _editnoteState createState() => _editnoteState(docid: docid);
+  State<AddReport> createState() => _AddReportState();
 }
 
-class _editnoteState extends State<editnote> {
-  DocumentSnapshot docid;
-  _editnoteState({required this.docid});
-  TextEditingController date = TextEditingController();
+class _AddReportState extends State<AddReport> {
+  TextEditingController dateController = TextEditingController();
+
   TextEditingController siteName = TextEditingController();
+
   TextEditingController team1 = TextEditingController();
+
   TextEditingController team2 = TextEditingController();
+
   TextEditingController team3 = TextEditingController();
+
   TextEditingController team4 = TextEditingController();
 
   TextEditingController timeOn1 = TextEditingController();
+
   TextEditingController timeOff1 = TextEditingController();
+
   TextEditingController timeOn2 = TextEditingController();
+
   TextEditingController timeOff2 = TextEditingController();
+
   TextEditingController timeOn3 = TextEditingController();
+
   TextEditingController timeOff3 = TextEditingController();
+
   TextEditingController timeOn4 = TextEditingController();
+
   TextEditingController timeOff4 = TextEditingController();
 
-  @override
-  void initState() {
-    date = TextEditingController(text: widget.docid.get('date'));
-    siteName = TextEditingController(text: widget.docid.get('siteName'));
-    team1 = TextEditingController(text: widget.docid.get('team1'));
-    timeOn1 = TextEditingController(text: widget.docid.get('timeOn1'));
-    timeOff1 = TextEditingController(text: widget.docid.get('timeOff1'));
-    team2 = TextEditingController(text: widget.docid.get('team2'));
-    timeOn2 = TextEditingController(text: widget.docid.get('timeOn2'));
-    timeOff2 = TextEditingController(text: widget.docid.get('timeOff2'));
-    team3 = TextEditingController(text: widget.docid.get('team3'));
-    timeOn3 = TextEditingController(text: widget.docid.get('timeOn3'));
-    timeOff3 = TextEditingController(text: widget.docid.get('timeOff3'));
-    team4 = TextEditingController(text: widget.docid.get('team4'));
-    timeOn4 = TextEditingController(text: widget.docid.get('timeOn4'));
-    timeOff4 = TextEditingController(text: widget.docid.get('timeOff4'));
+  CollectionReference ref =
+      FirebaseFirestore.instance.collection('SiteReports2023');
 
-    super.initState();
+  Future<void> getData() async {
+    // Get docs from collection reference
+    QuerySnapshot querySnapshot = await ref.get();
+
+    // Get data from docs and convert map to List
+    final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
+    print(allData);
   }
+
+  String dropdownValue = siteList.first;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+        leading: MaterialButton(
+          onPressed: () {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => Home()));
+          },
+          child: Row(
+            children: const [
+              Icon(Icons.arrow_circle_left_outlined,
+                  color: Colors.white, size: 18),
+              Text(
+                " Back",
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Color.fromARGB(255, 251, 251, 251),
+                ),
+              ),
+            ],
+          ),
+        ),
+        leadingWidth: 100,
+        title: Image.asset("assets/gemini-icon-transparent.png",
+            color: Colors.white, fit: BoxFit.contain, height: 50),
+        centerTitle: true,
         actions: [
           MaterialButton(
             onPressed: () {
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (_) => Home()));
-            },
-            child: const Text(
-              "Back",
-              style: TextStyle(
-                fontSize: 20,
-                color: Color.fromARGB(255, 251, 251, 251),
-              ),
-            ),
-          ),
-          MaterialButton(
-            onPressed: () {
-              widget.docid.reference.update({
-                'date': date.text,
-                'siteName': siteName.text,
+              ref.add({
+                'date': dateController.text,
+                'siteName': dropdownValue,
                 'team1': team1.text,
                 'team2': team1.text,
                 'team3': team1.text,
@@ -93,60 +110,78 @@ class _editnoteState extends State<editnote> {
                     context, MaterialPageRoute(builder: (_) => Home()));
               });
             },
-            child: const Text(
-              "Save",
-              style: TextStyle(
-                fontSize: 20,
-                color: Color.fromARGB(255, 251, 251, 251),
-              ),
-            ),
-          ),
-          MaterialButton(
-            onPressed: () {
-              widget.docid.reference.delete().whenComplete(() {
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (_) => Home()));
-              });
-            },
-            child: const Text(
-              "Delete",
-              style: TextStyle(
-                fontSize: 20,
-                color: Color.fromARGB(255, 251, 251, 251),
-              ),
+            child: Row(
+              children: const [
+                Text(
+                  "Submit ",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Color.fromARGB(255, 251, 251, 251),
+                  ),
+                ),
+                Icon(
+                  Icons.send,
+                  color: Colors.white,
+                  size: 18,
+                ),
+              ],
             ),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        child: Container(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              const SizedBox(
-                height: 20,
-              ),
+              // date picker
               Container(
                 decoration: BoxDecoration(border: Border.all()),
                 child: TextField(
-                  controller: date,
+                  controller: dateController,
                   decoration: const InputDecoration(
-                    hintText: 'Enter date',
+                    icon: Icon(Icons.calendar_month_rounded),
+                    labelText: "Date:",
+                    hintText: 'Select date',
                   ),
+                  readOnly: true,
+                  onTap: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if (pickedDate != null) {
+                      String formattedDate =
+                          DateFormat("yyyy-MM-dd").format(pickedDate);
+                      setState(() {
+                        dateController.text = formattedDate.toString();
+                      });
+                    } else {
+                      print('No Date Selected');
+                    }
+                  },
                 ),
               ),
               const SizedBox(
                 height: 10,
               ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: siteName,
-                  maxLines: null,
-                  keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter site name',
-                  ),
-                ),
+              // site list drop down
+              DropdownButtonFormField<String>(
+                value: dropdownValue,
+                items: siteList.map((site) {
+                  return DropdownMenuItem<String>(
+                    value: site,
+                    child: Text('$site'),
+                  );
+                }).toList(),
+                onChanged: (String? value) {
+                  setState(() {
+                    dropdownValue = value!;
+                  });
+                  getData();
+                },
               ),
               const SizedBox(
                 height: 10,
@@ -304,29 +339,6 @@ class _editnoteState extends State<editnote> {
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     hintText: 'Enter time Off',
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              MaterialButton(
-                color: const Color.fromARGB(255, 0, 11, 133),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => SiteReport(
-                        docid: docid,
-                      ),
-                    ),
-                  );
-                },
-                child: const Text(
-                  "Make Report",
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Color.fromARGB(255, 251, 251, 251),
                   ),
                 ),
               ),
