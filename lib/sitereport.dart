@@ -37,7 +37,7 @@ class _SiteReportState extends State<SiteReport> {
   void initState() {
     setState(() {
       date = widget.docid.get('date');
-      siteName = widget.docid.get('site name');
+      siteName = widget.docid.get('siteName');
       team1 = widget.docid.get('team1');
       timeOn1 = widget.docid.get('timeOn1');
       timeOff1 = widget.docid.get('timeOff1');

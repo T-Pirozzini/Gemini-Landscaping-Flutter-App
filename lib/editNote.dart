@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'main.dart';
-import 'report.dart';
 import 'sitereport.dart';
 
 class editnote extends StatefulWidget {
@@ -311,7 +310,7 @@ class _editnoteState extends State<editnote> {
                 height: 20,
               ),
               MaterialButton(
-                color: const Color.fromARGB(255, 0, 11, 133),
+                color: const Color.fromARGB(255, 31, 182, 77),
                 onPressed: () {
                   Navigator.push(
                     context,
