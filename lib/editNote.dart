@@ -56,14 +56,14 @@ class _editnoteState extends State<editnote> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 0, 11, 133),
+        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         actions: [
           MaterialButton(
             onPressed: () {
               Navigator.pushReplacement(
                   context, MaterialPageRoute(builder: (_) => Home()));
             },
-            child: Text(
+            child: const Text(
               "Back",
               style: TextStyle(
                 fontSize: 20,
@@ -93,7 +93,7 @@ class _editnoteState extends State<editnote> {
                     context, MaterialPageRoute(builder: (_) => Home()));
               });
             },
-            child: Text(
+            child: const Text(
               "Save",
               style: TextStyle(
                 fontSize: 20,
@@ -108,7 +108,7 @@ class _editnoteState extends State<editnote> {
                     context, MaterialPageRoute(builder: (_) => Home()));
               });
             },
-            child: Text(
+            child: const Text(
               "Delete",
               style: TextStyle(
                 fontSize: 20,
@@ -122,19 +122,19 @@ class _editnoteState extends State<editnote> {
         child: Container(
           child: Column(
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
               Container(
                 decoration: BoxDecoration(border: Border.all()),
                 child: TextField(
                   controller: date,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter date',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -143,12 +143,12 @@ class _editnoteState extends State<editnote> {
                   controller: siteName,
                   maxLines: null,
                   keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter site name',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -157,12 +157,12 @@ class _editnoteState extends State<editnote> {
                   controller: team1,
                   maxLines: null,
                   keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter crew leader name',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -171,12 +171,12 @@ class _editnoteState extends State<editnote> {
                   controller: timeOn1,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time On',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -185,7 +185,7 @@ class _editnoteState extends State<editnote> {
                   controller: timeOff1,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time Off',
                   ),
                 ),
@@ -196,12 +196,12 @@ class _editnoteState extends State<editnote> {
                   controller: team2,
                   maxLines: null,
                   keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter name',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -210,12 +210,12 @@ class _editnoteState extends State<editnote> {
                   controller: timeOn2,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time On',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -224,7 +224,7 @@ class _editnoteState extends State<editnote> {
                   controller: timeOff2,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time Off',
                   ),
                 ),
@@ -235,12 +235,12 @@ class _editnoteState extends State<editnote> {
                   controller: team3,
                   maxLines: null,
                   keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter name',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -249,12 +249,12 @@ class _editnoteState extends State<editnote> {
                   controller: timeOn3,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time On',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -263,7 +263,7 @@ class _editnoteState extends State<editnote> {
                   controller: timeOff3,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time Off',
                   ),
                 ),
@@ -274,12 +274,12 @@ class _editnoteState extends State<editnote> {
                   controller: team4,
                   maxLines: null,
                   keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter name',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -288,12 +288,12 @@ class _editnoteState extends State<editnote> {
                   controller: timeOn4,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time On',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -302,16 +302,16 @@ class _editnoteState extends State<editnote> {
                   controller: timeOff4,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time Off',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
               MaterialButton(
-                color: Color.fromARGB(255, 0, 11, 133),
+                color: const Color.fromARGB(255, 0, 11, 133),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -322,7 +322,7 @@ class _editnoteState extends State<editnote> {
                     ),
                   );
                 },
-                child: Text(
+                child: const Text(
                   "Make Report",
                   style: TextStyle(
                     fontSize: 20,

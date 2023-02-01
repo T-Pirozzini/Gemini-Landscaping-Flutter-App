@@ -63,7 +63,7 @@ class _AddReportState extends State<AddReport> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 31, 182, 77),
+        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         leading: MaterialButton(
           onPressed: () {
             Navigator.pushReplacement(
@@ -171,14 +171,14 @@ class _AddReportState extends State<AddReport> {
               DropdownButtonFormField<String>(
                 value: dropdownValue,
                 items: siteList.map((site) {
-                  return DropdownMenuItem<String>(                    
+                  return DropdownMenuItem<String>(
                     value: site,
                     child: Text('$site'),
                   );
                 }).toList(),
                 onChanged: (String? value) {
                   setState(() {
-                    dropdownValue = value!;                    
+                    dropdownValue = value!;
                   });
                   getData();
                 },
@@ -259,7 +259,7 @@ class _AddReportState extends State<AddReport> {
                   controller: timeOff2,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time Off',
                   ),
                 ),
@@ -270,12 +270,12 @@ class _AddReportState extends State<AddReport> {
                   controller: team3,
                   maxLines: null,
                   keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter name',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -284,12 +284,12 @@ class _AddReportState extends State<AddReport> {
                   controller: timeOn3,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time On',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -298,7 +298,7 @@ class _AddReportState extends State<AddReport> {
                   controller: timeOff3,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time Off',
                   ),
                 ),
@@ -309,12 +309,12 @@ class _AddReportState extends State<AddReport> {
                   controller: team4,
                   maxLines: null,
                   keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter name',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -323,12 +323,12 @@ class _AddReportState extends State<AddReport> {
                   controller: timeOn4,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time On',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Container(
@@ -337,7 +337,7 @@ class _AddReportState extends State<AddReport> {
                   controller: timeOff4,
                   maxLines: null,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Enter time Off',
                   ),
                 ),

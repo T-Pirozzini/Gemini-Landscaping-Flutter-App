@@ -117,7 +117,7 @@ class _SiteReportState extends State<SiteReport> {
                 pw.Center(
                   child: pw.Text(
                     'Site Report 2023',
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 30,
                     ),
                   ),
@@ -133,13 +133,13 @@ class _SiteReportState extends State<SiteReport> {
                       children: [
                         pw.Text(
                           'Date: ',
-                          style: pw.TextStyle(
+                          style: const pw.TextStyle(
                             fontSize: 20,
                           ),
                         ),
                         pw.Text(
                           date,
-                          style: pw.TextStyle(
+                          style: const pw.TextStyle(
                             fontSize: 20,
                           ),
                         ),
@@ -149,13 +149,13 @@ class _SiteReportState extends State<SiteReport> {
                       children: [
                         pw.Text(
                           'Site Name: ',
-                          style: pw.TextStyle(
+                          style: const pw.TextStyle(
                             fontSize: 20,
                           ),
                         ),
                         pw.Text(
                           siteName,
-                          style: pw.TextStyle(
+                          style: const pw.TextStyle(
                             fontSize: 20,
                           ),
                         ),
@@ -291,13 +291,13 @@ class _SiteReportState extends State<SiteReport> {
                   children: [
                     pw.Text(
                       'Name#1: ',
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 20,
                       ),
                     ),
                     pw.Text(
                       team1,
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 20,
                       ),
                     ),
@@ -308,13 +308,13 @@ class _SiteReportState extends State<SiteReport> {
                   children: [
                     pw.Text(
                       'Name#2: ',
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 20,
                       ),
                     ),
                     pw.Text(
                       team2,
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 20,
                       ),
                     ),
@@ -325,25 +325,25 @@ class _SiteReportState extends State<SiteReport> {
                   children: [
                     pw.Text(
                       'Name#3: ',
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 20,
                       ),
                     ),
                     pw.Text(
                       team3,
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 20,
                       ),
                     ),
                     pw.Text(
                       'On:',
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 20,
                       ),
                     ),
                     pw.Text(
                       timeOn1,
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 20,
                       ),
                     ),
@@ -355,13 +355,13 @@ class _SiteReportState extends State<SiteReport> {
                   children: [
                     pw.Text(
                       'Total Time: ',
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 50,
                       ),
                     ),
                     pw.Text(
                       timeTotal.toString(),
-                      style: pw.TextStyle(
+                      style: const pw.TextStyle(
                         fontSize: 50,
                       ),
                     ),
