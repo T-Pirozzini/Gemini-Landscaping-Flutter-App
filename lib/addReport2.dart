@@ -11,39 +11,17 @@ List<String> siteList = [
   'Country Grocer'
 ];
 
-class AddReport extends StatefulWidget {
+class AddReport2 extends StatefulWidget {
   @override
-  State<AddReport> createState() => _AddReportState();
+  State<AddReport2> createState() => _AddReport2State();
 }
 
-class _AddReportState extends State<AddReport> {
+class _AddReport2State extends State<AddReport2> {
   TextEditingController dateController = TextEditingController();
 
   TextEditingController siteName = TextEditingController();
 
   TextEditingController team1 = TextEditingController();
-
-  TextEditingController team2 = TextEditingController();
-
-  TextEditingController team3 = TextEditingController();
-
-  TextEditingController team4 = TextEditingController();
-
-  TextEditingController timeOn1temp = TextEditingController();
-
-  TextEditingController timeOff1temp = TextEditingController();
-
-  TextEditingController timeOn2 = TextEditingController();
-
-  TextEditingController timeOff2 = TextEditingController();
-
-  TextEditingController timeOn3 = TextEditingController();
-
-  TextEditingController timeOff3 = TextEditingController();
-
-  TextEditingController timeOn4 = TextEditingController();
-
-  TextEditingController timeOff4 = TextEditingController();
 
   CollectionReference ref =
       FirebaseFirestore.instance.collection('SiteReports2023');
@@ -61,9 +39,6 @@ class _AddReportState extends State<AddReport> {
 
   TimeOfDay? timeOn1 = TimeOfDay.now();
   TimeOfDay? timeOff1 = TimeOfDay.now();
-
-  var temp1 = 1;
-  var temp2 = 2;
 
   @override
   Widget build(BuildContext context) {
@@ -100,17 +75,8 @@ class _AddReportState extends State<AddReport> {
                 'date': dateController.text,
                 'siteName': dropdownValue,
                 'team1': team1.text,
-                'team2': team1.text,
-                'team3': team1.text,
-                'team4': team1.text,
-                'timeOn1temp': temp1,
-                'timeOff1temp': temp2,
-                'timeOn2': timeOn2.text,
-                'timeOff2': timeOff2.text,
-                'timeOn3': timeOn3.text,
-                'timeOff3': timeOff3.text,
-                'timeOn4': timeOn4.text,
-                'timeOff4': timeOff4.text,
+                'timeOn1': timeOn1,
+                'timeOff1': timeOff1,
               }).whenComplete(() {
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (_) => Home()));
@@ -206,6 +172,7 @@ class _AddReportState extends State<AddReport> {
               const SizedBox(
                 height: 10,
               ),
+              // Time ON/Off
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -246,148 +213,6 @@ class _AddReportState extends State<AddReport> {
                     },
                   ),
                 ],
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOn1temp,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time On',
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOff1temp,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time Off',
-                  ),
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: team2,
-                  maxLines: null,
-                  keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter name',
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOn2,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time On',
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOff2,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time Off',
-                  ),
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: team3,
-                  maxLines: null,
-                  keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter name',
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOn3,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time On',
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOff3,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time Off',
-                  ),
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: team4,
-                  maxLines: null,
-                  keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter name',
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOn4,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time On',
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOff4,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time Off',
-                  ),
-                ),
               ),
             ],
           ),

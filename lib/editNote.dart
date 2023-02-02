@@ -22,8 +22,8 @@ class _editnoteState extends State<editnote> {
   TextEditingController team3 = TextEditingController();
   TextEditingController team4 = TextEditingController();
 
-  TextEditingController timeOn1 = TextEditingController();
-  TextEditingController timeOff1 = TextEditingController();
+  TextEditingController timeOn1temp = TextEditingController();
+  TextEditingController timeOff1temp = TextEditingController();
   TextEditingController timeOn2 = TextEditingController();
   TextEditingController timeOff2 = TextEditingController();
   TextEditingController timeOn3 = TextEditingController();
@@ -36,8 +36,8 @@ class _editnoteState extends State<editnote> {
     date = TextEditingController(text: widget.docid.get('date'));
     siteName = TextEditingController(text: widget.docid.get('siteName'));
     team1 = TextEditingController(text: widget.docid.get('team1'));
-    timeOn1 = TextEditingController(text: widget.docid.get('timeOn1'));
-    timeOff1 = TextEditingController(text: widget.docid.get('timeOff1'));
+    timeOn1temp = TextEditingController(text: widget.docid.get('timeOn1'));
+    timeOff1temp = TextEditingController(text: widget.docid.get('timeOff1'));
     team2 = TextEditingController(text: widget.docid.get('team2'));
     timeOn2 = TextEditingController(text: widget.docid.get('timeOn2'));
     timeOff2 = TextEditingController(text: widget.docid.get('timeOff2'));
@@ -79,8 +79,8 @@ class _editnoteState extends State<editnote> {
                 'team2': team1.text,
                 'team3': team1.text,
                 'team4': team1.text,
-                'timeOn1': timeOn1.text,
-                'timeOff1': timeOff1.text,
+                'timeOn1temp': timeOn1temp.text,
+                'timeOff1temp': timeOff1temp.text,
                 'timeOn2': timeOn2.text,
                 'timeOff2': timeOff2.text,
                 'timeOn3': timeOn3.text,
@@ -167,7 +167,7 @@ class _editnoteState extends State<editnote> {
               Container(
                 decoration: BoxDecoration(border: Border.all()),
                 child: TextField(
-                  controller: timeOn1,
+                  controller: timeOn1temp,
                   maxLines: null,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
@@ -181,7 +181,7 @@ class _editnoteState extends State<editnote> {
               Container(
                 decoration: BoxDecoration(border: Border.all()),
                 child: TextField(
-                  controller: timeOff1,
+                  controller: timeOff1temp,
                   maxLines: null,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(

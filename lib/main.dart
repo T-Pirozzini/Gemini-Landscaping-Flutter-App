@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'addReport.dart';
+import 'addReport2.dart';
 import 'editnote.dart';
 
 void main() async {
@@ -36,8 +37,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  // final Stream<QuerySnapshot> _usersStream =
-  //     FirebaseFirestore.instance.collection('report').snapshots();
   final Stream<QuerySnapshot> _reportStream2023 =
       FirebaseFirestore.instance.collection('SiteReports2023').snapshots();
   @override
