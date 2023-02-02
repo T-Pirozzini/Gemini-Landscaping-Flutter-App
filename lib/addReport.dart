@@ -21,29 +21,13 @@ class _AddReportState extends State<AddReport> {
 
   TextEditingController siteName = TextEditingController();
 
-  TextEditingController team1 = TextEditingController();
+  TextEditingController name1 = TextEditingController();
 
-  TextEditingController team2 = TextEditingController();
+  TextEditingController name2 = TextEditingController();
 
-  TextEditingController team3 = TextEditingController();
+  TextEditingController name3 = TextEditingController();
 
-  TextEditingController team4 = TextEditingController();
-
-  TextEditingController timeOn1temp = TextEditingController();
-
-  TextEditingController timeOff1temp = TextEditingController();
-
-  TextEditingController timeOn2 = TextEditingController();
-
-  TextEditingController timeOff2 = TextEditingController();
-
-  TextEditingController timeOn3 = TextEditingController();
-
-  TextEditingController timeOff3 = TextEditingController();
-
-  TextEditingController timeOn4 = TextEditingController();
-
-  TextEditingController timeOff4 = TextEditingController();
+  TextEditingController name4 = TextEditingController();
 
   CollectionReference ref =
       FirebaseFirestore.instance.collection('SiteReports2023');
@@ -61,9 +45,12 @@ class _AddReportState extends State<AddReport> {
 
   TimeOfDay? timeOn1 = TimeOfDay.now();
   TimeOfDay? timeOff1 = TimeOfDay.now();
-
-  var temp1 = 1;
-  var temp2 = 2;
+  TimeOfDay? timeOn2 = TimeOfDay.now();
+  TimeOfDay? timeOff2 = TimeOfDay.now();
+  TimeOfDay? timeOn3 = TimeOfDay.now();
+  TimeOfDay? timeOff3 = TimeOfDay.now();
+  TimeOfDay? timeOn4 = TimeOfDay.now();
+  TimeOfDay? timeOff4 = TimeOfDay.now();
 
   @override
   Widget build(BuildContext context) {
@@ -99,18 +86,30 @@ class _AddReportState extends State<AddReport> {
               ref.add({
                 'date': dateController.text,
                 'siteName': dropdownValue,
-                'team1': team1.text,
-                'team2': team1.text,
-                'team3': team1.text,
-                'team4': team1.text,
-                'timeOn1temp': temp1,
-                'timeOff1temp': temp2,
-                'timeOn2': timeOn2.text,
-                'timeOff2': timeOff2.text,
-                'timeOn3': timeOn3.text,
-                'timeOff3': timeOff3.text,
-                'timeOn4': timeOn4.text,
-                'timeOff4': timeOff4.text,
+                'name1': name1.text,
+                'name2': name2.text,
+                'name3': name3.text,
+                'name4': name4.text,
+                'timeOn1':
+                    timeOn1!.hour.toString() + ':' + timeOn1!.minute.toString(),
+                'timeOff1': timeOff1!.hour.toString() +
+                    ':' +
+                    timeOff1!.minute.toString(),
+                'timeOn2':
+                    timeOn2!.hour.toString() + ':' + timeOn2!.minute.toString(),
+                'timeOff2': timeOff2!.hour.toString() +
+                    ':' +
+                    timeOff2!.minute.toString(),
+                'timeOn3':
+                    timeOn3!.hour.toString() + ':' + timeOn3!.minute.toString(),
+                'timeOff3': timeOff3!.hour.toString() +
+                    ':' +
+                    timeOff3!.minute.toString(),
+                'timeOn4':
+                    timeOn4!.hour.toString() + ':' + timeOn4!.minute.toString(),
+                'timeOff4': timeOff4!.hour.toString() +
+                    ':' +
+                    timeOff4!.minute.toString(),
               }).whenComplete(() {
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (_) => Home()));
@@ -192,202 +191,267 @@ class _AddReportState extends State<AddReport> {
               const SizedBox(
                 height: 10,
               ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: team1,
-                  maxLines: null,
-                  keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter crew leader name',
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  FloatingActionButton.extended(
-                    heroTag: "btn1On",
-                    icon: const Icon(Icons.access_time_outlined),
-                    label: Text(
-                        'ON - ${timeOn1!.hour.toString()}:${timeOn1!.minute.toString()}'),
-                    backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-                    onPressed: () async {
-                      TimeOfDay? newTimeOn1 = await showTimePicker(
-                        context: context,
-                        initialTime: timeOn1!,
-                      );
-                      if (newTimeOn1 != null) {
-                        setState(() {
-                          timeOn1 = newTimeOn1;
-                        });
-                      }
-                    },
+                  Expanded(
+                    // decoration: BoxDecoration(border: Border.all()),
+                    child: TextField(
+                      controller: name1,
+                      maxLines: null,
+                      keyboardType: TextInputType.text,
+                      decoration: const InputDecoration(
+                        hintText: 'Driver',
+                      ),
+                    ),
                   ),
-                  FloatingActionButton.extended(
-                    heroTag: "btn1Off",
-                    icon: const Icon(Icons.access_time_outlined),
-                    label: Text(
-                        'OFF - ${timeOff1!.hour.toString()}:${timeOff1!.minute.toString()}'),
-                    backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-                    onPressed: () async {
-                      TimeOfDay? newTimeOff1 = await showTimePicker(
-                        context: context,
-                        initialTime: timeOff1!,
-                      );
-                      if (newTimeOff1 != null) {
-                        setState(() {
-                          timeOff1 = newTimeOff1;
-                        });
-                      }
-                    },
+                  Column(
+                    children: [
+                      const Text("On"),
+                      FloatingActionButton.extended(
+                        heroTag: "btn1On",
+                        icon: const Icon(Icons.access_time_outlined),
+                        label: Text(
+                            '${timeOn1!.hour.toString()}:${timeOn1!.minute.toString()}'),
+                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+                        onPressed: () async {
+                          TimeOfDay? newTimeOn1 = await showTimePicker(
+                            context: context,
+                            initialTime: timeOn1!,
+                          );
+                          if (newTimeOn1 != null) {
+                            setState(() {
+                              timeOn1 = newTimeOn1;
+                              print(timeOn1!.hour.toString() +
+                                  ':' +
+                                  timeOn1!.minute.toString());
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Column(
+                    children: [
+                      const Text("Off"),
+                      FloatingActionButton.extended(
+                        heroTag: "btn1Off",
+                        icon: const Icon(Icons.access_time_outlined),
+                        label: Text(
+                            '${timeOff1!.hour.toString()}:${timeOff1!.minute.toString()}'),
+                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+                        onPressed: () async {
+                          TimeOfDay? newTimeOff1 = await showTimePicker(
+                            context: context,
+                            initialTime: timeOff1!,
+                          );
+                          if (newTimeOff1 != null) {
+                            setState(() {
+                              timeOff1 = newTimeOff1;
+                            });
+                          }
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOn1temp,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time On',
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: name2,
+                      maxLines: null,
+                      keyboardType: TextInputType.text,
+                      decoration: const InputDecoration(
+                        hintText: 'Name',
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOff1temp,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time Off',
+                  Column(
+                    children: [
+                      const SizedBox(height: 4),
+                      FloatingActionButton.extended(
+                        heroTag: "btn2On",
+                        icon: const Icon(Icons.access_time_outlined),
+                        label: Text(
+                            '${timeOn2!.hour.toString()}:${timeOn2!.minute.toString()}'),
+                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+                        onPressed: () async {
+                          TimeOfDay? newTimeOn2 = await showTimePicker(
+                            context: context,
+                            initialTime: timeOn2!,
+                          );
+                          if (newTimeOn2 != null) {
+                            setState(() {
+                              timeOn2 = newTimeOn2;
+                            });
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: team2,
-                  maxLines: null,
-                  keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter name',
+                  const SizedBox(
+                    width: 10,
                   ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOn2,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time On',
+                  Column(
+                    children: [
+                      const SizedBox(height: 4),
+                      FloatingActionButton.extended(
+                        heroTag: "btn2Off",
+                        icon: const Icon(Icons.access_time_outlined),
+                        label: Text(
+                            '${timeOff2!.hour.toString()}:${timeOff2!.minute.toString()}'),
+                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+                        onPressed: () async {
+                          TimeOfDay? newTimeOff2 = await showTimePicker(
+                            context: context,
+                            initialTime: timeOff2!,
+                          );
+                          if (newTimeOff2 != null) {
+                            setState(() {
+                              timeOff2 = newTimeOff2;
+                            });
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                ),
+                ],
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOff2,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time Off',
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    // decoration: BoxDecoration(border: Border.all()),
+                    child: TextField(
+                      controller: name3,
+                      maxLines: null,
+                      keyboardType: TextInputType.text,
+                      decoration: const InputDecoration(
+                        hintText: 'Name',
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: team3,
-                  maxLines: null,
-                  keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter name',
+                  Column(
+                    children: [
+                      const SizedBox(height: 4),
+                      FloatingActionButton.extended(
+                        heroTag: "btn3On",
+                        icon: const Icon(Icons.access_time_outlined),
+                        label: Text(
+                            '${timeOn3!.hour.toString()}:${timeOn3!.minute.toString()}'),
+                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+                        onPressed: () async {
+                          TimeOfDay? newTimeOn3 = await showTimePicker(
+                            context: context,
+                            initialTime: timeOn3!,
+                          );
+                          if (newTimeOn3 != null) {
+                            setState(() {
+                              timeOn3 = newTimeOn3;
+                            });
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOn3,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time On',
+                  const SizedBox(
+                    width: 10,
                   ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOff3,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time Off',
+                  Column(
+                    children: [
+                      const SizedBox(height: 4),
+                      FloatingActionButton.extended(
+                        heroTag: "btn3Off",
+                        icon: const Icon(Icons.access_time_outlined),
+                        label: Text(
+                            '${timeOff3!.hour.toString()}:${timeOff3!.minute.toString()}'),
+                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+                        onPressed: () async {
+                          TimeOfDay? newTimeOff3 = await showTimePicker(
+                            context: context,
+                            initialTime: timeOff3!,
+                          );
+                          if (newTimeOff3 != null) {
+                            setState(() {
+                              timeOff3 = newTimeOff3;
+                            });
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                ),
+                ],
               ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: team4,
-                  maxLines: null,
-                  keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter name',
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    // decoration: BoxDecoration(border: Border.all()),
+                    child: TextField(
+                      controller: name4,
+                      maxLines: null,
+                      keyboardType: TextInputType.text,
+                      decoration: const InputDecoration(
+                        hintText: 'Name',
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOn4,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time On',
+                  Column(
+                    children: [
+                      const SizedBox(height: 4),
+                      FloatingActionButton.extended(
+                        heroTag: "btn4On",
+                        icon: const Icon(Icons.access_time_outlined),
+                        label: Text(
+                            '${timeOn4!.hour.toString()}:${timeOn4!.minute.toString()}'),
+                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+                        onPressed: () async {
+                          TimeOfDay? newTimeOn4 = await showTimePicker(
+                            context: context,
+                            initialTime: timeOn4!,
+                          );
+                          if (newTimeOn4 != null) {
+                            setState(() {
+                              timeOn4 = newTimeOn4;
+                            });
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
-                child: TextField(
-                  controller: timeOff4,
-                  maxLines: null,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter time Off',
+                  const SizedBox(
+                    width: 10,
                   ),
-                ),
+                  Column(
+                    children: [
+                      const SizedBox(height: 4),
+                      FloatingActionButton.extended(
+                        heroTag: "btn4Off",
+                        icon: const Icon(Icons.access_time_outlined),
+                        label: Text(
+                            '${timeOff4!.hour.toString()}:${timeOff4!.minute.toString()}'),
+                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+                        onPressed: () async {
+                          TimeOfDay? newTimeOff4 = await showTimePicker(
+                            context: context,
+                            initialTime: timeOff4!,
+                          );
+                          if (newTimeOff4 != null) {
+                            setState(() {
+                              timeOff4 = newTimeOff4;
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
