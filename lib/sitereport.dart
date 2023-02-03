@@ -51,10 +51,10 @@ class _SiteReportState extends State<SiteReport> {
       timeOn4 = widget.docid.get('timeOn4');
       timeOff4 = widget.docid.get('timeOff4');
 
-      timeTotal = (int.parse(timeOff1) - int.parse(timeOn1)) +
-          (int.parse(timeOff2) - int.parse(timeOn2)) +
-          (int.parse(timeOff3) - int.parse(timeOn3)) +
-          (int.parse(timeOff4) - int.parse(timeOn4));
+      // timeTotal = (int.parse(timeOff1) - int.parse(timeOn1)) +
+      //     (int.parse(timeOff2) - int.parse(timeOn2)) +
+      //     (int.parse(timeOff3) - int.parse(timeOn3)) +
+      //     (int.parse(timeOff4) - int.parse(timeOn4));
     });
 
     super.initState();
