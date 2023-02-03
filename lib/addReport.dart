@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 
 import 'main.dart';
 
@@ -11,24 +12,53 @@ List<String> siteList = [
   'Country Grocer'
 ];
 
+const List<Widget> garbage = <Widget>[
+  Text('grassed areas'),
+  Text('garden beds'),
+  Text('walkways')
+];
+const List<Widget> debris = <Widget>[
+  Text('grassed areas'),
+  Text('garden beds'),
+  Text('tree wells')
+];
+const List<Widget> lawn = <Widget>[
+  Text('mow'),
+  Text('trim'),
+  Text('edge'),
+  Text('lime'),
+  Text('aerate'),
+  Text('fertilize'),
+];
+const List<Widget> garden = <Widget>[
+  Text('blow out debris'),
+  Text('weed'),
+  Text('prune'),
+  Text('fertilize'),
+];
+const List<Widget> tree = <Widget>[
+  Text('< 8ft'),
+  Text('> 8ft'),
+];
+const List<Widget> blow = <Widget>[
+  Text('parking lot curbs'),
+  Text('drain basins'),
+  Text('walkways')
+];
+
 class AddReport extends StatefulWidget {
   const AddReport({super.key});
-  
+
   @override
   State<AddReport> createState() => _AddReportState();
 }
 
 class _AddReportState extends State<AddReport> {
   TextEditingController dateController = TextEditingController();
-
   TextEditingController siteName = TextEditingController();
-
   TextEditingController name1 = TextEditingController();
-
   TextEditingController name2 = TextEditingController();
-
   TextEditingController name3 = TextEditingController();
-
   TextEditingController name4 = TextEditingController();
 
   CollectionReference ref =
@@ -53,6 +83,20 @@ class _AddReportState extends State<AddReport> {
   TimeOfDay? timeOff3 = TimeOfDay.now();
   TimeOfDay? timeOn4 = TimeOfDay.now();
   TimeOfDay? timeOff4 = TimeOfDay.now();
+
+  final List<bool> _selectedGarbage = <bool>[false, false, false];
+  final List<bool> _selectedDebris = <bool>[false, false, false];
+  final List<bool> _selectedLawn = <bool>[
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ];
+  final List<bool> _selectedGarden = <bool>[false, false, false, false];
+  final List<bool> _selectedTree = <bool>[false, false];
+  final List<bool> _selectedBlow = <bool>[false, false, false];
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +267,7 @@ class _AddReportState extends State<AddReport> {
                           );
                           if (newTimeOn1 != null) {
                             setState(() {
-                              timeOn1 = newTimeOn1;                              
+                              timeOn1 = newTimeOn1;
                             });
                           }
                         },
@@ -451,6 +495,126 @@ class _AddReportState extends State<AddReport> {
                     ],
                   ),
                 ],
+              ),
+              const Text('Pick up loose garbage:'),
+              ToggleButtons(
+                onPressed: (int index) {
+                  // All buttons are selectable.
+                  setState(() {
+                    _selectedGarbage[index] = !_selectedGarbage[index];
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: Colors.green[700],
+                selectedColor: Colors.white,
+                fillColor: Colors.green[200],
+                color: Colors.green[400],
+                constraints: const BoxConstraints(
+                  minHeight: 30.0,
+                  minWidth: 110.0,
+                ),
+                isSelected: _selectedGarbage,
+                children: garbage,
+              ),
+              const Text('Rake yard debris:'),
+              ToggleButtons(
+                onPressed: (int index) {
+                  // All buttons are selectable.
+                  setState(() {
+                    _selectedDebris[index] = !_selectedDebris[index];
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: Colors.green[700],
+                selectedColor: Colors.white,
+                fillColor: Colors.green[200],
+                color: Colors.green[400],
+                constraints: const BoxConstraints(
+                  minHeight: 30.0,
+                  minWidth: 110.0,
+                ),
+                isSelected: _selectedDebris,
+                children: debris,
+              ),
+              const Text('Lawn care:'),
+              ToggleButtons(
+                onPressed: (int index) {
+                  // All buttons are selectable.
+                  setState(() {
+                    _selectedLawn[index] = !_selectedLawn[index];
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: Colors.green[700],
+                selectedColor: Colors.white,
+                fillColor: Colors.green[200],
+                color: Colors.green[400],
+                constraints: const BoxConstraints(
+                  minHeight: 30.0,
+                  minWidth: 60.0,
+                ),
+                isSelected: _selectedLawn,
+                children: lawn,
+              ),
+              const Text('Gardens:'),
+              ToggleButtons(
+                onPressed: (int index) {
+                  // All buttons are selectable.
+                  setState(() {
+                    _selectedGarden[index] = !_selectedGarden[index];
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: Colors.green[700],
+                selectedColor: Colors.white,
+                fillColor: Colors.green[200],
+                color: Colors.green[400],
+                constraints: const BoxConstraints(
+                  minHeight: 30.0,
+                  minWidth: 90.0,
+                ),
+                isSelected: _selectedGarden,
+                children: garden,
+              ),
+              const Text('Trees:'),
+              ToggleButtons(
+                onPressed: (int index) {
+                  // All buttons are selectable.
+                  setState(() {
+                    _selectedTree[index] = !_selectedTree[index];
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: Colors.green[700],
+                selectedColor: Colors.white,
+                fillColor: Colors.green[200],
+                color: Colors.green[400],
+                constraints: const BoxConstraints(
+                  minHeight: 30.0,
+                  minWidth: 110.0,
+                ),
+                isSelected: _selectedTree,
+                children: tree,
+              ),
+              const Text('Blow dust/debris:'),
+              ToggleButtons(
+                onPressed: (int index) {
+                  // All buttons are selectable.
+                  setState(() {
+                    _selectedBlow[index] = !_selectedBlow[index];
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: Colors.green[700],
+                selectedColor: Colors.white,
+                fillColor: Colors.green[200],
+                color: Colors.green[400],
+                constraints: const BoxConstraints(
+                  minHeight: 30.0,
+                  minWidth: 110.0,
+                ),
+                isSelected: _selectedBlow,
+                children: blow,
               ),
             ],
           ),
