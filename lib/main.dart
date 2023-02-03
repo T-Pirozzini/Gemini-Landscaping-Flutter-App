@@ -104,13 +104,15 @@ class _HomeState extends State<Home> {
                             ),
                           ),
                           title: Text(
-                            snapshot.data!.docChanges[index].doc['date'],
+                            snapshot.data!.docChanges[index].doc['info']
+                                ['date'],
                             style: const TextStyle(
                               fontSize: 20,
                             ),
                           ),
                           trailing: Text(
-                            snapshot.data!.docChanges[index].doc['siteName'],
+                            snapshot.data!.docChanges[index].doc['info']
+                                ['siteName'],
                             style: const TextStyle(
                               fontSize: 20,
                             ),

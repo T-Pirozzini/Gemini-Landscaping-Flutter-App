@@ -52,44 +52,30 @@ class _ViewReportState extends State<ViewReport> {
           child: Column(
             children: [
               Column(
-                // mainAxisAlignment: MainAxisAlignment.center,
-                // crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
                     decoration: BoxDecoration(border: Border.all()),
-                    child: Text(widget.docid.get('date')),
+                    child: Text(widget.docid["info"]['date']),
                   ),
                   const SizedBox(
                     height: 10,
                   ),
-                  Text(widget.docid.get("siteName")),
+                  Text(widget.docid["info"]["siteName"]),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                    widget.docid.get("name1"),
+                    widget.docid["names"]["name1"],
                   ),
                   Text(
-                    "On: " + widget.docid.get("timeOn1"),
+                    "On: ${widget.docid["times"]?["timeOn1"] ?? ""}",
                   ),
                   Text(
-                    "Off: ${widget.docid["times"]["timeOff1"]}",
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    widget.docid.get("name2"),
-                  ),
-                  Text(
-                    "On: " + widget.docid.get("timeOn2"),
-                  ),
-                  Text(
-                    "Off: " + widget.docid.get("timeOff2"),
+                    "Off: ${widget.docid["times"]?["timeOff1"] ?? ""}",
                   ),
                 ],
               ),
@@ -97,13 +83,13 @@ class _ViewReportState extends State<ViewReport> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                    widget.docid.get("name3"),
+                    widget.docid["names"]["name2"],
                   ),
                   Text(
-                    "On: " + widget.docid.get("timeOn3"),
+                    "On: ${widget.docid["times"]["timeOn2"]}",
                   ),
                   Text(
-                    "Off: " + widget.docid.get("timeOff3"),
+                    "Off: ${widget.docid["times"]["timeOff2"]}",
                   ),
                 ],
               ),
@@ -111,13 +97,27 @@ class _ViewReportState extends State<ViewReport> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
-                    widget.docid.get("name4"),
+                    widget.docid["names"]["name3"],
                   ),
                   Text(
-                    "On: " + widget.docid.get("timeOn4"),
+                    "On: ${widget.docid["times"]["timeOn3"]}",
                   ),
                   Text(
-                    "Off: " + widget.docid.get("timeOff4"),
+                    "Off: ${widget.docid["times"]["timeOff3"]}",
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    widget.docid["names"]["name4"],
+                  ),
+                  Text(
+                    "On: ${widget.docid["times"]["timeOn4"]}",
+                  ),
+                  Text(
+                    "Off: ${widget.docid["times"]["timeOff4"]}",
                   ),
                 ],
               ),
