@@ -3,8 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'addReport.dart';
-import 'addReport2.dart';
-import 'editnote.dart';
+// import 'addReport2.dart';
+// import 'editnote.dart';
+import 'viewReport.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +47,7 @@ class _HomeState extends State<Home> {
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         onPressed: () {
           Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => AddReport()));
+              context, MaterialPageRoute(builder: (_) => const AddReport()));
         },
         child: const Icon(
           Icons.add,
@@ -81,7 +82,7 @@ class _HomeState extends State<Home> {
                       context,
                       MaterialPageRoute(
                         builder: (_) =>
-                            editnote(docid: snapshot.data!.docs[index]),
+                            ViewReport(docid: snapshot.data!.docs[index]),
                       ),
                     );
                   },
