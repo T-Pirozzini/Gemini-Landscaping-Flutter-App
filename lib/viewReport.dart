@@ -75,7 +75,7 @@ class _ViewReportState extends State<ViewReport> {
                     "On: " + widget.docid.get("timeOn1"),
                   ),
                   Text(
-                    "Off: " + widget.docid.get("timeOff1"),
+                    "Off: ${widget.docid["times"]["timeOff1"]}",
                   ),
                 ],
               ),

@@ -12,17 +12,17 @@ List<String> siteList = [
   'Country Grocer'
 ];
 
-const List<Widget> garbage = <Widget>[
+const List<Widget> garbage2 = <Widget>[
   Text('grassed areas'),
   Text('garden beds'),
   Text('walkways')
 ];
-const List<Widget> debris = <Widget>[
+const List<Widget> debris2 = <Widget>[
   Text('grassed areas'),
   Text('garden beds'),
   Text('tree wells')
 ];
-const List<Widget> lawn = <Widget>[
+const List<Widget> lawn2 = <Widget>[
   Text('mow'),
   Text('trim'),
   Text('edge'),
@@ -30,13 +30,13 @@ const List<Widget> lawn = <Widget>[
   Text('aerate'),
   Text('fertilize'),
 ];
-const List<Widget> garden = <Widget>[
+const List<Widget> garden2 = <Widget>[
   Text('blow debris'),
   Text('weed'),
   Text('prune'),
   Text('fertilize'),
 ];
-const List<Widget> tree = <Widget>[
+const List<Widget> tree2 = <Widget>[
   Text('< 8ft'),
   Text('> 8ft'),
 ];
@@ -46,6 +46,16 @@ const List<Widget> blow2 = <Widget>[
   Text('walkways')
 ];
 
+List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
+List<String> _selectedGarbage = [];
+List<String> debris = ['grassed areas', 'garden beds', 'tree wells'];
+List<String> _selectedDebris = [];
+List<String> lawn = ['mow', 'trim', 'edge', 'lime', 'aerate', 'fertilize'];
+List<String> _selectedLawn = [];
+List<String> garden = ['blow debris', 'weed', 'prune', 'fertilize'];
+List<String> _selectedGarden = [];
+List<String> tree = ['< 8ft', '> 8ft'];
+List<String> _selectedTree = [];
 List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
 List<String> _selectedBlow = [];
 
@@ -87,19 +97,19 @@ class _AddReportState extends State<AddReport> {
   TimeOfDay? timeOn4 = TimeOfDay.now();
   TimeOfDay? timeOff4 = TimeOfDay.now();
 
-  final List<bool> _selectedGarbage = <bool>[false, false, false];
-  final List<bool> _selectedDebris = <bool>[false, false, false];
-  final List<bool> _selectedLawn = <bool>[
-    false,
-    false,
-    false,
-    false,
-    false,
-    false
-  ];
-  final List<bool> _selectedGarden = <bool>[false, false, false, false];
-  final List<bool> _selectedTree = <bool>[false, false];
-  // final List<bool> _selectedBlow = <bool>[false, false, false];
+  // final List<bool> _selectedGarbage = <bool>[false, false, false];
+  // final List<bool> _selectedDebris = <bool>[false, false, false];
+  // final List<bool> _selectedLawn = <bool>[
+  //   false,
+  //   false,
+  //   false,
+  //   false,
+  //   false,
+  //   false
+  // ];
+  // final List<bool> _selectedGarden = <bool>[false, false, false, false];
+  // final List<bool> _selectedTree = <bool>[false, false];
+  // // final List<bool> _selectedBlow = <bool>[false, false, false];
 
   @override
   Widget build(BuildContext context) {
@@ -133,33 +143,50 @@ class _AddReportState extends State<AddReport> {
           MaterialButton(
             onPressed: () {
               ref.add({
-                'date': dateController.text,
-                'siteName': dropdownValue,
-                'name1': name1.text,
-                'name2': name2.text,
-                'name3': name3.text,
-                'name4': name4.text,
-                'timeOn1':
-                    timeOn1!.hour.toString() + ':' + timeOn1!.minute.toString(),
-                'timeOff1': timeOff1!.hour.toString() +
-                    ':' +
-                    timeOff1!.minute.toString(),
-                'timeOn2':
-                    timeOn2!.hour.toString() + ':' + timeOn2!.minute.toString(),
-                'timeOff2': timeOff2!.hour.toString() +
-                    ':' +
-                    timeOff2!.minute.toString(),
-                'timeOn3':
-                    timeOn3!.hour.toString() + ':' + timeOn3!.minute.toString(),
-                'timeOff3': timeOff3!.hour.toString() +
-                    ':' +
-                    timeOff3!.minute.toString(),
-                'timeOn4':
-                    timeOn4!.hour.toString() + ':' + timeOn4!.minute.toString(),
-                'timeOff4': timeOff4!.hour.toString() +
-                    ':' +
-                    timeOff4!.minute.toString(),
-                'blow': _selectedBlow,
+                "info": {
+                  'date': dateController.text,
+                  'siteName': dropdownValue,
+                },
+                "names": {
+                  'name1': name1.text,
+                  'name2': name2.text,
+                  'name3': name3.text,
+                  'name4': name4.text,
+                },
+                "times": {
+                  'timeOn1': timeOn1!.hour.toString() +
+                      ':' +
+                      timeOn1!.minute.toString(),
+                  'timeOff1': timeOff1!.hour.toString() +
+                      ':' +
+                      timeOff1!.minute.toString(),
+                  'timeOn2': timeOn2!.hour.toString() +
+                      ':' +
+                      timeOn2!.minute.toString(),
+                  'timeOff2': timeOff2!.hour.toString() +
+                      ':' +
+                      timeOff2!.minute.toString(),
+                  'timeOn3': timeOn3!.hour.toString() +
+                      ':' +
+                      timeOn3!.minute.toString(),
+                  'timeOff3': timeOff3!.hour.toString() +
+                      ':' +
+                      timeOff3!.minute.toString(),
+                  'timeOn4': timeOn4!.hour.toString() +
+                      ':' +
+                      timeOn4!.minute.toString(),
+                  'timeOff4': timeOff4!.hour.toString() +
+                      ':' +
+                      timeOff4!.minute.toString(),
+                },
+                "service": {
+                  'garbage': _selectedGarbage,
+                  'debris': _selectedDebris,
+                  'lawn': _selectedLawn,
+                  'garden': _selectedGarden,
+                  'tree': _selectedTree,
+                  'blow': _selectedBlow,
+                },
               }).whenComplete(() {
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (_) => Home()));
@@ -591,7 +618,11 @@ class _AddReportState extends State<AddReport> {
                 onPressed: (int index) {
                   // All buttons are selectable.
                   setState(() {
-                    _selectedGarbage[index] = !_selectedGarbage[index];
+                    if (_selectedGarbage.contains(garbage[index])) {
+                      _selectedGarbage.remove(garbage[index]);
+                    } else {
+                      _selectedGarbage.add(garbage[index]);
+                    }
                   });
                 },
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -603,8 +634,10 @@ class _AddReportState extends State<AddReport> {
                   minHeight: 30.0,
                   minWidth: 110.0,
                 ),
-                isSelected: _selectedGarbage,
-                children: garbage,
+                isSelected: garbage
+                    .map((value) => _selectedGarbage.contains(value))
+                    .toList(),
+                children: garbage.map((value) => Text(value)).toList(),
               ),
               const SizedBox(height: 5),
               const Text('Rake yard debris:',
@@ -613,7 +646,11 @@ class _AddReportState extends State<AddReport> {
                 onPressed: (int index) {
                   // All buttons are selectable.
                   setState(() {
-                    _selectedDebris[index] = !_selectedDebris[index];
+                    if (_selectedDebris.contains(debris[index])) {
+                      _selectedDebris.remove(debris[index]);
+                    } else {
+                      _selectedDebris.add(debris[index]);
+                    }
                   });
                 },
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -625,8 +662,10 @@ class _AddReportState extends State<AddReport> {
                   minHeight: 30.0,
                   minWidth: 110.0,
                 ),
-                isSelected: _selectedDebris,
-                children: debris,
+                isSelected: debris
+                    .map((value) => _selectedDebris.contains(value))
+                    .toList(),
+                children: debris.map((value) => Text(value)).toList(),
               ),
               const SizedBox(height: 5),
               const Text('Lawn care:',
@@ -635,7 +674,11 @@ class _AddReportState extends State<AddReport> {
                 onPressed: (int index) {
                   // All buttons are selectable.
                   setState(() {
-                    _selectedLawn[index] = !_selectedLawn[index];
+                    if (_selectedLawn.contains(lawn[index])) {
+                      _selectedLawn.remove(lawn[index]);
+                    } else {
+                      _selectedLawn.add(lawn[index]);
+                    }
                   });
                 },
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -645,10 +688,11 @@ class _AddReportState extends State<AddReport> {
                 color: Colors.green[400],
                 constraints: const BoxConstraints(
                   minHeight: 30.0,
-                  minWidth: 60.0,
+                  minWidth: 55.0,
                 ),
-                isSelected: _selectedLawn,
-                children: lawn,
+                isSelected:
+                    lawn.map((value) => _selectedLawn.contains(value)).toList(),
+                children: lawn.map((value) => Text(value)).toList(),
               ),
               const SizedBox(height: 5),
               const Text('Gardens:',
@@ -657,7 +701,11 @@ class _AddReportState extends State<AddReport> {
                 onPressed: (int index) {
                   // All buttons are selectable.
                   setState(() {
-                    _selectedGarden[index] = !_selectedGarden[index];
+                    if (_selectedGarden.contains(garden[index])) {
+                      _selectedGarden.remove(garden[index]);
+                    } else {
+                      _selectedGarden.add(garden[index]);
+                    }
                   });
                 },
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -667,10 +715,12 @@ class _AddReportState extends State<AddReport> {
                 color: Colors.green[400],
                 constraints: const BoxConstraints(
                   minHeight: 30.0,
-                  minWidth: 90.0,
+                  minWidth: 85.0,
                 ),
-                isSelected: _selectedGarden,
-                children: garden,
+                isSelected: garden
+                    .map((value) => _selectedGarden.contains(value))
+                    .toList(),
+                children: garden.map((value) => Text(value)).toList(),
               ),
               const SizedBox(height: 5),
               const Text('Trees:',
@@ -679,7 +729,11 @@ class _AddReportState extends State<AddReport> {
                 onPressed: (int index) {
                   // All buttons are selectable.
                   setState(() {
-                    _selectedTree[index] = !_selectedTree[index];
+                    if (_selectedTree.contains(tree[index])) {
+                      _selectedTree.remove(tree[index]);
+                    } else {
+                      _selectedTree.add(tree[index]);
+                    }
                   });
                 },
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -691,8 +745,9 @@ class _AddReportState extends State<AddReport> {
                   minHeight: 30.0,
                   minWidth: 110.0,
                 ),
-                isSelected: _selectedTree,
-                children: tree,
+                isSelected:
+                    tree.map((value) => _selectedTree.contains(value)).toList(),
+                children: tree.map((value) => Text(value)).toList(),
               ),
               const SizedBox(height: 5),
               const Text('Blow dust/debris:',
