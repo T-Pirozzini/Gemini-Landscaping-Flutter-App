@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_switch/flutter_switch.dart';
 
 import 'main.dart';
 
@@ -242,35 +241,45 @@ class _AddReportState extends State<AddReport> {
                 children: [
                   Expanded(
                     // decoration: BoxDecoration(border: Border.all()),
-                    child: TextField(
-                      controller: name1,
-                      maxLines: null,
-                      keyboardType: TextInputType.text,
-                      decoration: const InputDecoration(
-                        hintText: 'Driver',
+                    child: Container(
+                      width: 100,
+                      height: 40,
+                      child: TextField(
+                        controller: name1,
+                        maxLines: null,
+                        keyboardType: TextInputType.text,
+                        decoration: const InputDecoration(
+                          hintText: 'Driver',
+                        ),
                       ),
                     ),
                   ),
                   Column(
                     children: [
-                      const Text("On"),
-                      FloatingActionButton.extended(
-                        heroTag: "btn1On",
-                        icon: const Icon(Icons.access_time_outlined),
-                        label: Text(
-                            '${timeOn1!.hour.toString()}:${timeOn1!.minute.toString()}'),
-                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-                        onPressed: () async {
-                          TimeOfDay? newTimeOn1 = await showTimePicker(
-                            context: context,
-                            initialTime: timeOn1!,
-                          );
-                          if (newTimeOn1 != null) {
-                            setState(() {
-                              timeOn1 = newTimeOn1;
-                            });
-                          }
-                        },
+                      const Text("On",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Container(
+                        width: 100,
+                        height: 30,
+                        child: FloatingActionButton.extended(
+                          heroTag: "btn1On",
+                          icon: const Icon(Icons.access_time_outlined),
+                          label: Text(
+                              '${timeOn1!.hour.toString()}:${timeOn1!.minute.toString()}'),
+                          backgroundColor:
+                              const Color.fromARGB(255, 31, 182, 77),
+                          onPressed: () async {
+                            TimeOfDay? newTimeOn1 = await showTimePicker(
+                              context: context,
+                              initialTime: timeOn1!,
+                            );
+                            if (newTimeOn1 != null) {
+                              setState(() {
+                                timeOn1 = newTimeOn1;
+                              });
+                            }
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -279,24 +288,30 @@ class _AddReportState extends State<AddReport> {
                   ),
                   Column(
                     children: [
-                      const Text("Off"),
-                      FloatingActionButton.extended(
-                        heroTag: "btn1Off",
-                        icon: const Icon(Icons.access_time_outlined),
-                        label: Text(
-                            '${timeOff1!.hour.toString()}:${timeOff1!.minute.toString()}'),
-                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-                        onPressed: () async {
-                          TimeOfDay? newTimeOff1 = await showTimePicker(
-                            context: context,
-                            initialTime: timeOff1!,
-                          );
-                          if (newTimeOff1 != null) {
-                            setState(() {
-                              timeOff1 = newTimeOff1;
-                            });
-                          }
-                        },
+                      const Text("Off",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Container(
+                        width: 100,
+                        height: 30,
+                        child: FloatingActionButton.extended(
+                          heroTag: "btn1Off",
+                          icon: const Icon(Icons.access_time_outlined),
+                          label: Text(
+                              '${timeOff1!.hour.toString()}:${timeOff1!.minute.toString()}'),
+                          backgroundColor:
+                              const Color.fromARGB(255, 31, 182, 77),
+                          onPressed: () async {
+                            TimeOfDay? newTimeOff1 = await showTimePicker(
+                              context: context,
+                              initialTime: timeOff1!,
+                            );
+                            if (newTimeOff1 != null) {
+                              setState(() {
+                                timeOff1 = newTimeOff1;
+                              });
+                            }
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -306,35 +321,44 @@ class _AddReportState extends State<AddReport> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: name2,
-                      maxLines: null,
-                      keyboardType: TextInputType.text,
-                      decoration: const InputDecoration(
-                        hintText: 'Name',
+                    child: Container(
+                      width: 100,
+                      height: 40,
+                      child: TextField(
+                        controller: name2,
+                        maxLines: null,
+                        keyboardType: TextInputType.text,
+                        decoration: const InputDecoration(
+                          hintText: 'Name',
+                        ),
                       ),
                     ),
                   ),
                   Column(
                     children: [
                       const SizedBox(height: 4),
-                      FloatingActionButton.extended(
-                        heroTag: "btn2On",
-                        icon: const Icon(Icons.access_time_outlined),
-                        label: Text(
-                            '${timeOn2!.hour.toString()}:${timeOn2!.minute.toString()}'),
-                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-                        onPressed: () async {
-                          TimeOfDay? newTimeOn2 = await showTimePicker(
-                            context: context,
-                            initialTime: timeOn2!,
-                          );
-                          if (newTimeOn2 != null) {
-                            setState(() {
-                              timeOn2 = newTimeOn2;
-                            });
-                          }
-                        },
+                      Container(
+                        width: 100,
+                        height: 30,
+                        child: FloatingActionButton.extended(
+                          heroTag: "btn2On",
+                          icon: const Icon(Icons.access_time_outlined),
+                          label: Text(
+                              '${timeOn2!.hour.toString()}:${timeOn2!.minute.toString()}'),
+                          backgroundColor:
+                              const Color.fromARGB(255, 31, 182, 77),
+                          onPressed: () async {
+                            TimeOfDay? newTimeOn2 = await showTimePicker(
+                              context: context,
+                              initialTime: timeOn2!,
+                            );
+                            if (newTimeOn2 != null) {
+                              setState(() {
+                                timeOn2 = newTimeOn2;
+                              });
+                            }
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -344,88 +368,28 @@ class _AddReportState extends State<AddReport> {
                   Column(
                     children: [
                       const SizedBox(height: 4),
-                      FloatingActionButton.extended(
-                        heroTag: "btn2Off",
-                        icon: const Icon(Icons.access_time_outlined),
-                        label: Text(
-                            '${timeOff2!.hour.toString()}:${timeOff2!.minute.toString()}'),
-                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-                        onPressed: () async {
-                          TimeOfDay? newTimeOff2 = await showTimePicker(
-                            context: context,
-                            initialTime: timeOff2!,
-                          );
-                          if (newTimeOff2 != null) {
-                            setState(() {
-                              timeOff2 = newTimeOff2;
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    // decoration: BoxDecoration(border: Border.all()),
-                    child: TextField(
-                      controller: name3,
-                      maxLines: null,
-                      keyboardType: TextInputType.text,
-                      decoration: const InputDecoration(
-                        hintText: 'Name',
-                      ),
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      const SizedBox(height: 4),
-                      FloatingActionButton.extended(
-                        heroTag: "btn3On",
-                        icon: const Icon(Icons.access_time_outlined),
-                        label: Text(
-                            '${timeOn3!.hour.toString()}:${timeOn3!.minute.toString()}'),
-                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-                        onPressed: () async {
-                          TimeOfDay? newTimeOn3 = await showTimePicker(
-                            context: context,
-                            initialTime: timeOn3!,
-                          );
-                          if (newTimeOn3 != null) {
-                            setState(() {
-                              timeOn3 = newTimeOn3;
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Column(
-                    children: [
-                      const SizedBox(height: 4),
-                      FloatingActionButton.extended(
-                        heroTag: "btn3Off",
-                        icon: const Icon(Icons.access_time_outlined),
-                        label: Text(
-                            '${timeOff3!.hour.toString()}:${timeOff3!.minute.toString()}'),
-                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-                        onPressed: () async {
-                          TimeOfDay? newTimeOff3 = await showTimePicker(
-                            context: context,
-                            initialTime: timeOff3!,
-                          );
-                          if (newTimeOff3 != null) {
-                            setState(() {
-                              timeOff3 = newTimeOff3;
-                            });
-                          }
-                        },
+                      Container(
+                        width: 100,
+                        height: 30,
+                        child: FloatingActionButton.extended(
+                          heroTag: "btn2Off",
+                          icon: const Icon(Icons.access_time_outlined),
+                          label: Text(
+                              '${timeOff2!.hour.toString()}:${timeOff2!.minute.toString()}'),
+                          backgroundColor:
+                              const Color.fromARGB(255, 31, 182, 77),
+                          onPressed: () async {
+                            TimeOfDay? newTimeOff2 = await showTimePicker(
+                              context: context,
+                              initialTime: timeOff2!,
+                            );
+                            if (newTimeOff2 != null) {
+                              setState(() {
+                                timeOff2 = newTimeOff2;
+                              });
+                            }
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -436,35 +400,44 @@ class _AddReportState extends State<AddReport> {
                 children: [
                   Expanded(
                     // decoration: BoxDecoration(border: Border.all()),
-                    child: TextField(
-                      controller: name4,
-                      maxLines: null,
-                      keyboardType: TextInputType.text,
-                      decoration: const InputDecoration(
-                        hintText: 'Name',
+                    child: Container(
+                      width: 100,
+                      height: 40,
+                      child: TextField(
+                        controller: name3,
+                        maxLines: null,
+                        keyboardType: TextInputType.text,
+                        decoration: const InputDecoration(
+                          hintText: 'Name',
+                        ),
                       ),
                     ),
                   ),
                   Column(
                     children: [
                       const SizedBox(height: 4),
-                      FloatingActionButton.extended(
-                        heroTag: "btn4On",
-                        icon: const Icon(Icons.access_time_outlined),
-                        label: Text(
-                            '${timeOn4!.hour.toString()}:${timeOn4!.minute.toString()}'),
-                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-                        onPressed: () async {
-                          TimeOfDay? newTimeOn4 = await showTimePicker(
-                            context: context,
-                            initialTime: timeOn4!,
-                          );
-                          if (newTimeOn4 != null) {
-                            setState(() {
-                              timeOn4 = newTimeOn4;
-                            });
-                          }
-                        },
+                      Container(
+                        width: 100,
+                        height: 30,
+                        child: FloatingActionButton.extended(
+                          heroTag: "btn3On",
+                          icon: const Icon(Icons.access_time_outlined),
+                          label: Text(
+                              '${timeOn3!.hour.toString()}:${timeOn3!.minute.toString()}'),
+                          backgroundColor:
+                              const Color.fromARGB(255, 31, 182, 77),
+                          onPressed: () async {
+                            TimeOfDay? newTimeOn3 = await showTimePicker(
+                              context: context,
+                              initialTime: timeOn3!,
+                            );
+                            if (newTimeOn3 != null) {
+                              setState(() {
+                                timeOn3 = newTimeOn3;
+                              });
+                            }
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -474,29 +447,115 @@ class _AddReportState extends State<AddReport> {
                   Column(
                     children: [
                       const SizedBox(height: 4),
-                      FloatingActionButton.extended(
-                        heroTag: "btn4Off",
-                        icon: const Icon(Icons.access_time_outlined),
-                        label: Text(
-                            '${timeOff4!.hour.toString()}:${timeOff4!.minute.toString()}'),
-                        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-                        onPressed: () async {
-                          TimeOfDay? newTimeOff4 = await showTimePicker(
-                            context: context,
-                            initialTime: timeOff4!,
-                          );
-                          if (newTimeOff4 != null) {
-                            setState(() {
-                              timeOff4 = newTimeOff4;
-                            });
-                          }
-                        },
+                      Container(
+                        width: 100,
+                        height: 30,
+                        child: FloatingActionButton.extended(
+                          heroTag: "btn3Off",
+                          icon: const Icon(Icons.access_time_outlined),
+                          label: Text(
+                              '${timeOff3!.hour.toString()}:${timeOff3!.minute.toString()}'),
+                          backgroundColor:
+                              const Color.fromARGB(255, 31, 182, 77),
+                          onPressed: () async {
+                            TimeOfDay? newTimeOff3 = await showTimePicker(
+                              context: context,
+                              initialTime: timeOff3!,
+                            );
+                            if (newTimeOff3 != null) {
+                              setState(() {
+                                timeOff3 = newTimeOff3;
+                              });
+                            }
+                          },
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
-              const Text('Pick up loose garbage:'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    // decoration: BoxDecoration(border: Border.all()),
+                    child: Container(
+                      width: 100,
+                      height: 40,
+                      child: TextField(
+                        controller: name4,
+                        maxLines: null,
+                        keyboardType: TextInputType.text,
+                        decoration: const InputDecoration(
+                          hintText: 'Name',
+                        ),
+                      ),
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      const SizedBox(height: 4),
+                      Container(
+                        width: 100,
+                        height: 30,
+                        child: FloatingActionButton.extended(
+                          heroTag: "btn4On",
+                          icon: const Icon(Icons.access_time_outlined),
+                          label: Text(
+                              '${timeOn4!.hour.toString()}:${timeOn4!.minute.toString()}'),
+                          backgroundColor:
+                              const Color.fromARGB(255, 31, 182, 77),
+                          onPressed: () async {
+                            TimeOfDay? newTimeOn4 = await showTimePicker(
+                              context: context,
+                              initialTime: timeOn4!,
+                            );
+                            if (newTimeOn4 != null) {
+                              setState(() {
+                                timeOn4 = newTimeOn4;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Column(
+                    children: [
+                      const SizedBox(height: 4),
+                      Container(
+                        width: 100,
+                        height: 30,
+                        child: FloatingActionButton.extended(
+                          heroTag: "btn4Off",
+                          icon: const Icon(Icons.access_time_outlined),
+                          label: Text(
+                              '${timeOff4!.hour.toString()}:${timeOff4!.minute.toString()}'),
+                          backgroundColor:
+                              const Color.fromARGB(255, 31, 182, 77),
+                          onPressed: () async {
+                            TimeOfDay? newTimeOff4 = await showTimePicker(
+                              context: context,
+                              initialTime: timeOff4!,
+                            );
+                            if (newTimeOff4 != null) {
+                              setState(() {
+                                timeOff4 = newTimeOff4;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5),
+              const Text('Pick up loose garbage:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -516,7 +575,9 @@ class _AddReportState extends State<AddReport> {
                 isSelected: _selectedGarbage,
                 children: garbage,
               ),
-              const Text('Rake yard debris:'),
+              const SizedBox(height: 5),
+              const Text('Rake yard debris:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -536,7 +597,9 @@ class _AddReportState extends State<AddReport> {
                 isSelected: _selectedDebris,
                 children: debris,
               ),
-              const Text('Lawn care:'),
+              const SizedBox(height: 5),
+              const Text('Lawn care:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -556,7 +619,9 @@ class _AddReportState extends State<AddReport> {
                 isSelected: _selectedLawn,
                 children: lawn,
               ),
-              const Text('Gardens:'),
+              const SizedBox(height: 5),
+              const Text('Gardens:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -576,7 +641,9 @@ class _AddReportState extends State<AddReport> {
                 isSelected: _selectedGarden,
                 children: garden,
               ),
-              const Text('Trees:'),
+              const SizedBox(height: 5),
+              const Text('Trees:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -596,7 +663,9 @@ class _AddReportState extends State<AddReport> {
                 isSelected: _selectedTree,
                 children: tree,
               ),
-              const Text('Blow dust/debris:'),
+              const SizedBox(height: 5),
+              const Text('Blow dust/debris:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
