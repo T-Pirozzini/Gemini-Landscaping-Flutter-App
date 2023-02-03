@@ -29,14 +29,14 @@ class _editnoteState extends State<editnote> {
   TextEditingController name2 = TextEditingController();
   TextEditingController name3 = TextEditingController();
   TextEditingController name4 = TextEditingController();
-  String timeOn1 = "12";
-  String timeOff1 = "12";
-  String timeOn2 = "12";
-  String timeOff2 = "12;";
-  String timeOn3 = "12";
-  String timeOff3 = "12";
-  String timeOn4 = "12";
-  String timeOff4 = "12";
+  // String timeOn1 = widget.docid.get('timeOn1');
+  // String timeOff1 = "";
+  // String timeOn2 = "";
+  // String timeOff2 = "";
+  // String timeOn3 = "";
+  // String timeOff3 = "";
+  // String timeOn4 = "";
+  // String timeOff4 = "";
 
   CollectionReference ref =
       FirebaseFirestore.instance.collection('SiteReports2023');
@@ -52,22 +52,31 @@ class _editnoteState extends State<editnote> {
 
   String dropdownValue = siteList.first;
 
+  TimeOfDay? timeOn1 = TimeOfDay.now();
+  TimeOfDay? timeOff1 = TimeOfDay.now();
+  TimeOfDay? timeOn2 = TimeOfDay.now();
+  TimeOfDay? timeOff2 = TimeOfDay.now();
+  TimeOfDay? timeOn3 = TimeOfDay.now();
+  TimeOfDay? timeOff3 = TimeOfDay.now();
+  TimeOfDay? timeOn4 = TimeOfDay.now();
+  TimeOfDay? timeOff4 = TimeOfDay.now();
+
   @override
   void initState() {
     date = TextEditingController(text: widget.docid.get('date'));
     siteName = TextEditingController(text: widget.docid.get('siteName'));
     name1 = TextEditingController(text: widget.docid.get('name1'));
-    // timeOn1 = widget.docid.get('timeOn1');
-    // timeOff1 = widget.docid.get("timeOff1");
+    timeOn1 = widget.docid.get('timeOn1');
+    timeOff1 = widget.docid.get('timeOff1');
     name2 = TextEditingController(text: widget.docid.get('name2'));
-    // timeOn2 = widget.docid.get('timeOn2');
-    // timeOff2 = widget.docid.get('timeOff2');
+    timeOn2 = widget.docid.get('timeOn2');
+    timeOff2 = widget.docid.get('timeOff2');
     name3 = TextEditingController(text: widget.docid.get('name3'));
-    // timeOn3 = widget.docid.get('timeOn3');
-    // timeOff3 = widget.docid.get('timeOff3');
+    timeOn3 = widget.docid.get('timeOn3');
+    timeOff3 = widget.docid.get('timeOff3');
     name4 = TextEditingController(text: widget.docid.get('name4'));
-    // timeOn4 = widget.docid.get('timeOn4');
-    // timeOff4 = widget.docid.get('timeOff4');
+    timeOn4 = widget.docid.get('timeOn4');
+    timeOff4 = widget.docid.get('timeOff4');
 
     super.initState();
   }
@@ -96,18 +105,29 @@ class _editnoteState extends State<editnote> {
               widget.docid.reference.update({
                 'date': date.text,
                 'siteName': siteName.text,
-                'team1': name1.text,
-                'team2': name1.text,
-                'team3': name1.text,
-                'team4': name1.text,
-                // 'timeOn1': timeOn1,
-                // 'timeOff1': timeOff1,
-                // 'timeOn2': timeOn2,
-                // 'timeOff2': timeOff2,
-                // 'timeOn3': timeOn3,
-                // 'timeOff3': timeOff3,
-                // 'timeOn4': timeOn4,
-                // 'timeOff4': timeOff4,
+                'name1': name1.text,
+                'name2': name2.text,
+                'name3': name3.text,
+                'name4': name4.text,
+                'timeOn1': timeOn1,
+                'timeOff1': timeOff1!.hour.toString() +
+                    ':' +
+                    timeOff1!.minute.toString(),
+                'timeOn2':
+                    timeOn2!.hour.toString() + ':' + timeOn2!.minute.toString(),
+                'timeOff2': timeOff2!.hour.toString() +
+                    ':' +
+                    timeOff2!.minute.toString(),
+                'timeOn3':
+                    timeOn3!.hour.toString() + ':' + timeOn3!.minute.toString(),
+                'timeOff3': timeOff3!.hour.toString() +
+                    ':' +
+                    timeOff3!.minute.toString(),
+                'timeOn4':
+                    timeOn4!.hour.toString() + ':' + timeOn4!.minute.toString(),
+                'timeOff4': timeOff4!.hour.toString() +
+                    ':' +
+                    timeOff4!.minute.toString(),
               }).whenComplete(() {
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (_) => Home()));
@@ -222,6 +242,11 @@ class _editnoteState extends State<editnote> {
                             context: context,
                             initialTime: widget.docid.get('timeOn1'),
                           );
+                          if (newTimeOn1 != null) {
+                            setState(() {
+                              timeOn1 = newTimeOn1;
+                            });
+                          }
                         },
                       ),
                     ],

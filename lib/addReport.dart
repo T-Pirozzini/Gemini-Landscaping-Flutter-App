@@ -12,6 +12,8 @@ List<String> siteList = [
 ];
 
 class AddReport extends StatefulWidget {
+  const AddReport({super.key});
+  
   @override
   State<AddReport> createState() => _AddReportState();
 }
@@ -221,10 +223,7 @@ class _AddReportState extends State<AddReport> {
                           );
                           if (newTimeOn1 != null) {
                             setState(() {
-                              timeOn1 = newTimeOn1;
-                              print(timeOn1!.hour.toString() +
-                                  ':' +
-                                  timeOn1!.minute.toString());
+                              timeOn1 = newTimeOn1;                              
                             });
                           }
                         },
