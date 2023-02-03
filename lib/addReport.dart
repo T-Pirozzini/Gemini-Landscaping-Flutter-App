@@ -629,7 +629,7 @@ class _AddReportState extends State<AddReport> {
                 selectedBorderColor: Colors.green[700],
                 selectedColor: Colors.white,
                 fillColor: Colors.green[200],
-                color: Colors.green[400],
+                color: Colors.green[700],
                 constraints: const BoxConstraints(
                   minHeight: 30.0,
                   minWidth: 110.0,
@@ -657,7 +657,7 @@ class _AddReportState extends State<AddReport> {
                 selectedBorderColor: Colors.green[700],
                 selectedColor: Colors.white,
                 fillColor: Colors.green[200],
-                color: Colors.green[400],
+                color: Colors.green[700],
                 constraints: const BoxConstraints(
                   minHeight: 30.0,
                   minWidth: 110.0,
@@ -685,7 +685,7 @@ class _AddReportState extends State<AddReport> {
                 selectedBorderColor: Colors.green[700],
                 selectedColor: Colors.white,
                 fillColor: Colors.green[200],
-                color: Colors.green[400],
+                color: Colors.green[700],
                 constraints: const BoxConstraints(
                   minHeight: 30.0,
                   minWidth: 55.0,
@@ -712,7 +712,7 @@ class _AddReportState extends State<AddReport> {
                 selectedBorderColor: Colors.green[700],
                 selectedColor: Colors.white,
                 fillColor: Colors.green[200],
-                color: Colors.green[400],
+                color: Colors.green[700],
                 constraints: const BoxConstraints(
                   minHeight: 30.0,
                   minWidth: 85.0,
@@ -740,7 +740,7 @@ class _AddReportState extends State<AddReport> {
                 selectedBorderColor: Colors.green[700],
                 selectedColor: Colors.white,
                 fillColor: Colors.green[200],
-                color: Colors.green[400],
+                color: Colors.green[700],
                 constraints: const BoxConstraints(
                   minHeight: 30.0,
                   minWidth: 110.0,
@@ -767,7 +767,7 @@ class _AddReportState extends State<AddReport> {
                 selectedBorderColor: Colors.green[700],
                 selectedColor: Colors.white,
                 fillColor: Colors.green[200],
-                color: Colors.green[400],
+                color: Colors.green[700],
                 constraints: const BoxConstraints(
                   minHeight: 30.0,
                   minWidth: 110.0,
