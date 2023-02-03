@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/src/material/theme.dart';
 
 import 'main.dart';
 
@@ -30,7 +31,7 @@ const List<Widget> lawn = <Widget>[
   Text('fertilize'),
 ];
 const List<Widget> garden = <Widget>[
-  Text('blow out debris'),
+  Text('blow debris'),
   Text('weed'),
   Text('prune'),
   Text('fertilize'),
@@ -39,11 +40,14 @@ const List<Widget> tree = <Widget>[
   Text('< 8ft'),
   Text('> 8ft'),
 ];
-const List<Widget> blow = <Widget>[
-  Text('parking lot curbs'),
+const List<Widget> blow2 = <Widget>[
+  Text('parking curbs'),
   Text('drain basins'),
   Text('walkways')
 ];
+
+List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
+List<String> _selectedBlow = [];
 
 class AddReport extends StatefulWidget {
   const AddReport({super.key});
@@ -95,7 +99,7 @@ class _AddReportState extends State<AddReport> {
   ];
   final List<bool> _selectedGarden = <bool>[false, false, false, false];
   final List<bool> _selectedTree = <bool>[false, false];
-  final List<bool> _selectedBlow = <bool>[false, false, false];
+  // final List<bool> _selectedBlow = <bool>[false, false, false];
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +159,7 @@ class _AddReportState extends State<AddReport> {
                 'timeOff4': timeOff4!.hour.toString() +
                     ':' +
                     timeOff4!.minute.toString(),
+                'blow': _selectedBlow,
               }).whenComplete(() {
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (_) => Home()));
@@ -185,13 +190,19 @@ class _AddReportState extends State<AddReport> {
           child: Column(
             children: [
               // date picker
-              Container(
-                decoration: BoxDecoration(border: Border.all()),
+              SizedBox(
+                height: 55,
                 child: TextField(
                   controller: dateController,
                   decoration: const InputDecoration(
-                    icon: Icon(Icons.calendar_month_rounded),
+                    prefixIcon: Icon(Icons.calendar_month_rounded),
+                    prefixIconColor: Colors.green,
                     labelText: "Date:",
+                    labelStyle: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.bold),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
                     hintText: 'Select date',
                   ),
                   readOnly: true,
@@ -201,6 +212,23 @@ class _AddReportState extends State<AddReport> {
                       initialDate: DateTime.now(),
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2101),
+                      builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: const ColorScheme.light(
+                              primary: Colors.green,
+                              onPrimary: Colors.white,
+                              onSurface: Colors.black,
+                            ),
+                            textButtonTheme: TextButtonThemeData(
+                              style: TextButton.styleFrom(
+                                primary: Colors.green,
+                              ),
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
                     );
                     if (pickedDate != null) {
                       String formattedDate =
@@ -218,20 +246,23 @@ class _AddReportState extends State<AddReport> {
                 height: 10,
               ),
               // site list drop down
-              DropdownButtonFormField<String>(
-                value: dropdownValue,
-                items: siteList.map((site) {
-                  return DropdownMenuItem<String>(
-                    value: site,
-                    child: Text(site),
-                  );
-                }).toList(),
-                onChanged: (String? value) {
-                  setState(() {
-                    dropdownValue = value!;
-                  });
-                  getData();
-                },
+              SizedBox(
+                height: 45,
+                child: DropdownButtonFormField<String>(
+                  value: dropdownValue,
+                  items: siteList.map((site) {
+                    return DropdownMenuItem<String>(
+                      value: site,
+                      child: Text(site),
+                    );
+                  }).toList(),
+                  onChanged: (String? value) {
+                    setState(() {
+                      dropdownValue = value!;
+                    });
+                    getData();
+                  },
+                ),
               ),
               const SizedBox(
                 height: 10,
@@ -256,7 +287,7 @@ class _AddReportState extends State<AddReport> {
                   ),
                   Column(
                     children: [
-                      const Text("On",
+                      const Text("ON",
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       Container(
                         width: 100,
@@ -288,7 +319,7 @@ class _AddReportState extends State<AddReport> {
                   ),
                   Column(
                     children: [
-                      const Text("Off",
+                      const Text("OFF",
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       Container(
                         width: 100,
@@ -670,7 +701,11 @@ class _AddReportState extends State<AddReport> {
                 onPressed: (int index) {
                   // All buttons are selectable.
                   setState(() {
-                    _selectedBlow[index] = !_selectedBlow[index];
+                    if (_selectedBlow.contains(blow[index])) {
+                      _selectedBlow.remove(blow[index]);
+                    } else {
+                      _selectedBlow.add(blow[index]);
+                    }
                   });
                 },
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -682,8 +717,9 @@ class _AddReportState extends State<AddReport> {
                   minHeight: 30.0,
                   minWidth: 110.0,
                 ),
-                isSelected: _selectedBlow,
-                children: blow,
+                isSelected:
+                    blow.map((value) => _selectedBlow.contains(value)).toList(),
+                children: blow.map((value) => Text(value)).toList(),
               ),
             ],
           ),
