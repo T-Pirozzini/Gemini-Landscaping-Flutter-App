@@ -187,6 +187,106 @@ class _ViewReportState extends State<ViewReport> {
                   ),
                 ],
               ),
+              Table(                
+                children: [
+                  TableRow(
+                    children: [
+                      Container(
+                        child: const Text('Pick up loose garbage:'),
+                      ),
+                      Container(
+                        child: Column(
+                          children: (widget.docid["service"]["garbage"]
+                                  .whereType<String>()
+                                  .toList() as List<String>)
+                              .map((item) => Text(item))
+                              .toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Container(
+                        child: const Text('Rake yard debris:'),
+                      ),
+                      Container(
+                        child: Column(
+                          children: (widget.docid["service"]["debris"]
+                                  .whereType<String>()
+                                  .toList() as List<String>)
+                              .map((item) => Text(item))
+                              .toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Container(
+                        child: const Text('Lawn care:'),
+                      ),
+                      Container(
+                        child: Column(
+                          children: (widget.docid["service"]["lawn"]
+                                  .whereType<String>()
+                                  .toList() as List<String>)
+                              .map((item) => Text(item))
+                              .toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Container(
+                        child: const Text('Gardens:'),
+                      ),
+                      Container(
+                        child: Column(
+                          children: (widget.docid["service"]["garden"]
+                                  .whereType<String>()
+                                  .toList() as List<String>)
+                              .map((item) => Text(item))
+                              .toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Container(
+                        child: const Text('Trees:'),
+                      ),
+                      Container(
+                        child: Column(
+                          children: (widget.docid["service"]["tree"]
+                                  .whereType<String>()
+                                  .toList() as List<String>)
+                              .map((item) => Text(item))
+                              .toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Container(
+                        child: const Text('Blow dust/debris:'),
+                      ),
+                      Container(
+                        child: Column(
+                          children: (widget.docid["service"]["blow"]
+                                  .whereType<String>()
+                                  .toList() as List<String>)
+                              .map((item) => Text(item))
+                              .toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
         ),
