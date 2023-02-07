@@ -62,8 +62,11 @@ class _ViewReportState extends State<ViewReport> {
                   const SizedBox(
                     height: 10,
                   ),
-                  Text(widget.docid["info"]["siteName"]),
-                  const SizedBox(height: 10.0),
+                  Text(
+                    widget.docid["info"]["siteName"],
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(height: 15.0),
                 ],
               ),
               Table(
@@ -187,20 +190,26 @@ class _ViewReportState extends State<ViewReport> {
                   ),
                 ],
               ),
-              Table(                
+              SizedBox(height: 20),
+              Table(
+                // border: TableBorder.all(),
                 children: [
                   TableRow(
                     children: [
                       Container(
-                        child: const Text('Pick up loose garbage:'),
+                        child: const Text('Pick up loose garbage:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
-                      Container(
-                        child: Column(
-                          children: (widget.docid["service"]["garbage"]
-                                  .whereType<String>()
-                                  .toList() as List<String>)
-                              .map((item) => Text(item))
-                              .toList(),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: Container(
+                          child: Column(
+                            children: (widget.docid["service"]["garbage"]
+                                    .whereType<String>()
+                                    .toList() as List<String>)
+                                .map((item) => Text(item))
+                                .toList(),
+                          ),
                         ),
                       ),
                     ],
@@ -208,15 +217,19 @@ class _ViewReportState extends State<ViewReport> {
                   TableRow(
                     children: [
                       Container(
-                        child: const Text('Rake yard debris:'),
+                        child: const Text('Rake yard debris:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
-                      Container(
-                        child: Column(
-                          children: (widget.docid["service"]["debris"]
-                                  .whereType<String>()
-                                  .toList() as List<String>)
-                              .map((item) => Text(item))
-                              .toList(),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: Container(
+                          child: Column(
+                            children: (widget.docid["service"]["debris"]
+                                    .whereType<String>()
+                                    .toList() as List<String>)
+                                .map((item) => Text(item))
+                                .toList(),
+                          ),
                         ),
                       ),
                     ],
@@ -224,15 +237,19 @@ class _ViewReportState extends State<ViewReport> {
                   TableRow(
                     children: [
                       Container(
-                        child: const Text('Lawn care:'),
+                        child: const Text('Lawn care:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
-                      Container(
-                        child: Column(
-                          children: (widget.docid["service"]["lawn"]
-                                  .whereType<String>()
-                                  .toList() as List<String>)
-                              .map((item) => Text(item))
-                              .toList(),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: Container(
+                          child: Column(
+                            children: (widget.docid["service"]["lawn"]
+                                    .whereType<String>()
+                                    .toList() as List<String>)
+                                .map((item) => Text(item))
+                                .toList(),
+                          ),
                         ),
                       ),
                     ],
@@ -240,15 +257,19 @@ class _ViewReportState extends State<ViewReport> {
                   TableRow(
                     children: [
                       Container(
-                        child: const Text('Gardens:'),
+                        child: const Text('Gardens:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
-                      Container(
-                        child: Column(
-                          children: (widget.docid["service"]["garden"]
-                                  .whereType<String>()
-                                  .toList() as List<String>)
-                              .map((item) => Text(item))
-                              .toList(),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: Container(
+                          child: Column(
+                            children: (widget.docid["service"]["garden"]
+                                    .whereType<String>()
+                                    .toList() as List<String>)
+                                .map((item) => Text(item))
+                                .toList(),
+                          ),
                         ),
                       ),
                     ],
@@ -256,15 +277,19 @@ class _ViewReportState extends State<ViewReport> {
                   TableRow(
                     children: [
                       Container(
-                        child: const Text('Trees:'),
+                        child: const Text('Trees:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
-                      Container(
-                        child: Column(
-                          children: (widget.docid["service"]["tree"]
-                                  .whereType<String>()
-                                  .toList() as List<String>)
-                              .map((item) => Text(item))
-                              .toList(),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: Container(
+                          child: Column(
+                            children: (widget.docid["service"]["tree"]
+                                    .whereType<String>()
+                                    .toList() as List<String>)
+                                .map((item) => Text(item))
+                                .toList(),
+                          ),
                         ),
                       ),
                     ],
@@ -272,20 +297,40 @@ class _ViewReportState extends State<ViewReport> {
                   TableRow(
                     children: [
                       Container(
-                        child: const Text('Blow dust/debris:'),
+                        child: const Text('Blow dust/debris:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
-                      Container(
-                        child: Column(
-                          children: (widget.docid["service"]["blow"]
-                                  .whereType<String>()
-                                  .toList() as List<String>)
-                              .map((item) => Text(item))
-                              .toList(),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: Container(
+                          child: Column(
+                            children: (widget.docid["service"]["blow"]
+                                    .whereType<String>()
+                                    .toList() as List<String>)
+                                .map((item) => Text(item))
+                                .toList(),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ],
+              ),
+              MaterialButton(
+                onPressed: () {
+                  widget.docid.reference.delete().whenComplete(() {
+                    Navigator.pushReplacement(
+                        context, MaterialPageRoute(builder: (_) => Home()));
+                  });
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    SizedBox(height: 300),
+                    Text("Delete Report?"),
+                    Icon(Icons.delete),
+                  ],
+                ),
               ),
             ],
           ),
