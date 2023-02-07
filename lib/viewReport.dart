@@ -63,61 +63,127 @@ class _ViewReportState extends State<ViewReport> {
                     height: 10,
                   ),
                   Text(widget.docid["info"]["siteName"]),
+                  const SizedBox(height: 10.0),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Table(
+                border: TableBorder.all(),
                 children: [
-                  Text(
-                    widget.docid["names"]["name1"],
-                  ),
-                  Text(
-                    "On: ${widget.docid["times"]?["timeOn1"] ?? ""}",
-                  ),
-                  Text(
-                    "Off: ${widget.docid["times"]?["timeOff1"] ?? ""}",
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    widget.docid["names"]["name2"],
-                  ),
-                  Text(
-                    "On: ${widget.docid["times"]["timeOn2"]}",
-                  ),
-                  Text(
-                    "Off: ${widget.docid["times"]["timeOff2"]}",
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    widget.docid["names"]["name3"],
-                  ),
-                  Text(
-                    "On: ${widget.docid["times"]["timeOn3"]}",
-                  ),
-                  Text(
-                    "Off: ${widget.docid["times"]["timeOff3"]}",
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    widget.docid["names"]["name4"],
-                  ),
-                  Text(
-                    "On: ${widget.docid["times"]["timeOn4"]}",
-                  ),
-                  Text(
-                    "Off: ${widget.docid["times"]["timeOff4"]}",
+                  TableRow(children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Name',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: const Text('On',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: const Text('Off',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: const Text('Hours',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ]),
+                  TableRow(children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["names"]["name1"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOn1"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOff1"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                          "${(Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1]))).toString().substring(0, 4)}"),
+                    ),
+                  ]),
+                  TableRow(children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["names"]["name2"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOn2"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOff2"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                          "${(Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))).toString().substring(0, 4)}"),
+                    ),
+                  ]),
+                  TableRow(children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["names"]["name3"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOn3"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOff3"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                          "${(Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))).toString().substring(0, 4)}"),
+                    ),
+                  ]),
+                  TableRow(children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["names"]["name4"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOn4"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOff4"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                          "${(Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1]))).toString().substring(0, 4)}"),
+                    ),
+                  ]),
+                  TableRow(
+                    children: [
+                      Container(),
+                      Container(),
+                      Container(
+                        alignment: Alignment.center,
+                        child: const Text("Total",
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                            "${(((Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1])))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1])))).toString().substring(0, 5)}"),
+                      ),
+                    ],
                   ),
                 ],
               ),
