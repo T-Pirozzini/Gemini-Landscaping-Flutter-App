@@ -73,16 +73,29 @@ class _SiteReportState extends State<SiteReport> {
 
   @override
   Widget build(BuildContext context) {
-    return PdfPreview(
-      maxPageWidth: 1000,
-      // useActions: false,
-      // canChangePageFormat: true,
-      canChangeOrientation: false,
-      // pageFormats:pageformat,
-      canDebug: false,
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_circle_left_outlined),
+          onPressed: () => Navigator.pop(context),
+        ),
+        leadingWidth: 100,
+        title: Image.asset("assets/gemini-icon-transparent.png",
+            color: Colors.white, fit: BoxFit.contain, height: 50),
+        centerTitle: true,
+      ),
+      body: PdfPreview(
+        maxPageWidth: 1000,
+        // useActions: false,
+        // canChangePageFormat: true,
+        canChangeOrientation: false,
+        // pageFormats:pageformat,
+        canDebug: false,
 
-      build: (format) => generateDocument(
-        format,
+        build: (format) => generateDocument(
+          format,
+        ),
       ),
     );
   }
@@ -132,7 +145,7 @@ class _SiteReportState extends State<SiteReport> {
                   child: pw.Text(
                     'SITE REPORT 2023',
                     style: pw.TextStyle(
-                      fontSize: 30,
+                      fontSize: 25,
                       fontWeight: pw.FontWeight.bold,
                     ),
                   ),
@@ -346,7 +359,7 @@ class _SiteReportState extends State<SiteReport> {
                                     fontWeight: pw.FontWeight.bold)),
                           ),
                           pw.Padding(
-                            padding: const pw.EdgeInsets.only(bottom: 15.0),
+                            padding: const pw.EdgeInsets.only(bottom: 5.0),
                             child: pw.Container(
                               child: pw.Column(
                                 children: (garbage.whereType<String>().toList()
@@ -372,7 +385,7 @@ class _SiteReportState extends State<SiteReport> {
                                     fontWeight: pw.FontWeight.bold)),
                           ),
                           pw.Padding(
-                            padding: const pw.EdgeInsets.only(bottom: 15.0),
+                            padding: const pw.EdgeInsets.only(bottom: 5.0),
                             child: pw.Container(
                               child: pw.Column(
                                 children: (debris.whereType<String>().toList()
@@ -398,7 +411,7 @@ class _SiteReportState extends State<SiteReport> {
                                     fontWeight: pw.FontWeight.bold)),
                           ),
                           pw.Padding(
-                            padding: const pw.EdgeInsets.only(bottom: 15.0),
+                            padding: const pw.EdgeInsets.only(bottom: 5.0),
                             child: pw.Container(
                               child: pw.Column(
                                 children: (lawn.whereType<String>().toList()
@@ -424,7 +437,7 @@ class _SiteReportState extends State<SiteReport> {
                                     fontWeight: pw.FontWeight.bold)),
                           ),
                           pw.Padding(
-                            padding: const pw.EdgeInsets.only(bottom: 15.0),
+                            padding: const pw.EdgeInsets.only(bottom: 5.0),
                             child: pw.Container(
                               child: pw.Column(
                                 children: (garden.whereType<String>().toList()
@@ -450,7 +463,7 @@ class _SiteReportState extends State<SiteReport> {
                                     fontWeight: pw.FontWeight.bold)),
                           ),
                           pw.Padding(
-                            padding: const pw.EdgeInsets.only(bottom: 15.0),
+                            padding: const pw.EdgeInsets.only(bottom: 5.0),
                             child: pw.Container(
                               child: pw.Column(
                                 children: (tree.whereType<String>().toList()
@@ -476,7 +489,7 @@ class _SiteReportState extends State<SiteReport> {
                                     fontWeight: pw.FontWeight.bold)),
                           ),
                           pw.Padding(
-                            padding: const pw.EdgeInsets.only(bottom: 15.0),
+                            padding: const pw.EdgeInsets.only(bottom: 5.0),
                             child: pw.Container(
                               child: pw.Column(
                                 children: (blow.whereType<String>().toList()

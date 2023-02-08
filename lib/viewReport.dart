@@ -345,9 +345,9 @@ class _ViewReportState extends State<ViewReport> {
                   });
                 },
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: const [
-                    SizedBox(height: 300),
+                    SizedBox(height: 100),
                     Text("Delete Report?"),
                     Icon(Icons.delete),
                   ],
