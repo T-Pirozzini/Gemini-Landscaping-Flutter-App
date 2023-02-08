@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'main.dart';
+import 'sitereport.dart';
 
 class ViewReport extends StatefulWidget {
   DocumentSnapshot docid;
@@ -315,6 +316,26 @@ class _ViewReportState extends State<ViewReport> {
                     ],
                   ),
                 ],
+              ),
+              MaterialButton(
+                color: Color.fromARGB(255, 0, 11, 133),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SiteReport(
+                        docid: docid,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "Make Report",
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Color.fromARGB(255, 251, 251, 251),
+                  ),
+                ),
               ),
               MaterialButton(
                 onPressed: () {
