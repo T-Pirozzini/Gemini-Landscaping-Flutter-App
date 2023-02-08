@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'main.dart';
+import 'sitereport.dart';
 
 class ViewReport extends StatefulWidget {
   DocumentSnapshot docid;
@@ -52,74 +53,305 @@ class _ViewReportState extends State<ViewReport> {
           child: Column(
             children: [
               Column(
-                // mainAxisAlignment: MainAxisAlignment.center,
-                // crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
                     decoration: BoxDecoration(border: Border.all()),
-                    child: Text(widget.docid.get('date')),
+                    child: Text(widget.docid["info"]['date']),
                   ),
                   const SizedBox(
                     height: 10,
                   ),
-                  Text(widget.docid.get("siteName")),
+                  Text(
+                    widget.docid["info"]["siteName"],
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(height: 15.0),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Table(
+                border: TableBorder.all(),
                 children: [
-                  Text(
-                    widget.docid.get("name1"),
-                  ),
-                  Text(
-                    "On: " + widget.docid.get("timeOn1"),
-                  ),
-                  Text(
-                    "Off: " + widget.docid.get("timeOff1"),
+                  TableRow(children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Name',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: const Text('On',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: const Text('Off',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: const Text('Hours',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ]),
+                  TableRow(children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["names"]["name1"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOn1"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOff1"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                          "${(Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1]))).toString().substring(0, 4)}"),
+                    ),
+                  ]),
+                  TableRow(children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["names"]["name2"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOn2"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOff2"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                          "${(Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))).toString().substring(0, 4)}"),
+                    ),
+                  ]),
+                  TableRow(children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["names"]["name3"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOn3"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOff3"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                          "${(Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))).toString().substring(0, 4)}"),
+                    ),
+                  ]),
+                  TableRow(children: [
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["names"]["name4"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOn4"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(widget.docid["times"]["timeOff4"]),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                          "${(Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1]))).toString().substring(0, 4)}"),
+                    ),
+                  ]),
+                  TableRow(
+                    children: [
+                      Container(),
+                      Container(),
+                      Container(
+                        alignment: Alignment.center,
+                        child: const Text("Total",
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        child: Text(
+                            "${(((Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1])))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1])))).toString().substring(0, 5)}"),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              SizedBox(height: 20),
+              Table(
+                // border: TableBorder.all(),
                 children: [
-                  Text(
-                    widget.docid.get("name2"),
+                  TableRow(
+                    children: [
+                      Container(
+                        child: const Text('Pick up loose garbage:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: Container(
+                          child: Column(
+                            children: (widget.docid["service"]["garbage"]
+                                    .whereType<String>()
+                                    .toList() as List<String>)
+                                .map((item) => Text(item))
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    "On: " + widget.docid.get("timeOn2"),
+                  TableRow(
+                    children: [
+                      Container(
+                        child: const Text('Rake yard debris:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: Container(
+                          child: Column(
+                            children: (widget.docid["service"]["debris"]
+                                    .whereType<String>()
+                                    .toList() as List<String>)
+                                .map((item) => Text(item))
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    "Off: " + widget.docid.get("timeOff2"),
+                  TableRow(
+                    children: [
+                      Container(
+                        child: const Text('Lawn care:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: Container(
+                          child: Column(
+                            children: (widget.docid["service"]["lawn"]
+                                    .whereType<String>()
+                                    .toList() as List<String>)
+                                .map((item) => Text(item))
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Container(
+                        child: const Text('Gardens:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: Container(
+                          child: Column(
+                            children: (widget.docid["service"]["garden"]
+                                    .whereType<String>()
+                                    .toList() as List<String>)
+                                .map((item) => Text(item))
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Container(
+                        child: const Text('Trees:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: Container(
+                          child: Column(
+                            children: (widget.docid["service"]["tree"]
+                                    .whereType<String>()
+                                    .toList() as List<String>)
+                                .map((item) => Text(item))
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Container(
+                        child: const Text('Blow dust/debris:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 15.0),
+                        child: Container(
+                          child: Column(
+                            children: (widget.docid["service"]["blow"]
+                                    .whereType<String>()
+                                    .toList() as List<String>)
+                                .map((item) => Text(item))
+                                .toList(),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    widget.docid.get("name3"),
+              MaterialButton(
+                color: Color.fromARGB(255, 20, 177, 54),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SiteReport(
+                        docid: docid,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text(
+                  "Generate Report",
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Color.fromARGB(255, 251, 251, 251),
                   ),
-                  Text(
-                    "On: " + widget.docid.get("timeOn3"),
-                  ),
-                  Text(
-                    "Off: " + widget.docid.get("timeOff3"),
-                  ),
-                ],
+                ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    widget.docid.get("name4"),
-                  ),
-                  Text(
-                    "On: " + widget.docid.get("timeOn4"),
-                  ),
-                  Text(
-                    "Off: " + widget.docid.get("timeOff4"),
-                  ),
-                ],
+              MaterialButton(
+                onPressed: () {
+                  widget.docid.reference.delete().whenComplete(() {
+                    Navigator.pushReplacement(
+                        context, MaterialPageRoute(builder: (_) => Home()));
+                  });
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: const [
+                    SizedBox(height: 100),
+                    Text("Delete Report?"),
+                    Icon(Icons.delete),
+                  ],
+                ),
               ),
             ],
           ),

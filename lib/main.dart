@@ -55,7 +55,8 @@ class _HomeState extends State<Home> {
       ),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-        title: const Text('Site Reports 2023'),
+        title: const Text('SITE REPORTS 2023'),
+        centerTitle: true,
       ),
       body: StreamBuilder(
         stream: _reportStream2023,
@@ -104,13 +105,15 @@ class _HomeState extends State<Home> {
                             ),
                           ),
                           title: Text(
-                            snapshot.data!.docChanges[index].doc['date'],
+                            snapshot.data!.docChanges[index].doc['info']
+                                ['date'],
                             style: const TextStyle(
                               fontSize: 20,
                             ),
                           ),
                           trailing: Text(
-                            snapshot.data!.docChanges[index].doc['siteName'],
+                            snapshot.data!.docChanges[index].doc['info']
+                                ['siteName'],
                             style: const TextStyle(
                               fontSize: 20,
                             ),
