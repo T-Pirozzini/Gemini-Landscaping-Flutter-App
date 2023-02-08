@@ -94,6 +94,9 @@ class _LoginState extends State<Login> {
           children: <Widget>[
             _entryField('email', _controllerEmail),
             _entryField('password', _controllerPassword),
+            _errorMessage(),
+            _submitButton(),
+            _loginOrRegisterButton(),
           ],
         ),
       ),

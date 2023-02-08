@@ -4,12 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'addReport.dart';
-// import 'addReport2.dart';
-// import 'editnote.dart';
 import 'viewReport.dart';
 import 'auth.dart';
+import 'widget_tree.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(MyApp());
@@ -36,7 +35,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primaryColor: const Color.fromARGB(255, 31, 182, 77),
       ),
-      home: Home(),
+      home: LoginPage(),
     );
   }
 }
