@@ -27,23 +27,21 @@ class _SiteReportState extends State<SiteReport> {
   var tree;
   var debris;
   var blow;
+
   var name1;
   var name2;
   var name3;
   var name4;
-  // var timeOn1;
-  // var timeOff1;
-  // var team2;
-  // var timeOn2;
-  // var timeOff2;
-  // var team3;
-  // var timeOn3;
-  // var timeOff3;
-  // var team4;
-  // var timeOn4;
-  // var timeOff4;
 
-  // var timeTotal;
+  var on1;
+  var on2;
+  var on3;
+  var on4;
+  var off1;
+  var off2;
+  var off3;
+  var off4;
+
   void initState() {
     setState(() {
       date = widget.docid['info']['date'];
@@ -53,6 +51,14 @@ class _SiteReportState extends State<SiteReport> {
       name2 = widget.docid['names']['name2'];
       name3 = widget.docid['names']['name3'];
       name4 = widget.docid['names']['name4'];
+      on1 = widget.docid['times']['timeOn1'];
+      on2 = widget.docid['times']['timeOn2'];
+      on3 = widget.docid['times']['timeOn3'];
+      on4 = widget.docid['times']['timeOn4'];
+      off1 = widget.docid['times']['timeOff1'];
+      off2 = widget.docid['times']['timeOff2'];
+      off3 = widget.docid['times']['timeOff3'];
+      off4 = widget.docid['times']['timeOff4'];
 
       garbage = widget.docid['service']['garbage'];
       debris = widget.docid['service']['debris'];
@@ -188,61 +194,142 @@ class _SiteReportState extends State<SiteReport> {
                   ],
                 ),
                 // Team & Time ON/OFF Table
-                pw.Table(
-                  border: pw.TableBorder.all(),
-                  children: [
-                    pw.TableRow(children: [
-                      pw.Text(''),
-                      pw.Container(
-                        alignment: pw.Alignment.center,
-                        child: pw.Text('Name',
-                            style:
-                                pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                pw.Container(
+                  margin: const pw.EdgeInsets.all(20.0),
+                  child: pw.Table(
+                    border: pw.TableBorder.all(),
+                    children: [
+                      pw.TableRow(children: [
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                          height: 20,
+                          child: pw.Text('Name',
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                          height: 20,
+                          child: pw.Text('On',
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                          height: 20,
+                          child: pw.Text('Off',
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                          height: 20,
+                          child: pw.Text('Hours',
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        ),
+                      ]),
+                      pw.TableRow(children: [
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(name1),
+                        ),
+                        pw.Container(
+                            alignment: pw.Alignment.center,
+                            child: pw.Text(on1)),
+                        pw.Container(
+                            alignment: pw.Alignment.center,
+                            child: pw.Text(off1)),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(
+                              "${(Duration(hours: int.parse(off1.split(":")[0]), minutes: int.parse(off1.split(":")[1])) - Duration(hours: int.parse(on1.split(":")[0]), minutes: int.parse(on1.split(":")[1]))).toString().substring(0, 4)}"),
+                        )
+                      ]),
+                      pw.TableRow(children: [
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(name2),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(on2),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(off2),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(
+                              "${(Duration(hours: int.parse(off2.split(":")[0]), minutes: int.parse(off2.split(":")[1])) - Duration(hours: int.parse(on2.split(":")[0]), minutes: int.parse(on2.split(":")[1]))).toString().substring(0, 4)}"),
+                        ),
+                      ]),
+                      pw.TableRow(children: [
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(name3),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(on3),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(off3),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(
+                              "${(Duration(hours: int.parse(off3.split(":")[0]), minutes: int.parse(off3.split(":")[1])) - Duration(hours: int.parse(on3.split(":")[0]), minutes: int.parse(on3.split(":")[1]))).toString().substring(0, 4)}"),
+                        ),
+                      ]),
+                      pw.TableRow(children: [
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(name4),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(on4),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(off4),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(
+                              "${(Duration(hours: int.parse(off4.split(":")[0]), minutes: int.parse(off4.split(":")[1])) - Duration(hours: int.parse(on4.split(":")[0]), minutes: int.parse(on4.split(":")[1]))).toString().substring(0, 4)}"),
+                        ),
+                      ]),
+                      pw.TableRow(
+                        children: [
+                          pw.Text(''),
+                          pw.Text(''),
+                          pw.Container(
+                            alignment: pw.Alignment.centerRight,
+                            child: pw.Text('Total:',
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    fontSize: 15)),
+                          ),
+                          pw.Container(
+                            alignment: pw.Alignment.center,
+                            child: pw.Text(
+                                "${(((Duration(hours: int.parse(off1.split(":")[0]), minutes: int.parse(off1.split(":")[1])) - Duration(hours: int.parse(on1.split(":")[0]), minutes: int.parse(on1.split(":")[1])))) + (Duration(hours: int.parse(off2.split(":")[0]), minutes: int.parse(off2.split(":")[1])) - Duration(hours: int.parse(on2.split(":")[0]), minutes: int.parse(on2.split(":")[1]))) + (Duration(hours: int.parse(off3.split(":")[0]), minutes: int.parse(off3.split(":")[1])) - Duration(hours: int.parse(on3.split(":")[0]), minutes: int.parse(on3.split(":")[1]))) + (Duration(hours: int.parse(off4.split(":")[0]), minutes: int.parse(off4.split(":")[1])) - Duration(hours: int.parse(on4.split(":")[0]), minutes: int.parse(on4.split(":")[1])))).toString().substring(0, 5)}",
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    fontSize: 15)),
+                          ),
+                        ],
                       ),
-                      pw.Container(
-                        alignment: pw.Alignment.center,
-                        child: pw.Text('On',
-                            style:
-                                pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                      ),
-                      pw.Container(
-                        alignment: pw.Alignment.center,
-                        child: pw.Text('Off',
-                            style:
-                                pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                      ),
-                      pw.Container(
-                        alignment: pw.Alignment.center,
-                        child: pw.Text('Hours',
-                            style:
-                                pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                      ),
-                    ]),
-                    pw.TableRow(children: [
-                      pw.Text('Driver'),
-                      pw.Text(name1),
-                    ]),
-                    pw.TableRow(children: [
-                      pw.Text('Name #2:'),
-                      pw.Text(name2),
-                    ]),
-                    pw.TableRow(children: [
-                      pw.Text('Name #3'),
-                      pw.Text(name3),
-                    ]),
-                    pw.TableRow(children: [
-                      pw.Text('Name #4'),
-                      pw.Text(name4),
-                    ]),
-                    pw.TableRow(children: [
-                      pw.Text(''),
-                      pw.Text(''),
-                      pw.Text(''),
-                      pw.Text('Total Hours:',
-                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                      pw.Text(''), // Output total hours
-                    ]),
-                  ],
+                    ],
+                  ),
                 ),
                 pw.Divider(),
                 // SERVICES TABLE
@@ -253,160 +340,172 @@ class _SiteReportState extends State<SiteReport> {
                           fontSize: 20, fontWeight: pw.FontWeight.bold)),
                 ),
                 pw.SizedBox(height: 10),
-                pw.Table(
-                  children: [
-                    pw.TableRow(
-                      decoration: const pw.BoxDecoration(
-                        border: pw.TableBorder(
+                pw.Container(
+                  margin: const pw.EdgeInsets.only(
+                      left: 50.0, right: 50.0, bottom: 50.0),
+                  child: pw.Table(
+                    children: [
+                      pw.TableRow(
+                        decoration: const pw.BoxDecoration(
+                          border: pw.TableBorder(
                             bottom: pw.BorderSide(
-                                color: PdfColor(0.5, 0.8, 0.3, 0.1), width: 2)),
-                      ),
-                      children: [
-                        pw.Container(
-                          child: pw.Text('Pick up loose garbage:',
-                              style:
-                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.only(bottom: 15.0),
-                          child: pw.Container(
-                            child: pw.Column(
-                              children: (garbage.whereType<String>().toList()
-                                      as List<String>)
-                                  .map((item) => pw.Text(item))
-                                  .toList(),
-                            ),
+                                color: PdfColor(0.5, 0.8, 0.3, 0.1), width: 2),
+                            top: pw.BorderSide(
+                                color: PdfColor(0.5, 0.8, 0.3, 0.1), width: 2),
                           ),
                         ),
-                      ],
-                    ),
-                    pw.TableRow(
-                      decoration: const pw.BoxDecoration(
-                        border: pw.TableBorder(
-                            bottom: pw.BorderSide(
-                                color: PdfColor(0.5, 0.8, 0.3, 0.1), width: 2)),
-                      ),
-                      children: [
-                        pw.Container(
-                          child: pw.Text('Rake yard debris:',
-                              style:
-                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                        ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.only(bottom: 15.0),
-                          child: pw.Container(
-                            child: pw.Column(
-                              children: (debris.whereType<String>().toList()
-                                      as List<String>)
-                                  .map((item) => pw.Text(item))
-                                  .toList(),
+                        children: [
+                          pw.Container(
+                            child: pw.Text('Pick up loose garbage:',
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.only(bottom: 15.0),
+                            child: pw.Container(
+                              child: pw.Column(
+                                children: (garbage.whereType<String>().toList()
+                                        as List<String>)
+                                    .map((item) => pw.Text(item))
+                                    .toList(),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    pw.TableRow(
-                      decoration: const pw.BoxDecoration(
-                        border: pw.TableBorder(
-                            bottom: pw.BorderSide(
-                                color: PdfColor(0.5, 0.8, 0.3, 0.1), width: 2)),
+                        ],
                       ),
-                      children: [
-                        pw.Container(
-                          child: pw.Text('Lawn care:',
-                              style:
-                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      pw.TableRow(
+                        decoration: const pw.BoxDecoration(
+                          border: pw.TableBorder(
+                              bottom: pw.BorderSide(
+                                  color: PdfColor(0.5, 0.8, 0.3, 0.1),
+                                  width: 2)),
                         ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.only(bottom: 15.0),
-                          child: pw.Container(
-                            child: pw.Column(
-                              children: (lawn.whereType<String>().toList()
-                                      as List<String>)
-                                  .map((item) => pw.Text(item))
-                                  .toList(),
+                        children: [
+                          pw.Container(
+                            child: pw.Text('Rake yard debris:',
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.only(bottom: 15.0),
+                            child: pw.Container(
+                              child: pw.Column(
+                                children: (debris.whereType<String>().toList()
+                                        as List<String>)
+                                    .map((item) => pw.Text(item))
+                                    .toList(),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    pw.TableRow(
-                      decoration: const pw.BoxDecoration(
-                        border: pw.TableBorder(
-                            bottom: pw.BorderSide(
-                                color: PdfColor(0.5, 0.8, 0.3, 0.1), width: 2)),
+                        ],
                       ),
-                      children: [
-                        pw.Container(
-                          child: pw.Text('Gardens:',
-                              style:
-                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      pw.TableRow(
+                        decoration: const pw.BoxDecoration(
+                          border: pw.TableBorder(
+                              bottom: pw.BorderSide(
+                                  color: PdfColor(0.5, 0.8, 0.3, 0.1),
+                                  width: 2)),
                         ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.only(bottom: 15.0),
-                          child: pw.Container(
-                            child: pw.Column(
-                              children: (garden.whereType<String>().toList()
-                                      as List<String>)
-                                  .map((item) => pw.Text(item))
-                                  .toList(),
+                        children: [
+                          pw.Container(
+                            child: pw.Text('Lawn care:',
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.only(bottom: 15.0),
+                            child: pw.Container(
+                              child: pw.Column(
+                                children: (lawn.whereType<String>().toList()
+                                        as List<String>)
+                                    .map((item) => pw.Text(item))
+                                    .toList(),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    pw.TableRow(
-                      decoration: const pw.BoxDecoration(
-                        border: pw.TableBorder(
-                            bottom: pw.BorderSide(
-                                color: PdfColor(0.5, 0.8, 0.3, 0.1), width: 2)),
+                        ],
                       ),
-                      children: [
-                        pw.Container(
-                          child: pw.Text('Trees:',
-                              style:
-                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      pw.TableRow(
+                        decoration: const pw.BoxDecoration(
+                          border: pw.TableBorder(
+                              bottom: pw.BorderSide(
+                                  color: PdfColor(0.5, 0.8, 0.3, 0.1),
+                                  width: 2)),
                         ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.only(bottom: 15.0),
-                          child: pw.Container(
-                            child: pw.Column(
-                              children: (tree.whereType<String>().toList()
-                                      as List<String>)
-                                  .map((item) => pw.Text(item))
-                                  .toList(),
+                        children: [
+                          pw.Container(
+                            child: pw.Text('Gardens:',
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.only(bottom: 15.0),
+                            child: pw.Container(
+                              child: pw.Column(
+                                children: (garden.whereType<String>().toList()
+                                        as List<String>)
+                                    .map((item) => pw.Text(item))
+                                    .toList(),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    pw.TableRow(
-                      decoration: const pw.BoxDecoration(
-                        border: pw.TableBorder(
-                            bottom: pw.BorderSide(
-                                color: PdfColor(0.5, 0.8, 0.3, 0.1), width: 2)),
+                        ],
                       ),
-                      children: [
-                        pw.Container(
-                          child: pw.Text('Blow dust/debris:',
-                              style:
-                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      pw.TableRow(
+                        decoration: const pw.BoxDecoration(
+                          border: pw.TableBorder(
+                              bottom: pw.BorderSide(
+                                  color: PdfColor(0.5, 0.8, 0.3, 0.1),
+                                  width: 2)),
                         ),
-                        pw.Padding(
-                          padding: const pw.EdgeInsets.only(bottom: 15.0),
-                          child: pw.Container(
-                            child: pw.Column(
-                              children: (blow.whereType<String>().toList()
-                                      as List<String>)
-                                  .map((item) => pw.Text(item))
-                                  .toList(),
+                        children: [
+                          pw.Container(
+                            child: pw.Text('Trees:',
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.only(bottom: 15.0),
+                            child: pw.Container(
+                              child: pw.Column(
+                                children: (tree.whereType<String>().toList()
+                                        as List<String>)
+                                    .map((item) => pw.Text(item))
+                                    .toList(),
+                              ),
                             ),
                           ),
+                        ],
+                      ),
+                      pw.TableRow(
+                        decoration: const pw.BoxDecoration(
+                          border: pw.TableBorder(
+                              bottom: pw.BorderSide(
+                                  color: PdfColor(0.5, 0.8, 0.3, 0.1),
+                                  width: 2)),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                        children: [
+                          pw.Container(
+                            child: pw.Text('Blow dust/debris:',
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.only(bottom: 15.0),
+                            child: pw.Container(
+                              child: pw.Column(
+                                children: (blow.whereType<String>().toList()
+                                        as List<String>)
+                                    .map((item) => pw.Text(item))
+                                    .toList(),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                )
               ],
             ),
           );
