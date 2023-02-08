@@ -318,7 +318,7 @@ class _ViewReportState extends State<ViewReport> {
                 ],
               ),
               MaterialButton(
-                color: Color.fromARGB(255, 0, 11, 133),
+                color: Color.fromARGB(255, 20, 177, 54),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -330,7 +330,7 @@ class _ViewReportState extends State<ViewReport> {
                   );
                 },
                 child: const Text(
-                  "Make Report",
+                  "Generate Report",
                   style: TextStyle(
                     fontSize: 20,
                     color: Color.fromARGB(255, 251, 251, 251),

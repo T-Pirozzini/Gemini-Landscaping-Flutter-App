@@ -66,24 +66,6 @@ class _SiteReportState extends State<SiteReport> {
       garden = widget.docid['service']['garden'];
       tree = widget.docid['service']['tree'];
       blow = widget.docid['service']['blow'];
-
-      //     team1 = widget.docid.get('team1');
-      //     timeOn1 = widget.docid.get('timeOn1');
-      //     timeOff1 = widget.docid.get('timeOff1');
-      //     team2 = widget.docid.get('team2');
-      //     timeOn2 = widget.docid.get('timeOn2');
-      //     timeOff2 = widget.docid.get('timeOff2');
-      //     team3 = widget.docid.get('team3');
-      //     timeOn3 = widget.docid.get('timeOn3');
-      //     timeOff3 = widget.docid.get('timeOff3');
-      //     team4 = widget.docid.get('team4');
-      //     timeOn4 = widget.docid.get('timeOn4');
-      //     timeOff4 = widget.docid.get('timeOff4');
-
-      // timeTotal = (int.parse(timeOff1) - int.parse(timeOn1)) +
-      //     (int.parse(timeOff2) - int.parse(timeOn2)) +
-      //     (int.parse(timeOff3) - int.parse(timeOn3)) +
-      //     (int.parse(timeOff4) - int.parse(timeOn4));
     });
 
     super.initState();
@@ -92,7 +74,7 @@ class _SiteReportState extends State<SiteReport> {
   @override
   Widget build(BuildContext context) {
     return PdfPreview(
-      // maxPageWidth: 1000,
+      maxPageWidth: 1000,
       // useActions: false,
       // canChangePageFormat: true,
       canChangeOrientation: false,
@@ -108,8 +90,11 @@ class _SiteReportState extends State<SiteReport> {
   Future<Uint8List> generateDocument(PdfPageFormat format) async {
     final doc = pw.Document(pageMode: PdfPageMode.outlines);
 
-    final font1 = await PdfGoogleFonts.openSansRegular();
-    final font2 = await PdfGoogleFonts.openSansBold();
+    final font3 = await PdfGoogleFonts.openSansRegular();
+    final font4 = await PdfGoogleFonts.openSansBold();
+
+    final font1 = await PdfGoogleFonts.latoRegular();
+    final font2 = await PdfGoogleFonts.latoBold();
 
     String? _gemini_logo =
         await rootBundle.loadString('assets/gemini_logo.svg');
@@ -118,10 +103,10 @@ class _SiteReportState extends State<SiteReport> {
       pw.Page(
         pageTheme: pw.PageTheme(
           pageFormat: format.copyWith(
-            marginBottom: 0,
+            marginBottom: 20,
             marginLeft: 30,
             marginRight: 30,
-            marginTop: 0,
+            marginTop: 10,
           ),
           orientation: pw.PageOrientation.portrait,
           theme: pw.ThemeData.withFont(
@@ -145,7 +130,7 @@ class _SiteReportState extends State<SiteReport> {
                 ),
                 pw.Center(
                   child: pw.Text(
-                    'Site Report 2023',
+                    'SITE REPORT 2023',
                     style: pw.TextStyle(
                       fontSize: 30,
                       fontWeight: pw.FontWeight.bold,
@@ -162,7 +147,7 @@ class _SiteReportState extends State<SiteReport> {
                     pw.Row(
                       children: [
                         pw.Text(
-                          'Date: ',
+                          'DATE: ',
                           style: pw.TextStyle(
                             fontSize: 20,
                             fontWeight: pw.FontWeight.bold,
@@ -179,7 +164,7 @@ class _SiteReportState extends State<SiteReport> {
                     pw.Row(
                       children: [
                         pw.Text(
-                          'Site Name: ',
+                          'SITE NAME: ',
                           style: pw.TextStyle(
                               fontSize: 20, fontWeight: pw.FontWeight.bold),
                         ),
@@ -204,7 +189,7 @@ class _SiteReportState extends State<SiteReport> {
                           alignment: pw.Alignment.center,
                           color: const PdfColor(0.5, 0.8, 0.3, 0.1),
                           height: 20,
-                          child: pw.Text('Name',
+                          child: pw.Text('NAME',
                               style:
                                   pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                         ),
@@ -212,7 +197,7 @@ class _SiteReportState extends State<SiteReport> {
                           alignment: pw.Alignment.center,
                           color: const PdfColor(0.5, 0.8, 0.3, 0.1),
                           height: 20,
-                          child: pw.Text('On',
+                          child: pw.Text('ON',
                               style:
                                   pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                         ),
@@ -220,7 +205,7 @@ class _SiteReportState extends State<SiteReport> {
                           alignment: pw.Alignment.center,
                           color: const PdfColor(0.5, 0.8, 0.3, 0.1),
                           height: 20,
-                          child: pw.Text('Off',
+                          child: pw.Text('OFF',
                               style:
                                   pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                         ),
@@ -228,7 +213,7 @@ class _SiteReportState extends State<SiteReport> {
                           alignment: pw.Alignment.center,
                           color: const PdfColor(0.5, 0.8, 0.3, 0.1),
                           height: 20,
-                          child: pw.Text('Hours',
+                          child: pw.Text('HOURS',
                               style:
                                   pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                         ),
@@ -335,14 +320,14 @@ class _SiteReportState extends State<SiteReport> {
                 // SERVICES TABLE
                 pw.Container(
                   alignment: pw.Alignment.topLeft,
-                  child: pw.Text("Services Provided:",
+                  child: pw.Text("SERVICES PROVIDED:",
                       style: pw.TextStyle(
                           fontSize: 20, fontWeight: pw.FontWeight.bold)),
                 ),
                 pw.SizedBox(height: 10),
                 pw.Container(
                   margin: const pw.EdgeInsets.only(
-                      left: 50.0, right: 50.0, bottom: 50.0),
+                      left: 80.0, right: 80.0, bottom: 50.0),
                   child: pw.Table(
                     children: [
                       pw.TableRow(
