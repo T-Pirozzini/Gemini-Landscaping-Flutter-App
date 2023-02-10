@@ -47,6 +47,8 @@ class _LoginPageState extends State<LoginPage> {
       // incorrect password
       else if (e.code == "wrong-password") {
         showErrorMessage('Invalid password');
+      } else {
+        showErrorMessage('Enter your email and password');
       }
     }
   }
@@ -57,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.deepPurple,
+          backgroundColor: const Color.fromARGB(255, 44, 179, 84),
           title: Center(
             child: Text(
               message,
@@ -84,15 +86,15 @@ class _LoginPageState extends State<LoginPage> {
                   ),
 
                   // logo
-                  const Icon(
-                    Icons.lock,
-                    size: 100,
+                  Image.asset(
+                    'assets/gemini-icon-transparent.png',
+                    height: 150,
                   ),
                   const SizedBox(height: 50),
 
                   // welcome back
                   Text(
-                    'Welcome back you\'ve been missed!',
+                    'Welcome back! Ready to start the day?',
                     style: TextStyle(
                       color: Colors.grey[700],
                       fontSize: 16,

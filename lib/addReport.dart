@@ -2,50 +2,32 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/src/material/theme.dart';
-
-import 'main.dart';
 
 List<String> siteList = [
+  // 'Enter Site Name', implement this functionality in future versions
   'Merewood Apartments',
   'Uplands Terrace',
   'North Point Apartments',
-  'Country Grocer'
+  'Country Grocer',
+  'Alderwood',
+  'Prideaux Manor',
+  'Sandscapes',
+  'Bowen Estates',
+  'Riverbend Terrace',
+  'Valley View Terrace',
+  'Woodgrove Pines',
+  'Pinewood Estates',
+  'Lancelot Gardens',
+  'Harwell Place',
+  'Peartree Meadows',
+  'Nanaimo Liquor Plus',
+  'Azalea Apartments',
+  'Westhill Centre',
+  'The Chemainus',
 ];
 
-const List<Widget> garbage2 = <Widget>[
-  Text('grassed areas'),
-  Text('garden beds'),
-  Text('walkways')
-];
-const List<Widget> debris2 = <Widget>[
-  Text('grassed areas'),
-  Text('garden beds'),
-  Text('tree wells')
-];
-const List<Widget> lawn2 = <Widget>[
-  Text('mow'),
-  Text('trim'),
-  Text('edge'),
-  Text('lime'),
-  Text('aerate'),
-  Text('fertilize'),
-];
-const List<Widget> garden2 = <Widget>[
-  Text('blow debris'),
-  Text('weed'),
-  Text('prune'),
-  Text('fertilize'),
-];
-const List<Widget> tree2 = <Widget>[
-  Text('< 8ft'),
-  Text('> 8ft'),
-];
-const List<Widget> blow2 = <Widget>[
-  Text('parking curbs'),
-  Text('drain basins'),
-  Text('walkways')
-];
+String dropdownValue = siteList.first;
+String enteredSiteName = '';
 
 List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
 List<String> _selectedGarbage = [];
@@ -87,8 +69,6 @@ class _AddReportState extends State<AddReport> {
     print(allData);
   }
 
-  String dropdownValue = siteList.first;
-
   TimeOfDay? timeOn1 = TimeOfDay.now();
   TimeOfDay? timeOff1 = TimeOfDay.now();
   TimeOfDay? timeOn2 = TimeOfDay.now();
@@ -97,20 +77,6 @@ class _AddReportState extends State<AddReport> {
   TimeOfDay? timeOff3 = TimeOfDay.now();
   TimeOfDay? timeOn4 = TimeOfDay.now();
   TimeOfDay? timeOff4 = TimeOfDay.now();
-
-  // final List<bool> _selectedGarbage = <bool>[false, false, false];
-  // final List<bool> _selectedDebris = <bool>[false, false, false];
-  // final List<bool> _selectedLawn = <bool>[
-  //   false,
-  //   false,
-  //   false,
-  //   false,
-  //   false,
-  //   false
-  // ];
-  // final List<bool> _selectedGarden = <bool>[false, false, false, false];
-  // final List<bool> _selectedTree = <bool>[false, false];
-  // // final List<bool> _selectedBlow = <bool>[false, false, false];
 
   @override
   Widget build(BuildContext context) {
@@ -276,22 +242,51 @@ class _AddReportState extends State<AddReport> {
               // site list drop down
               SizedBox(
                 height: 45,
-                child: DropdownButtonFormField<String>(
-                  value: dropdownValue,
-                  items: siteList.map((site) {
-                    return DropdownMenuItem<String>(
-                      value: site,
-                      child: Text(site),
-                    );
-                  }).toList(),
-                  onChanged: (String? value) {
-                    setState(() {
-                      dropdownValue = value!;
-                    });
-                    getData();
-                  },
+                child: Stack(
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: dropdownValue,
+                      items: siteList.map((site) {
+                        return DropdownMenuItem<String>(
+                          value: site,
+                          child: Text(site),
+                        );
+                      }).toList(),
+                      onChanged: (String? value) {
+                        setState(() {
+                          dropdownValue = value!;
+                          if (value == 'Enter site name') {
+                            enteredSiteName = '';
+                          }
+                        });
+                      },
+                    ),
+                    if (dropdownValue == 'Enter site name')
+                      Container(
+                        height: 45,
+                        margin: const EdgeInsets.only(left: 10, right: 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(
+                            color: Colors.red,
+                          ),
+                        ),
+                        child: TextField(
+                          onChanged: (String value) {
+                            setState(() {
+                              enteredSiteName = value;
+                            });
+                            getData();
+                          },
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
+
               const SizedBox(
                 height: 10,
               ),

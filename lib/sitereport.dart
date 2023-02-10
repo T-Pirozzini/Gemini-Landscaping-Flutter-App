@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+// import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -255,16 +255,18 @@ class _SiteReportState extends State<SiteReport> {
                         ),
                         pw.Container(
                           alignment: pw.Alignment.center,
-                          child: pw.Text(on2),
+                          child: name2 == "" ? pw.Text("") : pw.Text(on2),
                         ),
                         pw.Container(
                           alignment: pw.Alignment.center,
-                          child: pw.Text(off2),
+                          child: name2 == "" ? pw.Text("") : pw.Text(off2),
                         ),
                         pw.Container(
                           alignment: pw.Alignment.center,
-                          child: pw.Text(
-                              "${(Duration(hours: int.parse(off2.split(":")[0]), minutes: int.parse(off2.split(":")[1])) - Duration(hours: int.parse(on2.split(":")[0]), minutes: int.parse(on2.split(":")[1]))).toString().substring(0, 4)}"),
+                          child: name2 == ""
+                              ? pw.Text("")
+                              : pw.Text(
+                                  "${(Duration(hours: int.parse(off2.split(":")[0]), minutes: int.parse(off2.split(":")[1])) - Duration(hours: int.parse(on2.split(":")[0]), minutes: int.parse(on2.split(":")[1]))).toString().substring(0, 4)}"),
                         ),
                       ]),
                       pw.TableRow(children: [
@@ -274,16 +276,18 @@ class _SiteReportState extends State<SiteReport> {
                         ),
                         pw.Container(
                           alignment: pw.Alignment.center,
-                          child: pw.Text(on3),
+                          child: name3 == "" ? pw.Text("") : pw.Text(on3),
                         ),
                         pw.Container(
                           alignment: pw.Alignment.center,
-                          child: pw.Text(off3),
+                          child: name3 == "" ? pw.Text("") : pw.Text(off3),
                         ),
                         pw.Container(
                           alignment: pw.Alignment.center,
-                          child: pw.Text(
-                              "${(Duration(hours: int.parse(off3.split(":")[0]), minutes: int.parse(off3.split(":")[1])) - Duration(hours: int.parse(on3.split(":")[0]), minutes: int.parse(on3.split(":")[1]))).toString().substring(0, 4)}"),
+                          child: name3 == ""
+                              ? pw.Text("")
+                              : pw.Text(
+                                  "${(Duration(hours: int.parse(off3.split(":")[0]), minutes: int.parse(off3.split(":")[1])) - Duration(hours: int.parse(on3.split(":")[0]), minutes: int.parse(on3.split(":")[1]))).toString().substring(0, 4)}"),
                         ),
                       ]),
                       pw.TableRow(children: [
@@ -293,16 +297,18 @@ class _SiteReportState extends State<SiteReport> {
                         ),
                         pw.Container(
                           alignment: pw.Alignment.center,
-                          child: pw.Text(on4),
+                          child: name4 == "" ? pw.Text("") : pw.Text(on4),
                         ),
                         pw.Container(
                           alignment: pw.Alignment.center,
-                          child: pw.Text(off4),
+                          child: name4 == "" ? pw.Text("") : pw.Text(off4),
                         ),
                         pw.Container(
                           alignment: pw.Alignment.center,
-                          child: pw.Text(
-                              "${(Duration(hours: int.parse(off4.split(":")[0]), minutes: int.parse(off4.split(":")[1])) - Duration(hours: int.parse(on4.split(":")[0]), minutes: int.parse(on4.split(":")[1]))).toString().substring(0, 4)}"),
+                          child: name4 == ""
+                              ? pw.Text("")
+                              : pw.Text(
+                                  "${(Duration(hours: int.parse(off4.split(":")[0]), minutes: int.parse(off4.split(":")[1])) - Duration(hours: int.parse(on4.split(":")[0]), minutes: int.parse(on4.split(":")[1]))).toString().substring(0, 4)}"),
                         ),
                       ]),
                       pw.TableRow(
