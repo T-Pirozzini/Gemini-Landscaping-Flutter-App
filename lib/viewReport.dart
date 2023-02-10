@@ -66,7 +66,7 @@ class _ViewReportState extends State<ViewReport> {
                   ),
                   Text(
                     widget.docid["info"]["siteName"],
-                    style: TextStyle(fontSize: 20),
+                    style: const TextStyle(fontSize: 20),
                   ),
                   const SizedBox(height: 15.0),
                 ],

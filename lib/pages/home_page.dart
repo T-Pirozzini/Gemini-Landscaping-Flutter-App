@@ -37,12 +37,6 @@ class _HomeState extends State<Home> {
       ),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-        actions: const [
-          IconButton(
-            onPressed: signUserOut,
-            icon: Icon(Icons.logout_outlined),
-          )
-        ],
         title: const Text('SITE REPORTS 2023'),
         centerTitle: true,
       ),
@@ -122,9 +116,33 @@ class _HomeState extends State<Home> {
       ),
       bottomNavigationBar: Container(
         height: 50.0,
-        color: Colors.blue,
+        color: const Color.fromARGB(255, 31, 182, 77),
         child: Center(
-          child: Text(user.email!),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.account_circle, color: Colors.white),
+                  const SizedBox(width: 5),
+                  Text(
+                    user.email!,
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w400),
+                  ),
+                ],
+              ),
+              Row(
+                children: const [
+                  Text('Sign Out', style: TextStyle(color: Colors.white)),
+                  IconButton(
+                    onPressed: signUserOut,
+                    icon: Icon(Icons.logout_outlined, color: Colors.white),
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
