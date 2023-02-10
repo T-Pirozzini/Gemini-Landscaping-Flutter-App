@@ -4,6 +4,7 @@ import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'package:intl/intl.dart';
 
 List<String> siteList = [
+  // 'Enter Site Name', implement this functionality in future versions
   'Merewood Apartments',
   'Uplands Terrace',
   'North Point Apartments',
@@ -18,12 +19,15 @@ List<String> siteList = [
   'Pinewood Estates',
   'Lancelot Gardens',
   'Harwell Place',
-  'Peartree Meadows',  
+  'Peartree Meadows',
   'Nanaimo Liquor Plus',
   'Azalea Apartments',
   'Westhill Centre',
   'The Chemainus',
 ];
+
+String dropdownValue = siteList.first;
+String enteredSiteName = '';
 
 List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
 List<String> _selectedGarbage = [];
@@ -64,8 +68,6 @@ class _AddReportState extends State<AddReport> {
     final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
     print(allData);
   }
-
-  String dropdownValue = siteList.first;
 
   TimeOfDay? timeOn1 = TimeOfDay.now();
   TimeOfDay? timeOff1 = TimeOfDay.now();
@@ -240,22 +242,51 @@ class _AddReportState extends State<AddReport> {
               // site list drop down
               SizedBox(
                 height: 45,
-                child: DropdownButtonFormField<String>(
-                  value: dropdownValue,
-                  items: siteList.map((site) {
-                    return DropdownMenuItem<String>(
-                      value: site,
-                      child: Text(site),
-                    );
-                  }).toList(),
-                  onChanged: (String? value) {
-                    setState(() {
-                      dropdownValue = value!;
-                    });
-                    getData();
-                  },
+                child: Stack(
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: dropdownValue,
+                      items: siteList.map((site) {
+                        return DropdownMenuItem<String>(
+                          value: site,
+                          child: Text(site),
+                        );
+                      }).toList(),
+                      onChanged: (String? value) {
+                        setState(() {
+                          dropdownValue = value!;
+                          if (value == 'Enter site name') {
+                            enteredSiteName = '';
+                          }
+                        });
+                      },
+                    ),
+                    if (dropdownValue == 'Enter site name')
+                      Container(
+                        height: 45,
+                        margin: const EdgeInsets.only(left: 10, right: 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(
+                            color: Colors.red,
+                          ),
+                        ),
+                        child: TextField(
+                          onChanged: (String value) {
+                            setState(() {
+                              enteredSiteName = value;
+                            });
+                            getData();
+                          },
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
+
               const SizedBox(
                 height: 10,
               ),
