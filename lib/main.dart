@@ -1,4 +1,3 @@
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,7 +5,6 @@ import 'package:gemini_landscaping_app/pages/auth_page.dart';
 import 'firebase_options.dart';
 
 import 'auth.dart';
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,4 +39,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-

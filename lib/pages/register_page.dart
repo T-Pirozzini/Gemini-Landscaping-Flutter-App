@@ -4,6 +4,8 @@ import 'package:gemini_landscaping_app/components/my_textfield.dart';
 import 'package:gemini_landscaping_app/components/square_tile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../services/auth_service.dart';
+
 class RegisterPage extends StatefulWidget {
   final Function()? onTap;
   const RegisterPage({super.key, required this.onTap});
@@ -161,12 +163,18 @@ class _RegisterPageState extends State<RegisterPage> {
                   // google + apple sign in buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       // google
-                      SquareTile(imagePath: 'assets/google.png'),
-                      SizedBox(width: 10),
+                      SquareTile(
+                        onTap: () => AuthService().signInWithGoogle(),
+                        imagePath: 'assets/google.png',
+                      ),
+                      const SizedBox(width: 10),
                       // apple
-                      SquareTile(imagePath: 'assets/apple.png')
+                      SquareTile(
+                        onTap: () {},
+                        imagePath: 'assets/apple.png',
+                      )
                     ],
                   ),
                   const SizedBox(height: 50),
