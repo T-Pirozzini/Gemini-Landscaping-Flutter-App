@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
-import 'main.dart';
 import 'sitereport.dart';
 
 class ViewReport extends StatefulWidget {
@@ -124,16 +123,22 @@ class _ViewReportState extends State<ViewReport> {
                     ),
                     Container(
                       alignment: Alignment.center,
-                      child: Text(widget.docid["times"]["timeOn2"]),
+                      child: widget.docid["names"]["name2"] == ""
+                          ? Text("")
+                          : Text(widget.docid["times"]["timeOn2"]),
                     ),
                     Container(
                       alignment: Alignment.center,
-                      child: Text(widget.docid["times"]["timeOff2"]),
+                      child: widget.docid["names"]["name2"] == ""
+                          ? Text("")
+                          : Text(widget.docid["times"]["timeOff2"]),
                     ),
                     Container(
                       alignment: Alignment.center,
-                      child: Text(
-                          "${(Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))).toString().substring(0, 4)}"),
+                      child: widget.docid["names"]["name2"] == ""
+                          ? Text("")
+                          : Text(
+                              "${(Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))).toString().substring(0, 4)}"),
                     ),
                   ]),
                   TableRow(children: [
@@ -143,16 +148,22 @@ class _ViewReportState extends State<ViewReport> {
                     ),
                     Container(
                       alignment: Alignment.center,
-                      child: Text(widget.docid["times"]["timeOn3"]),
+                      child: widget.docid["names"]["name3"] == ""
+                          ? Text("")
+                          : Text(widget.docid["times"]["timeOn3"]),
                     ),
                     Container(
                       alignment: Alignment.center,
-                      child: Text(widget.docid["times"]["timeOff3"]),
+                      child: widget.docid["names"]["name3"] == ""
+                          ? Text("")
+                          : Text(widget.docid["times"]["timeOff3"]),
                     ),
                     Container(
                       alignment: Alignment.center,
-                      child: Text(
-                          "${(Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))).toString().substring(0, 4)}"),
+                      child: widget.docid["names"]["name3"] == ""
+                          ? Text("")
+                          : Text(
+                              "${(Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))).toString().substring(0, 4)}"),
                     ),
                   ]),
                   TableRow(children: [
@@ -162,16 +173,22 @@ class _ViewReportState extends State<ViewReport> {
                     ),
                     Container(
                       alignment: Alignment.center,
-                      child: Text(widget.docid["times"]["timeOn4"]),
+                      child: widget.docid["names"]["name4"] == ""
+                          ? Text("")
+                          : Text(widget.docid["times"]["timeOn4"]),
                     ),
                     Container(
                       alignment: Alignment.center,
-                      child: Text(widget.docid["times"]["timeOff4"]),
+                      child: widget.docid["names"]["name4"] == ""
+                          ? Text("")
+                          : Text(widget.docid["times"]["timeOff4"]),
                     ),
                     Container(
                       alignment: Alignment.center,
-                      child: Text(
-                          "${(Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1]))).toString().substring(0, 4)}"),
+                      child: widget.docid["names"]["name4"] == ""
+                          ? Text("")
+                          : Text(
+                              "${(Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1]))).toString().substring(0, 4)}"),
                     ),
                   ]),
                   TableRow(

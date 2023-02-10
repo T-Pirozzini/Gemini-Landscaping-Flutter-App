@@ -2,49 +2,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/src/material/theme.dart';
-
-import 'main.dart';
 
 List<String> siteList = [
   'Merewood Apartments',
   'Uplands Terrace',
   'North Point Apartments',
-  'Country Grocer'
-];
-
-const List<Widget> garbage2 = <Widget>[
-  Text('grassed areas'),
-  Text('garden beds'),
-  Text('walkways')
-];
-const List<Widget> debris2 = <Widget>[
-  Text('grassed areas'),
-  Text('garden beds'),
-  Text('tree wells')
-];
-const List<Widget> lawn2 = <Widget>[
-  Text('mow'),
-  Text('trim'),
-  Text('edge'),
-  Text('lime'),
-  Text('aerate'),
-  Text('fertilize'),
-];
-const List<Widget> garden2 = <Widget>[
-  Text('blow debris'),
-  Text('weed'),
-  Text('prune'),
-  Text('fertilize'),
-];
-const List<Widget> tree2 = <Widget>[
-  Text('< 8ft'),
-  Text('> 8ft'),
-];
-const List<Widget> blow2 = <Widget>[
-  Text('parking curbs'),
-  Text('drain basins'),
-  Text('walkways')
+  'Country Grocer',
+  'Alderwood',
+  'Prideaux Manor',
+  'Sandscapes',
+  'Bowen Estates',
+  'Riverbend Terrace',
+  'Valley View Terrace',
+  'Woodgrove Pines',
+  'Pinewood Estates',
+  'Lancelot Gardens',
+  'Harwell Place',
+  'Peartree Meadows',  
+  'Nanaimo Liquor Plus',
+  'Azalea Apartments',
+  'Westhill Centre',
+  'The Chemainus',
 ];
 
 List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
@@ -97,20 +75,6 @@ class _AddReportState extends State<AddReport> {
   TimeOfDay? timeOff3 = TimeOfDay.now();
   TimeOfDay? timeOn4 = TimeOfDay.now();
   TimeOfDay? timeOff4 = TimeOfDay.now();
-
-  // final List<bool> _selectedGarbage = <bool>[false, false, false];
-  // final List<bool> _selectedDebris = <bool>[false, false, false];
-  // final List<bool> _selectedLawn = <bool>[
-  //   false,
-  //   false,
-  //   false,
-  //   false,
-  //   false,
-  //   false
-  // ];
-  // final List<bool> _selectedGarden = <bool>[false, false, false, false];
-  // final List<bool> _selectedTree = <bool>[false, false];
-  // // final List<bool> _selectedBlow = <bool>[false, false, false];
 
   @override
   Widget build(BuildContext context) {
