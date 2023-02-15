@@ -7,14 +7,22 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:556393416525:android:685bb456eca8659ee29904",
+        "mobilesdk_app_id": "1:556393416525:android:bdd0f0359f413759e29904",
         "android_client_info": {
-          "package_name": "com.example.gemini_landscaping_app"
+          "package_name": "com.tpiro.geminilandscapingapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "556393416525-0gg83cskmrcucgd2b6rb39kub5slhuel.apps.googleusercontent.com",
+          "client_id": "556393416525-uus3btn8ek19ce42v1a7f0q68c7jt15d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tpiro.geminilandscapingapp",
+            "certificate_hash": "cbf343cc6f5aa0517cf4f40d34770dcee470b1cf"
+          }
+        },
+        {
+          "client_id": "556393416525-nfhu7g0dcagatm2rc84pg0e4kdv3un4g.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -29,6 +37,13 @@
             {
               "client_id": "556393416525-0gg83cskmrcucgd2b6rb39kub5slhuel.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "556393416525-kbbnlkclvr9s3i9sh0h6ipejofth21m6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.geminiLandscapingApp"
+              }
             }
           ]
         }

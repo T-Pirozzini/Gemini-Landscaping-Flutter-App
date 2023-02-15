@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "gemini_landscaping_app" "\0"
+            VALUE "FileDescription", "Gemini Mobile" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "gemini_landscaping_app" "\0"
+            VALUE "InternalName", "Gemini Mobile" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
             VALUE "OriginalFilename", "gemini_landscaping_app.exe" "\0"
-            VALUE "ProductName", "gemini_landscaping_app" "\0"
+            VALUE "ProductName", "Gemini Mobile" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
