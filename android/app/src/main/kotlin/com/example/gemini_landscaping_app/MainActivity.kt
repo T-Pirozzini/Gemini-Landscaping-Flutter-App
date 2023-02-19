@@ -1,4 +1,4 @@
-package com.example.gemini_landscaping_app
+package com.tpiro.geminilandscapingapp
 
 import io.flutter.embedding.android.FlutterActivity
 
