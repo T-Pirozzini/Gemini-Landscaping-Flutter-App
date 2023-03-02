@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>556393416525-sb0qklebppurgloka2p8iovrv0qg6nfb.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.556393416525-sb0qklebppurgloka2p8iovrv0qg6nfb</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>556393416525-cvmm3fjcogjcp2lnoerpm8q7vij2iem6.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBDHd_Z20593DvovunZcGvNSEVbKUiz_FU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>556393416525</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.tpiro.geminilandscapingapp</string>
+	<key>PROJECT_ID</key>
+	<string>gemini-landscaping-flutter</string>
+	<key>STORAGE_BUCKET</key>
+	<string>gemini-landscaping-flutter.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:556393416525:ios:c82368f17cfa1858e29904</string>
+</dict>
+</plist>
