@@ -18,9 +18,13 @@ void signUserOut() {
   FirebaseAuth.instance.signOut();
 }
 
+bool _sortBySiteName = false;
+// bool _sortByDate = false;
+
 class _HomeState extends State<Home> {
   final Stream<QuerySnapshot> _reportStream2023 =
       FirebaseFirestore.instance.collection('SiteReports2023').snapshots();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,6 +42,24 @@ class _HomeState extends State<Home> {
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         title: const Text('SITE REPORTS 2023'),
         centerTitle: true,
+        // leading: IconButton(
+        //   onPressed: () {
+        //     setState(() {
+        //       _sortByDate = !_sortByDate;
+        //     });
+        //   },
+        //   icon: Icon(Icons.access_time),
+        // ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _sortBySiteName = !_sortBySiteName;
+              });
+            },
+            icon: Icon(Icons.sort),
+          ),
+        ],
       ),
       body: StreamBuilder(
         stream: _reportStream2023,
@@ -51,20 +73,31 @@ class _HomeState extends State<Home> {
             );
           }
 
+          List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
+          // documents
+              // .sort((a, b) => b['info']['date'].compareTo(a['info']['date']));
+          // if (_sortByDate) {
+          //   documents.sort((a, b) => DateTime.parse(a['info']['date'])
+          //       .compareTo(DateTime.parse(b['info']['date'])));
+          // }
+          if (_sortBySiteName) {
+            documents.sort((a, b) =>
+                a['info']['siteName'].compareTo(b['info']['siteName']));
+          }
+
           return Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
             ),
             child: ListView.builder(
-              itemCount: snapshot.data!.docs.length,
+              itemCount: documents.length,
               itemBuilder: (_, index) {
                 return GestureDetector(
                   onTap: () {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (_) =>
-                            ViewReport(docid: snapshot.data!.docs[index]),
+                        builder: (_) => ViewReport(docid: documents[index]),
                       ),
                     );
                   },
@@ -86,15 +119,13 @@ class _HomeState extends State<Home> {
                             ),
                           ),
                           title: Text(
-                            snapshot.data!.docChanges[index].doc['info']
-                                ['date'],
+                            documents[index]['info']['date'],
                             style: const TextStyle(
                               fontSize: 20,
                             ),
                           ),
                           trailing: Text(
-                            snapshot.data!.docChanges[index].doc['info']
-                                ['siteName'],
+                            documents[index]['info']['siteName'],
                             style: const TextStyle(
                               fontSize: 20,
                             ),
@@ -132,8 +163,12 @@ class _HomeState extends State<Home> {
                 ],
               ),
               Row(
-                children: const [
-                  Text('Sign Out', style: TextStyle(color: Colors.white)),
+                children: [
+                  GestureDetector(
+                    onTap: signUserOut,
+                    child:
+                        Text('Sign Out', style: TextStyle(color: Colors.white)),
+                  ),
                   IconButton(
                     onPressed: signUserOut,
                     icon: Icon(Icons.logout_outlined, color: Colors.white),

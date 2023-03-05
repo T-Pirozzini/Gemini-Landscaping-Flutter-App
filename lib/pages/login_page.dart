@@ -117,17 +117,17 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 10),
 
                   // forgot password?
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text('Forgot password?',
-                            style: TextStyle(color: Colors.grey[600])),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 25),
+                  // Padding(
+                  //   padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.end,
+                  //     children: [
+                  //       Text('Forgot password?',
+                  //           style: TextStyle(color: Colors.grey[600])),
+                  //     ],
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 25),
 
                   // sign in button
                   MyButton(
@@ -137,74 +137,74 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 50),
 
                   // or continue with google or apple
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Divider(
-                            thickness: 0.5,
-                            color: Colors.grey[400],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: Text(
-                            'Or continue with',
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-                        ),
-                        Expanded(
-                          child: Divider(
-                            thickness: 0.5,
-                            color: Colors.grey[400],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  //   child: Row(
+                  //     children: [
+                  //       Expanded(
+                  //         child: Divider(
+                  //           thickness: 0.5,
+                  //           color: Colors.grey[400],
+                  //         ),
+                  //       ),
+                  //       Padding(
+                  //         padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  //         child: Text(
+                  //           'Or continue with',
+                  //           style: TextStyle(color: Colors.grey[700]),
+                  //         ),
+                  //       ),
+                  //       Expanded(
+                  //         child: Divider(
+                  //           thickness: 0.5,
+                  //           color: Colors.grey[400],
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
 
-                  const SizedBox(height: 50),
+                  // const SizedBox(height: 50),
 
-                  // google + apple sign in buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // google
-                      SquareTile(
-                        onTap: () => AuthService().signInWithGoogle(),
-                        imagePath: 'assets/google.png',
-                      ),
-                      const SizedBox(width: 10),
-                      // apple
-                      SquareTile(
-                        onTap: () {},
-                        imagePath: 'assets/apple.png',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 50),
-                  // not a member, register
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Not a member?",
-                        style: TextStyle(color: Colors.grey[700]),
-                      ),
-                      const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: widget.onTap,
-                        child: const Text(
-                          "Register now",
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // // google + apple sign in buttons
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     // google
+                  //     SquareTile(
+                  //       onTap: () => AuthService().signInWithGoogle(),
+                  //       imagePath: 'assets/google.png',
+                  //     ),
+                  //     const SizedBox(width: 10),
+                  //     // apple
+                  //     SquareTile(
+                  //       onTap: () {},
+                  //       imagePath: 'assets/apple.png',
+                  //     ),
+                  //   ],
+                  // ),
+                  // const SizedBox(height: 50),
+                  // // not a member, register
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     Text(
+                  //       "Not a member?",
+                  //       style: TextStyle(color: Colors.grey[700]),
+                  //     ),
+                  //     const SizedBox(width: 4),
+                  //     GestureDetector(
+                  //       onTap: widget.onTap,
+                  //       child: const Text(
+                  //         "Register now",
+                  //         style: TextStyle(
+                  //           color: Colors.blue,
+                  //           fontWeight: FontWeight.bold,
+                  //         ),
+                  //       ),
+                  //     ),
+                  // ],
+                  // ),
                 ],
               ),
             ),
