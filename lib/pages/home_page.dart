@@ -132,8 +132,12 @@ class _HomeState extends State<Home> {
                 ],
               ),
               Row(
-                children: const [
-                  Text('Sign Out', style: TextStyle(color: Colors.white)),
+                children: [
+                  GestureDetector(
+                    onTap: signUserOut,
+                    child:
+                        Text('Sign Out', style: TextStyle(color: Colors.white)),
+                  ),
                   IconButton(
                     onPressed: signUserOut,
                     icon: Icon(Icons.logout_outlined, color: Colors.white),
