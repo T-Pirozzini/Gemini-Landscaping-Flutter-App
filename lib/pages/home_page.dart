@@ -19,7 +19,7 @@ void signUserOut() {
 }
 
 bool _sortBySiteName = false;
-bool _sortByDate = true;
+// bool _sortByDate = false;
 
 class _HomeState extends State<Home> {
   final Stream<QuerySnapshot> _reportStream2023 =
@@ -42,25 +42,22 @@ class _HomeState extends State<Home> {
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         title: const Text('SITE REPORTS 2023'),
         centerTitle: true,
+        // leading: IconButton(
+        //   onPressed: () {
+        //     setState(() {
+        //       _sortByDate = !_sortByDate;
+        //     });
+        //   },
+        //   icon: Icon(Icons.access_time),
+        // ),
         actions: [
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              // padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              backgroundColor: Color.fromARGB(255, 31, 182, 77),
-            ),
+          IconButton(
             onPressed: () {
               setState(() {
                 _sortBySiteName = !_sortBySiteName;
               });
             },
-            child: Row(
-              children: [
-                Text('Site Name', style: TextStyle(fontSize: 14)),
-                Icon(_sortBySiteName
-                    ? Icons.arrow_upward
-                    : Icons.arrow_downward),
-              ],
-            ),
+            icon: Icon(Icons.sort),
           ),
         ],
       ),
@@ -77,16 +74,12 @@ class _HomeState extends State<Home> {
           }
 
           List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
-          documents
-              .sort((a, b) => b['info']['date'].compareTo(a['info']['date']));
-
-          // Sort the list by date if requested
-          if (_sortByDate) {
-            List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
-            documents
-                .sort((a, b) => b['info']['date'].compareTo(a['info']['date']));
-          }
-          // Sort the list by site name if requested
+          // documents
+              // .sort((a, b) => b['info']['date'].compareTo(a['info']['date']));
+          // if (_sortByDate) {
+          //   documents.sort((a, b) => DateTime.parse(a['info']['date'])
+          //       .compareTo(DateTime.parse(b['info']['date'])));
+          // }
           if (_sortBySiteName) {
             documents.sort((a, b) =>
                 a['info']['siteName'].compareTo(b['info']['siteName']));
