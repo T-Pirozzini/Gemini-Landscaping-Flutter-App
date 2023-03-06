@@ -75,7 +75,7 @@ class _HomeState extends State<Home> {
 
           List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
           // documents
-              // .sort((a, b) => b['info']['date'].compareTo(a['info']['date']));
+          // .sort((a, b) => b['info']['date'].compareTo(a['info']['date']));
           // if (_sortByDate) {
           //   documents.sort((a, b) => DateTime.parse(a['info']['date'])
           //       .compareTo(DateTime.parse(b['info']['date'])));
