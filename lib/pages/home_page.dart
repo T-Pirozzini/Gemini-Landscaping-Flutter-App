@@ -14,8 +14,8 @@ class Home extends StatefulWidget {
 final user = FirebaseAuth.instance.currentUser!;
 
 // sign user out method
-void signUserOut() {
-  FirebaseAuth.instance.signOut();
+Future<void> signUserOut() async {
+  await FirebaseAuth.instance.signOut();
 }
 
 bool _sortBySiteName = false;
