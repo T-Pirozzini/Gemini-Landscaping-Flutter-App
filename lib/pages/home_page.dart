@@ -19,11 +19,13 @@ void signUserOut() {
 }
 
 bool _sortBySiteName = false;
-// bool _sortByDate = false;
+bool _sortByDate = false;
 
 class _HomeState extends State<Home> {
-  final Stream<QuerySnapshot> _reportStream2023 =
-      FirebaseFirestore.instance.collection('SiteReports2023').snapshots();
+  final Stream<QuerySnapshot> _reportStream2023 = FirebaseFirestore.instance
+      .collection('SiteReports2023')
+      // .orderBy('date', descending: false)
+      .snapshots();
 
   @override
   Widget build(BuildContext context) {
@@ -42,14 +44,14 @@ class _HomeState extends State<Home> {
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         title: const Text('SITE REPORTS 2023'),
         centerTitle: true,
-        // leading: IconButton(
-        //   onPressed: () {
-        //     setState(() {
-        //       _sortByDate = !_sortByDate;
-        //     });
-        //   },
-        //   icon: Icon(Icons.access_time),
-        // ),
+        leading: IconButton(
+          onPressed: () {
+            setState(() {
+              _sortByDate = !_sortByDate;
+            });
+          },
+          icon: Icon(Icons.access_time),
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -74,13 +76,14 @@ class _HomeState extends State<Home> {
           }
 
           List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
-          // documents
-          // .sort((a, b) => b['info']['date'].compareTo(a['info']['date']));
-          // if (_sortByDate) {
-          //   documents.sort((a, b) => DateTime.parse(a['info']['date'])
-          //       .compareTo(DateTime.parse(b['info']['date'])));
-          // }
+
+          if (_sortByDate) {
+            _sortBySiteName = false;
+            documents.sort((a, b) => DateTime.parse(a['info']['date'])
+                .compareTo(DateTime.parse(b['info']['date'])));
+          }
           if (_sortBySiteName) {
+            _sortByDate = false;
             documents.sort((a, b) =>
                 a['info']['siteName'].compareTo(b['info']['siteName']));
           }
