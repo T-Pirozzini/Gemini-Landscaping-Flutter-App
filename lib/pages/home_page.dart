@@ -3,6 +3,8 @@ import "package:flutter/material.dart";
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../addReport.dart';
 import '../viewReport.dart';
+import '../auth.dart';
+import 'auth_page.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -11,12 +13,10 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-final user = FirebaseAuth.instance.currentUser!;
+// get current user
+final currentUser = FirebaseAuth.instance.currentUser!;
 
-// sign user out method
-Future<void> signUserOut() async {
-  await FirebaseAuth.instance.signOut();
-}
+final User? user = Auth().currentUser;
 
 bool _sortBySiteName = false;
 bool _sortByDate = false;
@@ -26,6 +26,15 @@ class _HomeState extends State<Home> {
       .collection('SiteReports2023')
       // .orderBy('date', descending: false)
       .snapshots();
+
+  // sign current user out
+  Future<void> signOut() async {
+    await Auth().signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => AuthPage()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +168,7 @@ class _HomeState extends State<Home> {
                   const Icon(Icons.account_circle, color: Colors.white),
                   const SizedBox(width: 5),
                   Text(
-                    user.email!,
+                    currentUser.email!,
                     style: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.w400),
                   ),
@@ -168,12 +177,12 @@ class _HomeState extends State<Home> {
               Row(
                 children: [
                   GestureDetector(
-                    onTap: signUserOut,
+                    onTap: signOut,
                     child:
                         Text('Sign Out', style: TextStyle(color: Colors.white)),
                   ),
                   IconButton(
-                    onPressed: signUserOut,
+                    onPressed: signOut,
                     icon: Icon(Icons.logout_outlined, color: Colors.white),
                   ),
                 ],
