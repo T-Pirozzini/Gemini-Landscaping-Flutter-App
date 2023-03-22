@@ -5,24 +5,21 @@ import '../viewReport.dart';
 import '../auth.dart';
 import 'auth_page.dart';
 
-
 class ReportsPage extends StatefulWidget {
   const ReportsPage({super.key});
-  
 
   @override
   State<ReportsPage> createState() => _ReportsPageState();
 }
 
 class _ReportsPageState extends State<ReportsPage> {
-
   // get current user
-final currentUser = FirebaseAuth.instance.currentUser!;
+  final currentUser = FirebaseAuth.instance.currentUser!;
 
-final User? user = Auth().currentUser;
+  final User? user = Auth().currentUser;
 
-bool _sortBySiteName = false;
-bool _sortByDate = false;
+  bool _sortBySiteName = false;
+  bool _sortByDate = false;
 
   final Stream<QuerySnapshot> _reportStream2023 = FirebaseFirestore.instance
       .collection('SiteReports2023')
@@ -40,7 +37,8 @@ bool _sortByDate = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(      
+    return Scaffold(
+      backgroundColor: Colors.grey.shade200,
       body: StreamBuilder(
         stream: _reportStream2023,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -85,18 +83,20 @@ bool _sortByDate = false;
                   child: Column(
                     children: [
                       const SizedBox(
-                        height: 4,
+                        height: 10,
                       ),
                       Padding(
                         padding: const EdgeInsets.only(
-                          left: 3,
-                          right: 3,
+                          left: 10,
+                          right: 10,
                         ),
                         child: ListTile(
+                          tileColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                             side: const BorderSide(
-                              color: Colors.black,
+                              width: 2.0,                              
+                              color: Colors.green,
                             ),
                           ),
                           title: Text(

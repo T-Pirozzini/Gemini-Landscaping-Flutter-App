@@ -1,12 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gemini_landscaping_app/pages/announcement_page.dart';
-import 'package:gemini_landscaping_app/pages/login_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
 import 'package:gemini_landscaping_app/pages/reports_page.dart';
 import '../addReport.dart';
-import '../viewReport.dart';
 import '../auth.dart';
 import 'auth_page.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
@@ -18,8 +15,8 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-// get current user
-final currentUser = FirebaseAuth.instance.currentUser!;
+// // get current user
+// final currentUser = FirebaseAuth.instance.currentUser!;
 
 final User? user = Auth().currentUser;
 
@@ -27,20 +24,6 @@ bool _sortBySiteName = false;
 bool _sortByDate = false;
 
 class _HomeState extends State<Home> {
-  final Stream<QuerySnapshot> _reportStream2023 = FirebaseFirestore.instance
-      .collection('SiteReports2023')
-      // .orderBy('date', descending: false)
-      .snapshots();
-
-  // sign current user out
-  Future<void> signOut() async {
-    await Auth().signOut();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => AuthPage()),
-    );
-  }
-
   // bottom navigation bar
   int currentIndex = 0;
   final pages = [
@@ -52,7 +35,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: Colors.grey.shade600,
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         onPressed: () {
@@ -60,7 +43,7 @@ class _HomeState extends State<Home> {
               context, MaterialPageRoute(builder: (_) => const AddReport()));
         },
         child: const Icon(
-          Icons.add,
+          Icons.note_add_outlined,
         ),
       ),
       appBar: AppBar(
@@ -87,90 +70,6 @@ class _HomeState extends State<Home> {
         ],
       ),
       body: pages[currentIndex],
-      // body: StreamBuilder(
-      //   stream: _reportStream2023,
-      //   builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-      //     if (snapshot.hasError) {
-      //       return const Text("something is wrong");
-      //     }
-      //     if (snapshot.connectionState == ConnectionState.waiting) {
-      //       return const Center(
-      //         child: CircularProgressIndicator(),
-      //       );
-      //     }
-
-      //     List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
-
-      //     if (_sortByDate) {
-      //       _sortBySiteName = false;
-      //       documents.sort((a, b) => DateTime.parse(a['info']['date'])
-      //           .compareTo(DateTime.parse(b['info']['date'])));
-      //     }
-      //     if (_sortBySiteName) {
-      //       _sortByDate = false;
-      //       documents.sort((a, b) =>
-      //           a['info']['siteName'].compareTo(b['info']['siteName']));
-      //     }
-
-      //     return Container(
-      //       decoration: BoxDecoration(
-      //         borderRadius: BorderRadius.circular(12),
-      //       ),
-      //       child: ListView.builder(
-      //         itemCount: documents.length,
-      //         itemBuilder: (_, index) {
-      //           return GestureDetector(
-      //             onTap: () {
-      //               Navigator.pushReplacement(
-      //                 context,
-      //                 MaterialPageRoute(
-      //                   builder: (_) => ViewReport(docid: documents[index]),
-      //                 ),
-      //               );
-      //             },
-      //             child: Column(
-      //               children: [
-      //                 const SizedBox(
-      //                   height: 4,
-      //                 ),
-      //                 Padding(
-      //                   padding: const EdgeInsets.only(
-      //                     left: 3,
-      //                     right: 3,
-      //                   ),
-      //                   child: ListTile(
-      //                     shape: RoundedRectangleBorder(
-      //                       borderRadius: BorderRadius.circular(10),
-      //                       side: const BorderSide(
-      //                         color: Colors.black,
-      //                       ),
-      //                     ),
-      //                     title: Text(
-      //                       documents[index]['info']['date'],
-      //                       style: const TextStyle(
-      //                         fontSize: 20,
-      //                       ),
-      //                     ),
-      //                     trailing: Text(
-      //                       documents[index]['info']['siteName'],
-      //                       style: const TextStyle(
-      //                         fontSize: 20,
-      //                       ),
-      //                     ),
-      //                     contentPadding: const EdgeInsets.symmetric(
-      //                       vertical: 12,
-      //                       horizontal: 16,
-      //                     ),
-      //                   ),
-      //                 ),
-      //               ],
-      //             ),
-      //           );
-      //         },
-      //       ),
-      //     );
-      //   },
-      // ),
       bottomNavigationBar: CurvedNavigationBar(
         height: 60,
         index: currentIndex,
@@ -196,41 +95,6 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      // bottomNavigationBar: Container(
-      //   height: 50.0,
-      //   color: const Color.fromARGB(255, 31, 182, 77),
-      //   child: Center(
-      //     child: Row(
-      //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-      //       children: [
-      //         Row(
-      //           children: [
-      //             const Icon(Icons.account_circle, color: Colors.white),
-      //             const SizedBox(width: 5),
-      //             Text(
-      //               currentUser.email!,
-      //               style: const TextStyle(
-      //                   color: Colors.white, fontWeight: FontWeight.w400),
-      //             ),
-      //           ],
-      //         ),
-      //         Row(
-      //           children: [
-      //             GestureDetector(
-      //               onTap: signOut,
-      //               child:
-      //                   Text('Sign Out', style: TextStyle(color: Colors.white)),
-      //             ),
-      //             IconButton(
-      //               onPressed: signOut,
-      //               icon: Icon(Icons.logout_outlined, color: Colors.white),
-      //             ),
-      //           ],
-      //         )
-      //       ],
-      //     ),
-      //   ),
-      // ),
     );
   }
 }
