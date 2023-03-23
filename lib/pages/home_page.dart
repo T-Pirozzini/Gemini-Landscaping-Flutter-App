@@ -17,14 +17,10 @@ class Home extends StatefulWidget {
 
 final User? user = Auth().currentUser;
 
-bool _sortBySiteName = false;
-bool _sortByDate = false;
-
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   // floating action bubble
   late Animation<double> _animation;
   late AnimationController _animationController;
-
   @override
   void initState() {
     _animationController = AnimationController(
@@ -55,29 +51,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         title: const Text('SITE REPORTS 2023'),
         centerTitle: true,
-        leading: IconButton(
-          onPressed: () {
-            setState(() {
-              _sortByDate = !_sortByDate;
-            });
-          },
-          icon: Icon(Icons.access_time),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _sortBySiteName = !_sortBySiteName;
-              });
-            },
-            icon: Icon(Icons.sort),
-          ),
-        ],
       ),
+      // Floating Action Button
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionBubble(
         items: <Bubble>[
-          // Floating action menu item
           Bubble(
             title: "Site Report",
             iconColor: Colors.white,
@@ -85,7 +63,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             icon: Icons.add,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
-              _animationController.reverse();
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const AddReport()));
             },
           ),
           Bubble(
@@ -106,29 +85,19 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
               _animationController.reverse();
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const AddReport()));
             },
           ),
         ],
         iconColor: Colors.white,
         backGroundColor: const Color.fromARGB(255, 31, 182, 77),
         animation: _animation,
-        // On pressed change animation state
         onPress: () => _animationController.isCompleted
             ? _animationController.reverse()
             : _animationController.forward(),
-        // Flaoting Action button Icon
         iconData: Icons.note_add_outlined,
-        // onPress: () {
-        //   Navigator.pushReplacement(
-        //       context, MaterialPageRoute(builder: (_) => const AddReport()));
-        // },
-        // child: const Icon(
-        //   Icons.note_add_outlined,
-        // ),
       ),
       body: pages[currentIndex],
+      // Bottom Navigator
       bottomNavigationBar: CurvedNavigationBar(
         height: 60,
         index: currentIndex,
