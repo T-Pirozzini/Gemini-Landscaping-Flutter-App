@@ -57,13 +57,18 @@ class _AddReportState extends State<AddReport> {
   TextEditingController name3 = TextEditingController();
   TextEditingController name4 = TextEditingController();
 
-  CollectionReference ref =
-      FirebaseFirestore.instance.collection(dropdownValue);
+  CollectionReference reportRef =
+      FirebaseFirestore.instance.collection('SiteReports2023');
 
   void _submitForm() {
-    String siteName = dropdownValue;    
-    ref = FirebaseFirestore.instance.collection(siteName);
-    ref.add({
+    String siteName = dropdownValue;
+
+    CollectionReference siteRef = FirebaseFirestore.instance
+        .collection('SiteReports2023')
+        .doc(siteName)
+        .collection(siteName);
+
+    siteRef.add({
       "info": {
         'date': dateController.text,
         'siteName': dropdownValue,
@@ -104,7 +109,7 @@ class _AddReportState extends State<AddReport> {
 
   Future<void> getData() async {
     // Get docs from collection reference
-    QuerySnapshot querySnapshot = await ref.get();
+    QuerySnapshot querySnapshot = await reportRef.get();
 
     // Get data from docs and convert map to List
     final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
@@ -207,11 +212,6 @@ class _AddReportState extends State<AddReport> {
                               primary: Colors.green,
                               onPrimary: Colors.white,
                               onSurface: Colors.black,
-                            ),
-                            textButtonTheme: TextButtonThemeData(
-                              style: TextButton.styleFrom(
-                                primary: Colors.green,
-                              ),
                             ),
                           ),
                           child: child!,
