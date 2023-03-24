@@ -51,18 +51,65 @@ class AddReport extends StatefulWidget {
 
 class _AddReportState extends State<AddReport> {
   TextEditingController dateController = TextEditingController();
-  TextEditingController siteName = TextEditingController();
+  TextEditingController siteNameController = TextEditingController();
   TextEditingController name1 = TextEditingController();
   TextEditingController name2 = TextEditingController();
   TextEditingController name3 = TextEditingController();
   TextEditingController name4 = TextEditingController();
 
-  CollectionReference ref =
+  CollectionReference reportRef =
       FirebaseFirestore.instance.collection('SiteReports2023');
+
+  void _submitForm() {
+    String siteName = dropdownValue;
+
+    CollectionReference siteRef = FirebaseFirestore.instance
+        .collection('SiteReports2023')
+        .doc(siteName)
+        .collection(siteName);
+
+    siteRef.add({
+      "info": {
+        'date': dateController.text,
+        'siteName': dropdownValue,
+      },
+      "names": {
+        'name1': name1.text,
+        'name2': name2.text,
+        'name3': name3.text,
+        'name4': name4.text,
+      },
+      "times": {
+        'timeOn1': timeOn1!.hour.toString() + ':' + timeOn1!.minute.toString(),
+        'timeOff1':
+            timeOff1!.hour.toString() + ':' + timeOff1!.minute.toString(),
+        'timeOn2': timeOn2!.hour.toString() + ':' + timeOn2!.minute.toString(),
+        'timeOff2':
+            timeOff2!.hour.toString() + ':' + timeOff2!.minute.toString(),
+        'timeOn3': timeOn3!.hour.toString() + ':' + timeOn3!.minute.toString(),
+        'timeOff3':
+            timeOff3!.hour.toString() + ':' + timeOff3!.minute.toString(),
+        'timeOn4': timeOn4!.hour.toString() + ':' + timeOn4!.minute.toString(),
+        'timeOff4':
+            timeOff4!.hour.toString() + ':' + timeOff4!.minute.toString(),
+      },
+      "service": {
+        'garbage': _selectedGarbage,
+        'debris': _selectedDebris,
+        'lawn': _selectedLawn,
+        'garden': _selectedGarden,
+        'tree': _selectedTree,
+        'blow': _selectedBlow,
+      },
+    }).whenComplete(() {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => Home()));
+    });
+  }
 
   Future<void> getData() async {
     // Get docs from collection reference
-    QuerySnapshot querySnapshot = await ref.get();
+    QuerySnapshot querySnapshot = await reportRef.get();
 
     // Get data from docs and convert map to List
     final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
@@ -109,55 +156,7 @@ class _AddReportState extends State<AddReport> {
         actions: [
           MaterialButton(
             onPressed: () {
-              ref.add({
-                "info": {
-                  'date': dateController.text,
-                  'siteName': dropdownValue,
-                },
-                "names": {
-                  'name1': name1.text,
-                  'name2': name2.text,
-                  'name3': name3.text,
-                  'name4': name4.text,
-                },
-                "times": {
-                  'timeOn1': timeOn1!.hour.toString() +
-                      ':' +
-                      timeOn1!.minute.toString(),
-                  'timeOff1': timeOff1!.hour.toString() +
-                      ':' +
-                      timeOff1!.minute.toString(),
-                  'timeOn2': timeOn2!.hour.toString() +
-                      ':' +
-                      timeOn2!.minute.toString(),
-                  'timeOff2': timeOff2!.hour.toString() +
-                      ':' +
-                      timeOff2!.minute.toString(),
-                  'timeOn3': timeOn3!.hour.toString() +
-                      ':' +
-                      timeOn3!.minute.toString(),
-                  'timeOff3': timeOff3!.hour.toString() +
-                      ':' +
-                      timeOff3!.minute.toString(),
-                  'timeOn4': timeOn4!.hour.toString() +
-                      ':' +
-                      timeOn4!.minute.toString(),
-                  'timeOff4': timeOff4!.hour.toString() +
-                      ':' +
-                      timeOff4!.minute.toString(),
-                },
-                "service": {
-                  'garbage': _selectedGarbage,
-                  'debris': _selectedDebris,
-                  'lawn': _selectedLawn,
-                  'garden': _selectedGarden,
-                  'tree': _selectedTree,
-                  'blow': _selectedBlow,
-                },
-              }).whenComplete(() {
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (_) => Home()));
-              });
+              _submitForm();
             },
             child: Row(
               children: const [
@@ -213,11 +212,6 @@ class _AddReportState extends State<AddReport> {
                               primary: Colors.green,
                               onPrimary: Colors.white,
                               onSurface: Colors.black,
-                            ),
-                            textButtonTheme: TextButtonThemeData(
-                              style: TextButton.styleFrom(
-                                primary: Colors.green,
-                              ),
                             ),
                           ),
                           child: child!,
