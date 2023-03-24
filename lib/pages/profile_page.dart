@@ -55,7 +55,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               margin: EdgeInsets.symmetric(horizontal: 80),
               decoration: BoxDecoration(
-                color: Colors.green.shade500,
+                color: const Color.fromARGB(255, 31, 182, 77),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(

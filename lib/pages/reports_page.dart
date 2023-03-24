@@ -21,10 +21,8 @@ class _ReportsPageState extends State<ReportsPage> {
   bool _sortBySiteName = false;
   bool _sortByDate = false;
 
-  final Stream<QuerySnapshot> _reportStream2023 = FirebaseFirestore.instance
-      .collection('SiteReports2023')
-      // .orderBy('date', descending: false)
-      .snapshots();
+  final Stream<QuerySnapshot> _reportStream2023 =
+      FirebaseFirestore.instance.collectionGroup('SiteReports2023').snapshots();
 
   // sign current user out
   Future<void> signOut() async {
@@ -34,6 +32,42 @@ class _ReportsPageState extends State<ReportsPage> {
       MaterialPageRoute(builder: (context) => AuthPage()),
     );
   }
+
+  // void getSiteReports() async {
+  //   QuerySnapshot siteReportsSnapshot =
+  //       await FirebaseFirestore.instance.collection('SiteReports2023').get();
+
+  //   for (DocumentSnapshot siteReportDoc in siteReportsSnapshot.docs) {
+  //     Query subCollectionsQuery = FirebaseFirestore.instance.collectionGroup(
+  //         siteReportDoc
+  //             .id); // use collectionGroup() to get all subcollections with the specified ID
+  //     QuerySnapshot subCollectionsSnapshot = await subCollectionsQuery.get();
+
+  //     subCollectionsSnapshot.docs.forEach((subDoc) {
+  //       print(subDoc.id + " => " + subDoc.data().toString());
+  //     });
+  //   }
+  // }
+
+  // Future<List<String>> getSubDocumentIds() async {
+  //   List<String> subDocIds = [];
+
+  //   QuerySnapshot siteReportsSnapshot =
+  //       await FirebaseFirestore.instance.collection('SiteReports2023').get();
+
+  //   for (DocumentSnapshot siteReportDoc in siteReportsSnapshot.docs) {
+  //     Query subCollectionsQuery = FirebaseFirestore.instance.collectionGroup(
+  //         siteReportDoc
+  //             .id); // use collectionGroup() to get all subcollections with the specified ID
+  //     QuerySnapshot subCollectionsSnapshot = await subCollectionsQuery.get();
+
+  //     subCollectionsSnapshot.docs.forEach((subDoc) {
+  //       subDocIds.add(subDoc.id);
+  //     });
+  //   }
+
+  //   return subDocIds;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +84,9 @@ class _ReportsPageState extends State<ReportsPage> {
               child: CircularProgressIndicator(),
             );
           }
+
+          // Call the function to get the subcollections and print their IDs
+          // getSiteReports();
 
           List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
 
@@ -95,18 +132,12 @@ class _ReportsPageState extends State<ReportsPage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                             side: const BorderSide(
-                              width: 2.0,                              
+                              width: 2.0,
                               color: Colors.green,
                             ),
                           ),
                           title: Text(
-                            documents[index]['info']['date'],
-                            style: const TextStyle(
-                              fontSize: 20,
-                            ),
-                          ),
-                          trailing: Text(
-                            documents[index]['info']['siteName'],
+                            documents[index].id,
                             style: const TextStyle(
                               fontSize: 20,
                             ),
