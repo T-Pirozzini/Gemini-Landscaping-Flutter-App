@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'sitereport.dart';
@@ -73,7 +74,6 @@ class _ViewReportState extends State<ViewReport> {
                 const SizedBox(height: 15.0),
               ],
             ),
-
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -298,7 +298,7 @@ class _ViewReportState extends State<ViewReport> {
                   );
                 },
               ),
-            ),            
+            ),
             MaterialButton(
               color: Color.fromARGB(255, 20, 177, 54),
               onPressed: () {
@@ -319,22 +319,25 @@ class _ViewReportState extends State<ViewReport> {
                 ),
               ),
             ),
-            MaterialButton(
-              onPressed: () {
-                widget.docid.reference.delete().whenComplete(() {
-                  Navigator.pushReplacement(
-                      context, MaterialPageRoute(builder: (_) => Home()));
-                });
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: const [
-                  SizedBox(height: 100),
-                  Text("Delete Report?"),
-                  Icon(Icons.delete),
-                ],
-              ),
-            ),
+            FirebaseAuth.instance.currentUser?.uid ==
+                    "5wwYztIxTifV0EQk3N7dfXsY0jm1"
+                ? MaterialButton(
+                    onPressed: () {
+                      widget.docid.reference.delete().whenComplete(() {
+                        Navigator.pushReplacement(
+                            context, MaterialPageRoute(builder: (_) => Home()));
+                      });
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: const [
+                        SizedBox(height: 100),
+                        Text("Delete Report?"),
+                        Icon(Icons.delete),
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ],
         ),
       ),
