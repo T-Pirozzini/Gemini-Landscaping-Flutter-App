@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
+import 'package:gemini_landscaping_app/extraReport.dart';
 import 'package:gemini_landscaping_app/pages/announcement_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
 import 'package:gemini_landscaping_app/pages/reports_page.dart';
@@ -74,7 +75,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             icon: Icons.add,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
-              _animationController.reverse();
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const ExtraReport()));
             },
           ),
           Bubble(
