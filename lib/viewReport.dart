@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'sitereport.dart';
 
+// ignore: must_be_immutable
 class ViewReport extends StatefulWidget {
   DocumentSnapshot docid;
   ViewReport({required this.docid});
@@ -21,6 +22,7 @@ class _ViewReportState extends State<ViewReport> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         leading: MaterialButton(
@@ -47,31 +49,39 @@ class _ViewReportState extends State<ViewReport> {
             color: Colors.white, fit: BoxFit.contain, height: 50),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(border: Border.all()),
-                    child: Text(widget.docid["info"]['date']),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    widget.docid["info"]["siteName"],
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                  const SizedBox(height: 15.0),
-                ],
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(2),
+                  decoration: BoxDecoration(border: Border.all()),
+                  child: Text(widget.docid["info"]['date']),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  widget.docid["info"]["siteName"].toUpperCase(),
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 15.0),
+              ],
+            ),
+
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
               ),
-              Table(
-                border: TableBorder.all(),
+              child: Table(
+                border: TableBorder.all(
+                  color: Color.fromARGB(255, 31, 182, 77),
+                ),
                 children: [
                   TableRow(children: [
                     Container(
@@ -203,176 +213,129 @@ class _ViewReportState extends State<ViewReport> {
                       Container(
                         alignment: Alignment.center,
                         child: Text(
-                            "${(((Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1])))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1])))).toString().substring(0, 5)}"),
+                            "${(((Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1])))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1])))).toString().substring(0, 4)}"),
                       ),
                     ],
                   ),
                 ],
               ),
-              SizedBox(height: 20),
-              Table(
-                // border: TableBorder.all(),
-                children: [
-                  TableRow(
-                    children: [
-                      Container(
-                        child: const Text('Pick up loose garbage:',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 15.0),
-                        child: Container(
-                          child: Column(
-                            children: (widget.docid["service"]["garbage"]
-                                    .whereType<String>()
-                                    .toList() as List<String>)
-                                .map((item) => Text(item))
-                                .toList(),
+            ),
+            SizedBox(height: 20),
+            Expanded(
+              child: ListView.builder(
+                itemCount: 6, // number of rows
+                itemBuilder: (context, index) {
+                  String label;
+                  List<String> items;
+                  switch (index) {
+                    case 0:
+                      label = 'Pick up loose garbage:';
+                      items = widget.docid["service"]["garbage"]
+                          .whereType<String>()
+                          .toList() as List<String>;
+                      break;
+                    case 1:
+                      label = 'Rake yard debris:';
+                      items = widget.docid["service"]["debris"]
+                          .whereType<String>()
+                          .toList() as List<String>;
+                      break;
+                    case 2:
+                      label = 'Lawn care:';
+                      items = widget.docid["service"]["lawn"]
+                          .whereType<String>()
+                          .toList() as List<String>;
+                      break;
+                    case 3:
+                      label = 'Gardens:';
+                      items = widget.docid["service"]["garden"]
+                          .whereType<String>()
+                          .toList() as List<String>;
+                      break;
+                    case 4:
+                      label = 'Trees:';
+                      items = widget.docid["service"]["tree"]
+                          .whereType<String>()
+                          .toList() as List<String>;
+                      break;
+                    case 5:
+                      label = 'Blow dust/debris:';
+                      items = widget.docid["service"]["blow"]
+                          .whereType<String>()
+                          .toList() as List<String>;
+                      break;
+                    default:
+                      label = '';
+                      items = [];
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 15.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Color.fromARGB(255, 31, 182, 77),
+                          )),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            height: 20,
+                            child: Text(
+                              label.toUpperCase(),
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w500),
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Container(
-                        child: const Text('Rake yard debris:',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 15.0),
-                        child: Container(
-                          child: Column(
-                            children: (widget.docid["service"]["debris"]
-                                    .whereType<String>()
-                                    .toList() as List<String>)
-                                .map((item) => Text(item))
-                                .toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Container(
-                        child: const Text('Lawn care:',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 15.0),
-                        child: Container(
-                          child: Column(
-                            children: (widget.docid["service"]["lawn"]
-                                    .whereType<String>()
-                                    .toList() as List<String>)
-                                .map((item) => Text(item))
-                                .toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Container(
-                        child: const Text('Gardens:',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 15.0),
-                        child: Container(
-                          child: Column(
-                            children: (widget.docid["service"]["garden"]
-                                    .whereType<String>()
-                                    .toList() as List<String>)
-                                .map((item) => Text(item))
-                                .toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Container(
-                        child: const Text('Trees:',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 15.0),
-                        child: Container(
-                          child: Column(
-                            children: (widget.docid["service"]["tree"]
-                                    .whereType<String>()
-                                    .toList() as List<String>)
-                                .map((item) => Text(item))
-                                .toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Container(
-                        child: const Text('Blow dust/debris:',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 15.0),
-                        child: Container(
-                          child: Column(
-                            children: (widget.docid["service"]["blow"]
-                                    .whereType<String>()
-                                    .toList() as List<String>)
-                                .map((item) => Text(item))
-                                .toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              MaterialButton(
-                color: Color.fromARGB(255, 20, 177, 54),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => SiteReport(
-                        docid: docid,
+                          ...items
+                              .map((item) =>
+                                  Text(item, style: TextStyle(fontSize: 14)))
+                              .toList(),
+                        ],
                       ),
                     ),
                   );
                 },
-                child: const Text(
-                  "Generate Report",
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Color.fromARGB(255, 251, 251, 251),
+              ),
+            ),            
+            MaterialButton(
+              color: Color.fromARGB(255, 20, 177, 54),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SiteReport(
+                      docid: docid,
+                    ),
                   ),
+                );
+              },
+              child: const Text(
+                "Generate Report",
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Color.fromARGB(255, 251, 251, 251),
                 ),
               ),
-              MaterialButton(
-                onPressed: () {
-                  widget.docid.reference.delete().whenComplete(() {
-                    Navigator.pushReplacement(
-                        context, MaterialPageRoute(builder: (_) => Home()));
-                  });
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: const [
-                    SizedBox(height: 100),
-                    Text("Delete Report?"),
-                    Icon(Icons.delete),
-                  ],
-                ),
+            ),
+            MaterialButton(
+              onPressed: () {
+                widget.docid.reference.delete().whenComplete(() {
+                  Navigator.pushReplacement(
+                      context, MaterialPageRoute(builder: (_) => Home()));
+                });
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: const [
+                  SizedBox(height: 100),
+                  Text("Delete Report?"),
+                  Icon(Icons.delete),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
