@@ -59,16 +59,9 @@ class _AddReportState extends State<AddReport> {
 
   CollectionReference reportRef =
       FirebaseFirestore.instance.collection('SiteReports2023');
-
+      
   void _submitForm() {
-    String siteName = dropdownValue;
-
-    CollectionReference siteRef = FirebaseFirestore.instance
-        .collection('SiteReports2023')
-        .doc(siteName)
-        .collection(siteName);
-
-    siteRef.add({
+    reportRef.add({
       "info": {
         'date': dateController.text,
         'siteName': dropdownValue,
@@ -113,7 +106,6 @@ class _AddReportState extends State<AddReport> {
 
     // Get data from docs and convert map to List
     final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
-    print(allData);
   }
 
   TimeOfDay? timeOn1 = TimeOfDay.now();
