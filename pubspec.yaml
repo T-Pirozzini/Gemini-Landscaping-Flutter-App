@@ -43,7 +43,7 @@ dependencies:
   google_sign_in: ^5.4.4
   curved_navigation_bar: ^1.0.3
   lottie: ^2.3.0
-  floating_action_bubble: ^1.1.4  
+  floating_action_bubble: ^1.1.4
 
 dev_dependencies:
   flutter_test:
