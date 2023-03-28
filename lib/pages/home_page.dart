@@ -9,6 +9,8 @@ import '../auth.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
 
+import '../uploadPhotos.dart';
+
 class Home extends StatefulWidget {
   const Home({super.key});
   @override
@@ -86,7 +88,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             icon: Icons.add_a_photo_outlined,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
-              _animationController.reverse();
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const UploadPhotos()));
             },
           ),
         ],
