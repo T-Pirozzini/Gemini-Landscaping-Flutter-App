@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
+import 'package:gemini_landscaping_app/extraReport.dart';
 import 'package:gemini_landscaping_app/pages/announcement_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
 import 'package:gemini_landscaping_app/pages/reports_page.dart';
@@ -7,6 +8,8 @@ import '../addReport.dart';
 import '../auth.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
+
+import '../uploadPhotos.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -74,7 +77,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             icon: Icons.add,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
-              _animationController.reverse();
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const ExtraReport()));
             },
           ),
           Bubble(
@@ -84,7 +88,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             icon: Icons.add_a_photo_outlined,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
-              _animationController.reverse();
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const UploadPhotos()));
             },
           ),
         ],

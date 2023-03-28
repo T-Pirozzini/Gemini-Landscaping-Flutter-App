@@ -3,59 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'package:intl/intl.dart';
 
-List<String> siteList = [
-  // 'Enter Site Name', implement this functionality in future versions
-  'Merewood Apartments',
-  'Uplands Terrace',
-  'North Point Apartments',
-  'Country Grocer',
-  'Alderwood',
-  'Prideaux Manor',
-  'Sandscapes',
-  'Bowen Estates',
-  'Riverbend Terrace',
-  'Valley View Terrace',
-  'Woodgrove Pines',
-  'Pinewood Estates',
-  'Lancelot Gardens',
-  'Harwell Place',
-  'Peartree Meadows',
-  'Nanaimo Liquor Plus',
-  'Azalea Apartments',
-  'Westhill Centre',
-  'The Chemainus',
-  'Legacy Place',
-  'Nuko',
-  'Guillevin',
-  'Bowen Terrace',
-];
-
-String dropdownValue = siteList.first;
-String enteredSiteName = '';
-
-List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
-List<String> _selectedGarbage = [];
-List<String> debris = ['grassed areas', 'garden beds', 'tree wells'];
-List<String> _selectedDebris = [];
-List<String> lawn = ['mow', 'trim', 'edge', 'lime', 'aerate', 'fertilize'];
-List<String> _selectedLawn = [];
-List<String> garden = ['blow debris', 'weed', 'prune', 'fertilize'];
-List<String> _selectedGarden = [];
-List<String> tree = ['< 8ft', '> 8ft'];
-List<String> _selectedTree = [];
-List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
-List<String> _selectedBlow = [];
-
-class AddReport extends StatefulWidget {
-  const AddReport({super.key});
+class ExtraReport extends StatefulWidget {
+  const ExtraReport({super.key});
 
   @override
-  State<AddReport> createState() => _AddReportState();
+  State<ExtraReport> createState() => _ExtraReportState();
 }
 
-class _AddReportState extends State<AddReport> {
+class _ExtraReportState extends State<ExtraReport> {
   TextEditingController dateController = TextEditingController();
-  TextEditingController siteNameController = TextEditingController();
+  TextEditingController _siteNameController = TextEditingController();
   TextEditingController _addressController = TextEditingController();
   TextEditingController name1 = TextEditingController();
   TextEditingController name2 = TextEditingController();
@@ -72,14 +29,27 @@ class _AddReportState extends State<AddReport> {
   TextEditingController _vendorController3 = TextEditingController();
   TextEditingController _amountController3 = TextEditingController();
 
-  CollectionReference reportRef =
+  List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
+  List<String> _selectedGarbage = [];
+  List<String> debris = ['grassed areas', 'garden beds', 'tree wells'];
+  List<String> _selectedDebris = [];
+  List<String> lawn = ['mow', 'trim', 'edge', 'lime', 'aerate', 'fertilize'];
+  List<String> _selectedLawn = [];
+  List<String> garden = ['blow debris', 'weed', 'prune', 'fertilize'];
+  List<String> _selectedGarden = [];
+  List<String> tree = ['< 8ft', '> 8ft'];
+  List<String> _selectedTree = [];
+  List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
+  List<String> _selectedBlow = [];
+
+  CollectionReference extraReportRef =
       FirebaseFirestore.instance.collection('SiteReports2023');
-      
+
   void _submitForm() {
-    reportRef.add({
+    extraReportRef.add({
       "info": {
         'date': dateController.text,
-        'siteName': dropdownValue,
+        'siteName': _siteNameController.text,
         'address': _addressController.text,
       },
       "names": {
@@ -126,14 +96,6 @@ class _AddReportState extends State<AddReport> {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Home()));
     });
-  }
-
-  Future<void> getData() async {
-    // Get docs from collection reference
-    QuerySnapshot querySnapshot = await reportRef.get();
-
-    // Get data from docs and convert map to List
-    final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
   }
 
   TimeOfDay? timeOn1 = TimeOfDay.now();
@@ -253,52 +215,48 @@ class _AddReportState extends State<AddReport> {
               const SizedBox(
                 height: 10,
               ),
-              // site list drop down
-              SizedBox(
-                height: 45,
-                child: Stack(
-                  children: [
-                    DropdownButtonFormField<String>(
-                      value: dropdownValue,
-                      items: siteList.map((site) {
-                        return DropdownMenuItem<String>(
-                          value: site,
-                          child: Text(site),
-                        );
-                      }).toList(),
-                      onChanged: (String? value) {
-                        setState(() {
-                          dropdownValue = value!;
-                          if (value == 'Enter site name') {
-                            enteredSiteName = '';
-                          }
-                        });
-                      },
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    if (dropdownValue == 'Enter site name')
-                      Container(
-                        height: 45,
-                        margin: const EdgeInsets.only(left: 10, right: 10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: Colors.red,
-                          ),
-                        ),
-                        child: TextField(
-                          onChanged: (String value) {
-                            setState(() {
-                              enteredSiteName = value;
-                            });
-                            getData();
-                          },
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                          ),
-                        ),
+                    width: 250,
+                    height: 50,
+                    child: TextField(
+                      controller: _siteNameController,
+                      maxLines: null,
+                      keyboardType: TextInputType.text,
+                      decoration: const InputDecoration(
+                        hintText: 'Site Name',
+                        border: InputBorder.none,
                       ),
-                  ],
-                ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    width: 350,
+                    height: 50,
+                    child: TextField(
+                      controller: _addressController,
+                      maxLines: null,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                        hintText: 'Address',
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(
@@ -307,7 +265,7 @@ class _AddReportState extends State<AddReport> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(                    
+                  Expanded(
                     child: Container(
                       width: 100,
                       height: 40,
@@ -466,7 +424,6 @@ class _AddReportState extends State<AddReport> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    // decoration: BoxDecoration(border: Border.all()),
                     child: Container(
                       width: 100,
                       height: 40,
@@ -545,7 +502,6 @@ class _AddReportState extends State<AddReport> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    // decoration: BoxDecoration(border: Border.all()),
                     child: Container(
                       width: 100,
                       height: 40,
@@ -620,170 +576,174 @@ class _AddReportState extends State<AddReport> {
                   ),
                 ],
               ),
-              const SizedBox(height: 5),
-              const Text('Pick up loose garbage:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              ToggleButtons(
-                onPressed: (int index) {
-                  // All buttons are selectable.
-                  setState(() {
-                    if (_selectedGarbage.contains(garbage[index])) {
-                      _selectedGarbage.remove(garbage[index]);
-                    } else {
-                      _selectedGarbage.add(garbage[index]);
-                    }
-                  });
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: Colors.green[700],
-                selectedColor: Colors.white,
-                fillColor: Colors.green[200],
-                color: Colors.green[700],
-                constraints: const BoxConstraints(
-                  minHeight: 30.0,
-                  minWidth: 110.0,
+              const SizedBox(height: 15),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                isSelected: garbage
-                    .map((value) => _selectedGarbage.contains(value))
-                    .toList(),
-                children: garbage.map((value) => Text(value)).toList(),
+                height: 150,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: TextField(
+                    controller: _descriptionController,
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
+                    decoration: InputDecoration(
+                      hintText: 'Description',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: 5),
-              const Text('Rake yard debris:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              ToggleButtons(
-                onPressed: (int index) {
-                  // All buttons are selectable.
-                  setState(() {
-                    if (_selectedDebris.contains(debris[index])) {
-                      _selectedDebris.remove(debris[index]);
-                    } else {
-                      _selectedDebris.add(debris[index]);
-                    }
-                  });
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: Colors.green[700],
-                selectedColor: Colors.white,
-                fillColor: Colors.green[200],
-                color: Colors.green[700],
-                constraints: const BoxConstraints(
-                  minHeight: 30.0,
-                  minWidth: 110.0,
+              SizedBox(height: 20),
+              Table(
+                border: TableBorder.all(
+                  color: Color.fromARGB(255, 31, 182, 77),
                 ),
-                isSelected: debris
-                    .map((value) => _selectedDebris.contains(value))
-                    .toList(),
-                children: debris.map((value) => Text(value)).toList(),
-              ),
-              const SizedBox(height: 5),
-              const Text('Lawn care:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              ToggleButtons(
-                onPressed: (int index) {
-                  // All buttons are selectable.
-                  setState(() {
-                    if (_selectedLawn.contains(lawn[index])) {
-                      _selectedLawn.remove(lawn[index]);
-                    } else {
-                      _selectedLawn.add(lawn[index]);
-                    }
-                  });
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: Colors.green[700],
-                selectedColor: Colors.white,
-                fillColor: Colors.green[200],
-                color: Colors.green[700],
-                constraints: const BoxConstraints(
-                  minHeight: 30.0,
-                  minWidth: 55.0,
-                ),
-                isSelected:
-                    lawn.map((value) => _selectedLawn.contains(value)).toList(),
-                children: lawn.map((value) => Text(value)).toList(),
-              ),
-              const SizedBox(height: 5),
-              const Text('Gardens:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              ToggleButtons(
-                onPressed: (int index) {
-                  // All buttons are selectable.
-                  setState(() {
-                    if (_selectedGarden.contains(garden[index])) {
-                      _selectedGarden.remove(garden[index]);
-                    } else {
-                      _selectedGarden.add(garden[index]);
-                    }
-                  });
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: Colors.green[700],
-                selectedColor: Colors.white,
-                fillColor: Colors.green[200],
-                color: Colors.green[700],
-                constraints: const BoxConstraints(
-                  minHeight: 30.0,
-                  minWidth: 85.0,
-                ),
-                isSelected: garden
-                    .map((value) => _selectedGarden.contains(value))
-                    .toList(),
-                children: garden.map((value) => Text(value)).toList(),
-              ),
-              const SizedBox(height: 5),
-              const Text('Trees:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              ToggleButtons(
-                onPressed: (int index) {
-                  // All buttons are selectable.
-                  setState(() {
-                    if (_selectedTree.contains(tree[index])) {
-                      _selectedTree.remove(tree[index]);
-                    } else {
-                      _selectedTree.add(tree[index]);
-                    }
-                  });
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: Colors.green[700],
-                selectedColor: Colors.white,
-                fillColor: Colors.green[200],
-                color: Colors.green[700],
-                constraints: const BoxConstraints(
-                  minHeight: 30.0,
-                  minWidth: 110.0,
-                ),
-                isSelected:
-                    tree.map((value) => _selectedTree.contains(value)).toList(),
-                children: tree.map((value) => Text(value)).toList(),
-              ),
-              const SizedBox(height: 5),
-              const Text('Blow dust/debris:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              ToggleButtons(
-                onPressed: (int index) {
-                  // All buttons are selectable.
-                  setState(() {
-                    if (_selectedBlow.contains(blow[index])) {
-                      _selectedBlow.remove(blow[index]);
-                    } else {
-                      _selectedBlow.add(blow[index]);
-                    }
-                  });
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: Colors.green[700],
-                selectedColor: Colors.white,
-                fillColor: Colors.green[200],
-                color: Colors.green[700],
-                constraints: const BoxConstraints(
-                  minHeight: 30.0,
-                  minWidth: 110.0,
-                ),
-                isSelected:
-                    blow.map((value) => _selectedBlow.contains(value)).toList(),
-                children: blow.map((value) => Text(value)).toList(),
+                children: [
+                  TableRow(
+                    children: [
+                      Center(
+                        child: Text(
+                          'MATERIALS',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                      ),
+                      Center(
+                        child: Text('VENDOR',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14)),
+                      ),
+                      Center(
+                        child: Text('AMOUNT',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14)),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: TextField(
+                          controller: _materialController1,
+                          maxLines: null,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            hintText: 'Item #1',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: TextField(
+                          controller: _vendorController1,
+                          maxLines: null,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            hintText: 'Vendor',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: TextField(
+                          controller: _amountController1,
+                          maxLines: null,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            hintText: 'Amount',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: TextField(
+                          controller: _materialController2,
+                          maxLines: null,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            hintText: 'Item #2',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: TextField(
+                          controller: _vendorController2,
+                          maxLines: null,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            hintText: 'Vendor',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: TextField(
+                          controller: _amountController2,
+                          maxLines: null,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            hintText: 'Amount',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: TextField(
+                          controller: _materialController3,
+                          maxLines: null,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            hintText: 'Item #3',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: TextField(
+                          controller: _vendorController3,
+                          maxLines: null,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            hintText: 'Vendor',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: TextField(
+                          controller: _amountController3,
+                          maxLines: null,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                            hintText: 'Amount',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
