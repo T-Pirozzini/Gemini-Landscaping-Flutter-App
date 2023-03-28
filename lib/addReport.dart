@@ -56,10 +56,21 @@ class AddReport extends StatefulWidget {
 class _AddReportState extends State<AddReport> {
   TextEditingController dateController = TextEditingController();
   TextEditingController siteNameController = TextEditingController();
+  TextEditingController _addressController = TextEditingController();
   TextEditingController name1 = TextEditingController();
   TextEditingController name2 = TextEditingController();
   TextEditingController name3 = TextEditingController();
   TextEditingController name4 = TextEditingController();
+  TextEditingController _descriptionController = TextEditingController();
+  TextEditingController _materialController1 = TextEditingController();
+  TextEditingController _vendorController1 = TextEditingController();
+  TextEditingController _amountController1 = TextEditingController();
+  TextEditingController _materialController2 = TextEditingController();
+  TextEditingController _vendorController2 = TextEditingController();
+  TextEditingController _amountController2 = TextEditingController();
+  TextEditingController _materialController3 = TextEditingController();
+  TextEditingController _vendorController3 = TextEditingController();
+  TextEditingController _amountController3 = TextEditingController();
 
   CollectionReference reportRef =
       FirebaseFirestore.instance.collection('SiteReports2023');
@@ -69,6 +80,7 @@ class _AddReportState extends State<AddReport> {
       "info": {
         'date': dateController.text,
         'siteName': dropdownValue,
+        'address': _addressController.text,
       },
       "names": {
         'name1': name1.text,
@@ -97,6 +109,18 @@ class _AddReportState extends State<AddReport> {
         'garden': _selectedGarden,
         'tree': _selectedTree,
         'blow': _selectedBlow,
+      },
+      "description": _descriptionController.text,
+      "materials": {
+        "material1": _materialController1.text,
+        "vendor1": _vendorController1.text,
+        "amount1": _amountController1.text,
+        "material2": _materialController2.text,
+        "vendor2": _vendorController2.text,
+        "amount2": _amountController2.text,
+        "material3": _materialController3.text,
+        "vendor3": _vendorController3.text,
+        "amount3": _amountController3.text,
       },
     }).whenComplete(() {
       Navigator.pushReplacement(

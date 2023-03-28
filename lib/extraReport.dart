@@ -29,6 +29,19 @@ class _ExtraReportState extends State<ExtraReport> {
   TextEditingController _vendorController3 = TextEditingController();
   TextEditingController _amountController3 = TextEditingController();
 
+  List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
+  List<String> _selectedGarbage = [];
+  List<String> debris = ['grassed areas', 'garden beds', 'tree wells'];
+  List<String> _selectedDebris = [];
+  List<String> lawn = ['mow', 'trim', 'edge', 'lime', 'aerate', 'fertilize'];
+  List<String> _selectedLawn = [];
+  List<String> garden = ['blow debris', 'weed', 'prune', 'fertilize'];
+  List<String> _selectedGarden = [];
+  List<String> tree = ['< 8ft', '> 8ft'];
+  List<String> _selectedTree = [];
+  List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
+  List<String> _selectedBlow = [];
+
   CollectionReference extraReportRef =
       FirebaseFirestore.instance.collection('SiteReports2023');
 
@@ -59,7 +72,26 @@ class _ExtraReportState extends State<ExtraReport> {
         'timeOff4':
             timeOff4!.hour.toString() + ':' + timeOff4!.minute.toString(),
       },
-      "service": {},
+      "service": {
+        'garbage': _selectedGarbage,
+        'debris': _selectedDebris,
+        'lawn': _selectedLawn,
+        'garden': _selectedGarden,
+        'tree': _selectedTree,
+        'blow': _selectedBlow,
+      },
+      "description": _descriptionController.text,
+      "materials": {
+        "material1": _materialController1.text,
+        "vendor1": _vendorController1.text,
+        "amount1": _amountController1.text,
+        "material2": _materialController2.text,
+        "vendor2": _vendorController2.text,
+        "amount2": _amountController2.text,
+        "material3": _materialController3.text,
+        "vendor3": _vendorController3.text,
+        "amount3": _amountController3.text,
+      },
     }).whenComplete(() {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Home()));
@@ -234,7 +266,6 @@ class _ExtraReportState extends State<ExtraReport> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    // decoration: BoxDecoration(border: Border.all()),
                     child: Container(
                       width: 100,
                       height: 40,

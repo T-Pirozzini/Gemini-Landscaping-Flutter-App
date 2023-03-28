@@ -71,6 +71,13 @@ class _ViewReportState extends State<ViewReport> {
                   style: const TextStyle(
                       fontSize: 24, fontWeight: FontWeight.bold),
                 ),
+                if (widget.docid["info"]["address"] !=
+                    null) // add a conditional statement
+                  Text(
+                    widget.docid["info"]["address"].toUpperCase(),
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
                 const SizedBox(height: 15.0),
               ],
             ),
@@ -223,99 +230,154 @@ class _ViewReportState extends State<ViewReport> {
             SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
-                itemCount: 6, // number of rows
+                itemCount: 8, // number of rows
                 itemBuilder: (context, index) {
-                  String label;
-                  List<String> items;
+                  String label = '';
+                  List<String> items = [];
+
                   switch (index) {
                     case 0:
                       label = 'Pick up loose garbage:';
-                      items = widget.docid["service"]["garbage"]
-                          .whereType<String>()
-                          .toList() as List<String>;
+                      if (widget.docid["service"] != null &&
+                          widget.docid["service"].containsKey("garbage")) {
+                        items = widget.docid["service"]["garbage"]
+                            .whereType<String>()
+                            .toList();
+                      }
                       break;
                     case 1:
                       label = 'Rake yard debris:';
-                      items = widget.docid["service"]["debris"]
-                          .whereType<String>()
-                          .toList() as List<String>;
+                      if (widget.docid["service"] != null &&
+                          widget.docid["service"].containsKey("debris")) {
+                        items = widget.docid["service"]["debris"]
+                            .whereType<String>()
+                            .toList();
+                      }
                       break;
                     case 2:
                       label = 'Lawn care:';
-                      items = widget.docid["service"]["lawn"]
-                          .whereType<String>()
-                          .toList() as List<String>;
+                      if (widget.docid["service"] != null &&
+                          widget.docid["service"].containsKey("lawn")) {
+                        items = widget.docid["service"]["lawn"]
+                            .whereType<String>()
+                            .toList();
+                      }
                       break;
                     case 3:
                       label = 'Gardens:';
-                      items = widget.docid["service"]["garden"]
-                          .whereType<String>()
-                          .toList() as List<String>;
+                      if (widget.docid["service"] != null &&
+                          widget.docid["service"].containsKey("garden")) {
+                        items = widget.docid["service"]["garden"]
+                            .whereType<String>()
+                            .toList();
+                      }
                       break;
                     case 4:
                       label = 'Trees:';
-                      items = widget.docid["service"]["tree"]
-                          .whereType<String>()
-                          .toList() as List<String>;
+                      if (widget.docid["service"] != null &&
+                          widget.docid["service"].containsKey("tree")) {
+                        items = widget.docid["service"]["tree"]
+                            .whereType<String>()
+                            .toList();
+                      }
                       break;
                     case 5:
                       label = 'Blow dust/debris:';
-                      items = widget.docid["service"]["blow"]
-                          .whereType<String>()
-                          .toList() as List<String>;
+                      if (widget.docid["service"] != null &&
+                          widget.docid["service"].containsKey("blow")) {
+                        items = widget.docid["service"]["blow"]
+                            .whereType<String>()
+                            .toList();
+                      }
                       break;
-                    default:
-                      label = '';
-                      items = [];
+                    case 6:
+                      label = 'Materials:';
+                      if (widget.docid["materials"] != null) {
+                        Map<String, dynamic> materials =
+                            widget.docid["materials"];
+                        for (int i = 1; i <= 3; i++) {
+                          String amountKey = 'amount$i';
+                          String materialKey = 'material$i';
+                          String vendorKey = 'vendor$i';
+                          if (materials.containsKey(amountKey) &&
+                              materials.containsKey(materialKey) &&
+                              materials.containsKey(vendorKey)) {
+                            String amount = materials[amountKey];
+                            String material = materials[materialKey];
+                            String vendor = materials[vendorKey];
+                            items.add('$material - $vendor - $amount');
+                          }
+                        }
+                      }
+                      break;
+                    case 7:
+                      label = 'Description:';
+                      if (widget.docid["description"] != null) {
+                        items = [widget.docid["description"]];
+                      }
+                      break;
                   }
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 15.0),
-                    child: Container(
-                      decoration: BoxDecoration(
+
+                  // Display items only if they exist
+                  if (items.isNotEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 15.0),
+                      child: Container(
+                        decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: Color.fromARGB(255, 31, 182, 77),
-                          )),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            height: 20,
-                            child: Text(
-                              label.toUpperCase(),
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w500),
-                            ),
                           ),
-                          ...items
-                              .map((item) =>
-                                  Text(item, style: TextStyle(fontSize: 14)))
-                              .toList(),
-                        ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              height: 20,
+                              child: Text(
+                                label.toUpperCase(),
+                                style: const TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            ...items
+                                .map((item) =>
+                                    Text(item, style: TextStyle(fontSize: 14)))
+                                .toList(),
+                          ],
+                        ),
+                      ),
+                    );
+                  } else {
+                    return SizedBox.shrink();
+                  }
+                },
+              ),
+            ),
+            SizedBox(height: 10),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Color.fromARGB(255, 20, 177, 54),
+              ),
+              child: MaterialButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SiteReport(
+                        docid: docid,
                       ),
                     ),
                   );
                 },
-              ),
-            ),
-            MaterialButton(
-              color: Color.fromARGB(255, 20, 177, 54),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => SiteReport(
-                      docid: docid,
-                    ),
+                child: const Text(
+                  "GENERATE REPORT",
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Color.fromARGB(255, 251, 251, 251),
                   ),
-                );
-              },
-              child: const Text(
-                "Generate Report",
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Color.fromARGB(255, 251, 251, 251),
                 ),
               ),
             ),
