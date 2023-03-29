@@ -64,7 +64,8 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                             ChatBubbleClipper7(type: BubbleType.receiverBubble),
                         alignment: Alignment.center,
                         backGroundColor: Colors.white,
-                        margin: EdgeInsets.only(top: 10, left: 5, right: 5),
+                        margin:
+                            EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -77,7 +78,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                                 ),
                                 Text(
                                   DateFormat('MMM d, y h:mm a')
-                                      .format(message['timestamp'].toDate()),                                  
+                                      .format(message['timestamp'].toDate()),
                                   style: TextStyle(fontWeight: FontWeight.w300),
                                 ),
                               ],
@@ -101,23 +102,42 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(hintText: 'Type a message'),
-                    onChanged: (value) {
-                      setState(() {
-                        _messageText = value;
-                      });
-                    },
-                    onSubmitted: (value) {
-                      _sendMessage();
-                    },
+                  child: Container(
+                    margin: EdgeInsets.only(right: 80, bottom: 15, top: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.green),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
+                              hintText: 'Type a message',
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                _messageText = value;
+                              });
+                            },
+                            onSubmitted: (value) {
+                              _sendMessage();
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.send),
+                          onPressed: () {
+                            _sendMessage();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: () {
-                    _sendMessage();
-                  },
                 ),
               ],
             ),
