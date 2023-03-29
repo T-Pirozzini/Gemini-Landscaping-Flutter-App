@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_chat_bubble/chat_bubble.dart';
+import 'package:intl/intl.dart';
 
 class AnnouncementPage extends StatefulWidget {
   const AnnouncementPage({super.key});
@@ -28,13 +30,13 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
       }
     } catch (e, stackTrace) {
       print('An error occurred while sending the message: $e\n$stackTrace');
-      // Handle the error gracefully.
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[300],
       body: Column(
         children: [
           Expanded(
@@ -56,10 +58,38 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                   itemBuilder: (context, index) {
                     final message =
                         messages[index].data() as Map<String, dynamic>;
-                    ;
-                    return ListTile(
-                      title: Text(message['text'] ?? 'No message'),
-                      subtitle: Text(message['senderId'] ?? 'No message'),
+                    return Expanded(
+                      child: ChatBubble(
+                        clipper:
+                            ChatBubbleClipper7(type: BubbleType.receiverBubble),
+                        alignment: Alignment.center,
+                        backGroundColor: Colors.white,
+                        margin: EdgeInsets.only(top: 10, left: 5, right: 5),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  message['senderId'] ?? 'No user id',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  DateFormat('MMM d, y h:mm a')
+                                      .format(message['timestamp'].toDate()),                                  
+                                  style: TextStyle(fontWeight: FontWeight.w300),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              message['text'] ?? 'No message',
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      ),
                     );
                   },
                 );
