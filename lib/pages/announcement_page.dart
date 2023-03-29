@@ -13,31 +13,34 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   String _messageText = '';
 
   void _sendMessage() {
-    if (_messageText.isNotEmpty) {
-      FirebaseFirestore.instance.collection('messages').add({
-        'text': _messageText,
-        'senderId': FirebaseAuth.instance.currentUser!,
-        'receiverId': 'user2',
-        'timestamp': Timestamp.now(),
-      });
-      setState(() {
-        _messageText = '';
-      });
+    try {
+      if (_messageText.isNotEmpty) {
+        FirebaseFirestore.instance.collection('announcements').add({
+          'text': _messageText,
+          'senderId': FirebaseAuth.instance.currentUser?.email,
+          'timestamp': Timestamp.now(),
+        });
+        setState(
+          () {
+            _messageText = '';
+          },
+        );
+      }
+    } catch (e, stackTrace) {
+      print('An error occurred while sending the message: $e\n$stackTrace');
+      // Handle the error gracefully.
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Announcements'),
-      ),
       body: Column(
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
-                  .collection('messages')
+                  .collection('announcements')
                   .orderBy('timestamp', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
@@ -51,11 +54,13 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                   reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    final message = messages[index].data();
+                    final message =
+                        messages[index].data() as Map<String, dynamic>;
+                    ;
                     return ListTile(
-                        // title: Text(message?['text']?.toString() ?? ''),
-                        // subtitle: Text(message['senderId']?.toString() ?? ''),
-                        );
+                      title: Text(message['text'] ?? 'No message'),
+                      subtitle: Text(message['senderId'] ?? 'No message'),
+                    );
                   },
                 );
               },
