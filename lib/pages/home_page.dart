@@ -63,7 +63,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             title: "Site Report",
             iconColor: Colors.white,
             bubbleColor: Color.fromARGB(255, 31, 182, 77),
-            icon: Icons.add,
+            icon: Icons.note_add_rounded,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
               Navigator.pushReplacement(context,
@@ -74,7 +74,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             title: "Extras Report",
             iconColor: Colors.white,
             bubbleColor: Color.fromARGB(255, 31, 182, 77),
-            icon: Icons.add,
+            icon: Icons.note_add_rounded,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
               Navigator.pushReplacement(context,
@@ -99,7 +99,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         onPress: () => _animationController.isCompleted
             ? _animationController.reverse()
             : _animationController.forward(),
-        iconData: Icons.note_add_outlined,
+        iconData: Icons.add,
       ),
       body: pages[currentIndex],
       // Bottom Navigator
