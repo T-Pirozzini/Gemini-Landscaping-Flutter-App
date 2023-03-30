@@ -73,7 +73,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                         backGroundColor:
                             message['senderId'] == currentUser.email
                                 ? Colors.white
-                                : Colors.grey.shade500,
+                                : Colors.blueGrey.shade300,
                         margin:
                             EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                         child: Column(
@@ -106,8 +106,10 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                             SizedBox(height: 10),
                             Text(
                               message['text'] ?? 'No message',
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.black),
+                              style: message['senderId'] == currentUser.email
+                                  ? TextStyle(fontSize: 20, color: Colors.black)
+                                  : TextStyle(
+                                      fontSize: 20, color: Colors.white),
                             ),
                           ],
                         ),
