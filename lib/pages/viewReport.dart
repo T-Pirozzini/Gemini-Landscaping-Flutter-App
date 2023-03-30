@@ -71,12 +71,11 @@ class _ViewReportState extends State<ViewReport> {
                   style: const TextStyle(
                       fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                if (widget.docid["info"]["address"] !=
-                    null) // add a conditional statement
+                if (widget.docid["info"]["address"] != null)
                   Text(
                     widget.docid["info"]["address"].toUpperCase(),
                     style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 const SizedBox(height: 15.0),
               ],
@@ -305,7 +304,7 @@ class _ViewReportState extends State<ViewReport> {
                             String amount = materials[amountKey];
                             String material = materials[materialKey];
                             String vendor = materials[vendorKey];
-                            items.add('$material - $vendor - $amount');
+                            items.add('$material - $vendor - \$$amount /');
                           }
                         }
                       }
@@ -341,10 +340,18 @@ class _ViewReportState extends State<ViewReport> {
                                     fontSize: 18, fontWeight: FontWeight.w500),
                               ),
                             ),
-                            ...items
-                                .map((item) =>
-                                    Text(item, style: TextStyle(fontSize: 14)))
-                                .toList(),
+                            Wrap(
+                              spacing: 8.0,
+                              alignment: WrapAlignment.center,
+                              children: items
+                                  .map(
+                                    (item) => Text(
+                                      item,
+                                      style: TextStyle(fontSize: 14),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
                           ],
                         ),
                       ),
