@@ -48,9 +48,9 @@ class _SiteReportState extends State<SiteReport> {
   var vendor1 = '';
   var vendor2 = '';
   var vendor3 = '';
-  var amount1 = '0';
-  var amount2 = '0';
-  var amount3 = '0';
+  var amount1;
+  var amount2;
+  var amount3;
 
   void initState() {
     setState(() {
@@ -130,6 +130,24 @@ class _SiteReportState extends State<SiteReport> {
 
     String? _gemini_logo =
         await rootBundle.loadString('assets/gemini_logo.svg');
+
+    // convert string amounts to a double
+    double totalAmount = 0.0;
+
+    if (amount1 != "") {
+      double amount1Value = double.tryParse(amount1) ?? 0.0;
+      totalAmount += amount1Value;
+    }
+
+    if (amount2 != "") {
+      double amount2Value = double.tryParse(amount2) ?? 0.0;
+      totalAmount += amount2Value;
+    }
+
+    if (amount3 != "") {
+      double amount3Value = double.tryParse(amount3) ?? 0.0;
+      totalAmount += amount3Value;
+    }
 
     doc.addPage(
       pw.Page(
@@ -621,10 +639,10 @@ class _SiteReportState extends State<SiteReport> {
                 ),
                 pw.Container(
                   alignment: pw.Alignment.topLeft,
-                  child: pw.Text(description,
-                      style: pw.TextStyle(
-                          fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                  child:
+                      pw.Text(description, style: pw.TextStyle(fontSize: 14)),
                 ),
+                pw.Divider(),
                 // MATERIALS TABLE
                 pw.Container(
                   margin: const pw.EdgeInsets.all(20.0),
@@ -706,7 +724,7 @@ class _SiteReportState extends State<SiteReport> {
                           pw.Container(
                             alignment: pw.Alignment.center,
                             child: pw.Text(
-                              '${(int.tryParse(amount1) ?? 0) + (int.tryParse(amount2) ?? 0) + (int.tryParse(amount3) ?? 0)}',
+                              '${totalAmount.toStringAsFixed(2)}',
                               style: pw.TextStyle(
                                   fontWeight: pw.FontWeight.bold, fontSize: 15),
                             ),
