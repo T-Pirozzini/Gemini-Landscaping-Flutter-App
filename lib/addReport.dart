@@ -74,7 +74,7 @@ class _AddReportState extends State<AddReport> {
 
   CollectionReference reportRef =
       FirebaseFirestore.instance.collection('SiteReports2023');
-      
+
   void _submitForm() {
     reportRef.add({
       "info": {
@@ -307,7 +307,7 @@ class _AddReportState extends State<AddReport> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(                    
+                  Expanded(
                     child: Container(
                       width: 100,
                       height: 40,
@@ -465,8 +465,7 @@ class _AddReportState extends State<AddReport> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    // decoration: BoxDecoration(border: Border.all()),
+                  Expanded(                   
                     child: Container(
                       width: 100,
                       height: 40,
@@ -544,8 +543,7 @@ class _AddReportState extends State<AddReport> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    // decoration: BoxDecoration(border: Border.all()),
+                  Expanded(                    
                     child: Container(
                       width: 100,
                       height: 40,
@@ -620,7 +618,7 @@ class _AddReportState extends State<AddReport> {
                   ),
                 ],
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 10),
               const Text('Pick up loose garbage:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               ToggleButtons(
@@ -640,7 +638,7 @@ class _AddReportState extends State<AddReport> {
                 fillColor: Colors.green[200],
                 color: Colors.green[700],
                 constraints: const BoxConstraints(
-                  minHeight: 30.0,
+                  minHeight: 25.0,
                   minWidth: 110.0,
                 ),
                 isSelected: garbage
@@ -648,7 +646,7 @@ class _AddReportState extends State<AddReport> {
                     .toList(),
                 children: garbage.map((value) => Text(value)).toList(),
               ),
-              const SizedBox(height: 5),
+              // const SizedBox(height: 5),
               const Text('Rake yard debris:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               ToggleButtons(
@@ -668,7 +666,7 @@ class _AddReportState extends State<AddReport> {
                 fillColor: Colors.green[200],
                 color: Colors.green[700],
                 constraints: const BoxConstraints(
-                  minHeight: 30.0,
+                  minHeight: 25.0,
                   minWidth: 110.0,
                 ),
                 isSelected: debris
@@ -676,7 +674,7 @@ class _AddReportState extends State<AddReport> {
                     .toList(),
                 children: debris.map((value) => Text(value)).toList(),
               ),
-              const SizedBox(height: 5),
+              // const SizedBox(height: 5),
               const Text('Lawn care:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               ToggleButtons(
@@ -696,7 +694,7 @@ class _AddReportState extends State<AddReport> {
                 fillColor: Colors.green[200],
                 color: Colors.green[700],
                 constraints: const BoxConstraints(
-                  minHeight: 30.0,
+                  minHeight: 25.0,
                   minWidth: 55.0,
                 ),
                 isSelected:
@@ -723,7 +721,7 @@ class _AddReportState extends State<AddReport> {
                 fillColor: Colors.green[200],
                 color: Colors.green[700],
                 constraints: const BoxConstraints(
-                  minHeight: 30.0,
+                  minHeight: 25.0,
                   minWidth: 85.0,
                 ),
                 isSelected: garden
@@ -751,7 +749,7 @@ class _AddReportState extends State<AddReport> {
                 fillColor: Colors.green[200],
                 color: Colors.green[700],
                 constraints: const BoxConstraints(
-                  minHeight: 30.0,
+                  minHeight: 25.0,
                   minWidth: 110.0,
                 ),
                 isSelected:
@@ -778,12 +776,32 @@ class _AddReportState extends State<AddReport> {
                 fillColor: Colors.green[200],
                 color: Colors.green[700],
                 constraints: const BoxConstraints(
-                  minHeight: 30.0,
+                  minHeight: 25.0,
                   minWidth: 110.0,
                 ),
                 isSelected:
                     blow.map((value) => _selectedBlow.contains(value)).toList(),
                 children: blow.map((value) => Text(value)).toList(),
+              ),
+              const SizedBox(height: 15),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                height: 150,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: TextField(
+                    controller: _descriptionController,
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
+                    decoration: InputDecoration(
+                      hintText: 'Description',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
