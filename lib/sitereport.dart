@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
@@ -16,6 +17,7 @@ class _SiteReportState extends State<SiteReport> {
   DocumentSnapshot docid;
   _SiteReportState({required this.docid});
   final pdf = pw.Document();
+
   var date;
   var siteName;
   var address = '';
@@ -51,6 +53,8 @@ class _SiteReportState extends State<SiteReport> {
   var amount1;
   var amount2;
   var amount3;
+
+  final currentUser = FirebaseAuth.instance.currentUser!.email.toString();
 
   void initState() {
     setState(() {
@@ -195,38 +199,63 @@ class _SiteReportState extends State<SiteReport> {
                   children: [
                     pw.Row(
                       children: [
-                        pw.Text(
-                          'DATE: ',
-                          style: pw.TextStyle(
-                            fontSize: 20,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              'DATE: ',
+                              style: pw.TextStyle(
+                                fontSize: 18,
+                                fontWeight: pw.FontWeight.bold,
+                              ),
+                            ),
+                            pw.Text(
+                              'ID #:',
+                              style: pw.TextStyle(
+                                fontSize: 18,
+                                fontWeight: pw.FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                        pw.Text(
-                          date,
-                          style: const pw.TextStyle(
-                            fontSize: 20,
-                          ),
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              date,
+                              style: pw.TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
+                            pw.Text(
+                              docid.id.substring(docid.id.length - 5),
+                              style: const pw.TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                     pw.Row(
                       children: [
                         pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
                           children: [
                             pw.Text(
                               'SITE NAME: ',
                               style: pw.TextStyle(
-                                  fontSize: 20, fontWeight: pw.FontWeight.bold),
+                                  fontSize: 18, fontWeight: pw.FontWeight.bold),
                             ),
                             pw.Text(
                               'ADDRESS: ',
                               style: pw.TextStyle(
-                                  fontSize: 20, fontWeight: pw.FontWeight.bold),
+                                  fontSize: 18, fontWeight: pw.FontWeight.bold),
                             ),
                           ],
                         ),
                         pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
                           children: [
                             pw.Text(
                               siteName,
@@ -734,6 +763,7 @@ class _SiteReportState extends State<SiteReport> {
                     ],
                   ),
                 ),
+                pw.Text('Submitted by: $currentUser'),
               ],
             ),
           );
