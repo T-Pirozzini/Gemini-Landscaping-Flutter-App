@@ -600,6 +600,7 @@ class _ExtraReportState extends State<ExtraReport> {
               Table(
                 border: TableBorder.all(
                   color: Color.fromARGB(255, 31, 182, 77),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 children: [
                   TableRow(
@@ -654,7 +655,7 @@ class _ExtraReportState extends State<ExtraReport> {
                         child: TextField(
                           controller: _amountController1,
                           maxLines: null,
-                          keyboardType: TextInputType.text,
+                          keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             hintText: 'Amount',
                             border: InputBorder.none,
@@ -694,7 +695,7 @@ class _ExtraReportState extends State<ExtraReport> {
                         child: TextField(
                           controller: _amountController2,
                           maxLines: null,
-                          keyboardType: TextInputType.text,
+                          keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             hintText: 'Amount',
                             border: InputBorder.none,
@@ -734,7 +735,7 @@ class _ExtraReportState extends State<ExtraReport> {
                         child: TextField(
                           controller: _amountController3,
                           maxLines: null,
-                          keyboardType: TextInputType.text,
+                          keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             hintText: 'Amount',
                             border: InputBorder.none,

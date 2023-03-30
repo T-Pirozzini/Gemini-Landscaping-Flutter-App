@@ -1,6 +1,5 @@
-// import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
@@ -18,8 +17,10 @@ class _SiteReportState extends State<SiteReport> {
   DocumentSnapshot docid;
   _SiteReportState({required this.docid});
   final pdf = pw.Document();
+
   var date;
   var siteName;
+  var address = '';
 
   var garbage;
   var lawn;
@@ -42,10 +43,24 @@ class _SiteReportState extends State<SiteReport> {
   var off3;
   var off4;
 
+  var description = '';
+  var material1 = '';
+  var material2 = '';
+  var material3 = '';
+  var vendor1 = '';
+  var vendor2 = '';
+  var vendor3 = '';
+  var amount1;
+  var amount2;
+  var amount3;
+
+  final currentUser = FirebaseAuth.instance.currentUser!.email.toString();
+
   void initState() {
     setState(() {
       date = widget.docid['info']['date'];
       siteName = widget.docid['info']['siteName'];
+      address = widget.docid['info']['address'];
 
       name1 = widget.docid['names']['name1'];
       name2 = widget.docid['names']['name2'];
@@ -66,6 +81,17 @@ class _SiteReportState extends State<SiteReport> {
       garden = widget.docid['service']['garden'];
       tree = widget.docid['service']['tree'];
       blow = widget.docid['service']['blow'];
+
+      description = widget.docid['description'];
+      material1 = widget.docid['materials']['material1'];
+      material2 = widget.docid['materials']['material2'];
+      material3 = widget.docid['materials']['material3'];
+      vendor1 = widget.docid['materials']['vendor1'];
+      vendor2 = widget.docid['materials']['vendor2'];
+      vendor3 = widget.docid['materials']['vendor3'];
+      amount1 = widget.docid['materials']['amount1'];
+      amount2 = widget.docid['materials']['amount2'];
+      amount3 = widget.docid['materials']['amount3'];
     });
 
     super.initState();
@@ -103,22 +129,37 @@ class _SiteReportState extends State<SiteReport> {
   Future<Uint8List> generateDocument(PdfPageFormat format) async {
     final doc = pw.Document(pageMode: PdfPageMode.outlines);
 
-    final font3 = await PdfGoogleFonts.openSansRegular();
-    final font4 = await PdfGoogleFonts.openSansBold();
-
     final font1 = await PdfGoogleFonts.latoRegular();
     final font2 = await PdfGoogleFonts.latoBold();
 
     String? _gemini_logo =
         await rootBundle.loadString('assets/gemini_logo.svg');
 
+    // convert string amounts to a double
+    double totalAmount = 0.0;
+
+    if (amount1 != "") {
+      double amount1Value = double.tryParse(amount1) ?? 0.0;
+      totalAmount += amount1Value;
+    }
+
+    if (amount2 != "") {
+      double amount2Value = double.tryParse(amount2) ?? 0.0;
+      totalAmount += amount2Value;
+    }
+
+    if (amount3 != "") {
+      double amount3Value = double.tryParse(amount3) ?? 0.0;
+      totalAmount += amount3Value;
+    }
+
     doc.addPage(
       pw.Page(
         pageTheme: pw.PageTheme(
           pageFormat: format.copyWith(
-            marginBottom: 20,
-            marginLeft: 30,
-            marginRight: 30,
+            marginBottom: 10,
+            marginLeft: 20,
+            marginRight: 20,
             marginTop: 10,
           ),
           orientation: pw.PageOrientation.portrait,
@@ -130,12 +171,11 @@ class _SiteReportState extends State<SiteReport> {
         build: (context) {
           return pw.Container(
             child: pw.Column(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
               children: [
-                pw.Flexible(
+                pw.Container(
                   child: pw.SvgImage(
                     svg: _gemini_logo,
-                    height: 200,
+                    height: 150,
                   ),
                 ),
                 pw.SizedBox(
@@ -159,34 +199,89 @@ class _SiteReportState extends State<SiteReport> {
                   children: [
                     pw.Row(
                       children: [
-                        pw.Text(
-                          'DATE: ',
-                          style: pw.TextStyle(
-                            fontSize: 20,
-                            fontWeight: pw.FontWeight.bold,
-                          ),
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              'DATE: ',
+                              style: pw.TextStyle(
+                                fontSize: 18,
+                                fontWeight: pw.FontWeight.bold,
+                              ),
+                            ),
+                            pw.Text(
+                              'ID #:',
+                              style: pw.TextStyle(
+                                fontSize: 18,
+                                fontWeight: pw.FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                        pw.Text(
-                          date,
-                          style: const pw.TextStyle(
-                            fontSize: 20,
-                          ),
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              date,
+                              style: pw.TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
+                            pw.Text(
+                              docid.id.substring(docid.id.length - 5),
+                              style: const pw.TextStyle(
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                     pw.Row(
                       children: [
-                        pw.Text(
-                          'SITE NAME: ',
-                          style: pw.TextStyle(
-                              fontSize: 20, fontWeight: pw.FontWeight.bold),
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              'SITE NAME: ',
+                              style: pw.TextStyle(
+                                  fontSize: 18, fontWeight: pw.FontWeight.bold),
+                            ),
+                            pw.Text(
+                              'ADDRESS: ',
+                              style: pw.TextStyle(
+                                  fontSize: 18, fontWeight: pw.FontWeight.bold),
+                            ),
+                          ],
                         ),
-                        pw.Text(
-                          siteName,
-                          style: const pw.TextStyle(
-                            fontSize: 20,
-                          ),
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              siteName,
+                              style: const pw.TextStyle(
+                                fontSize: 20,
+                              ),
+                            ),
+                            pw.Text(
+                              address,
+                              style: const pw.TextStyle(
+                                fontSize: 20,
+                              ),
+                            ),
+                          ],
                         ),
+                        // pw.Text(
+                        //   'SITE NAME: ',
+                        //   style: pw.TextStyle(
+                        //       fontSize: 20, fontWeight: pw.FontWeight.bold),
+                        // ),
+                        // pw.Text(
+                        //   siteName,
+                        //   style: const pw.TextStyle(
+                        //     fontSize: 20,
+                        //   ),
+                        // ),
                       ],
                     ),
                   ],
@@ -341,12 +436,11 @@ class _SiteReportState extends State<SiteReport> {
                   alignment: pw.Alignment.topLeft,
                   child: pw.Text("SERVICES PROVIDED:",
                       style: pw.TextStyle(
-                          fontSize: 20, fontWeight: pw.FontWeight.bold)),
+                          fontSize: 16, fontWeight: pw.FontWeight.bold)),
                 ),
                 pw.SizedBox(height: 10),
                 pw.Container(
-                  margin: const pw.EdgeInsets.only(
-                      left: 80.0, right: 80.0, bottom: 50.0),
+                  margin: const pw.EdgeInsets.only(left: 20.0, right: 20.0),
                   child: pw.Table(
                     children: [
                       pw.TableRow(
@@ -367,10 +461,19 @@ class _SiteReportState extends State<SiteReport> {
                           pw.Padding(
                             padding: const pw.EdgeInsets.only(bottom: 5.0),
                             child: pw.Container(
-                              child: pw.Column(
+                              child: pw.Row(
                                 children: (garbage.whereType<String>().toList()
                                         as List<String>)
-                                    .map((item) => pw.Text(item))
+                                    .map(
+                                      (item) => pw.Row(
+                                        children: [
+                                          pw.Text(item),
+                                          pw.SizedBox(width: 5),
+                                          pw.Text('|'),
+                                          pw.SizedBox(width: 5),
+                                        ],
+                                      ),
+                                    )
                                     .toList(),
                               ),
                             ),
@@ -393,10 +496,19 @@ class _SiteReportState extends State<SiteReport> {
                           pw.Padding(
                             padding: const pw.EdgeInsets.only(bottom: 5.0),
                             child: pw.Container(
-                              child: pw.Column(
+                              child: pw.Row(
                                 children: (debris.whereType<String>().toList()
                                         as List<String>)
-                                    .map((item) => pw.Text(item))
+                                    .map(
+                                      (item) => pw.Row(
+                                        children: [
+                                          pw.Text(item),
+                                          pw.SizedBox(width: 5),
+                                          pw.Text('|'),
+                                          pw.SizedBox(width: 5),
+                                        ],
+                                      ),
+                                    )
                                     .toList(),
                               ),
                             ),
@@ -419,10 +531,19 @@ class _SiteReportState extends State<SiteReport> {
                           pw.Padding(
                             padding: const pw.EdgeInsets.only(bottom: 5.0),
                             child: pw.Container(
-                              child: pw.Column(
+                              child: pw.Row(
                                 children: (lawn.whereType<String>().toList()
                                         as List<String>)
-                                    .map((item) => pw.Text(item))
+                                    .map(
+                                      (item) => pw.Row(
+                                        children: [
+                                          pw.Text(item),
+                                          pw.SizedBox(width: 5),
+                                          pw.Text('|'),
+                                          pw.SizedBox(width: 5),
+                                        ],
+                                      ),
+                                    )
                                     .toList(),
                               ),
                             ),
@@ -445,10 +566,19 @@ class _SiteReportState extends State<SiteReport> {
                           pw.Padding(
                             padding: const pw.EdgeInsets.only(bottom: 5.0),
                             child: pw.Container(
-                              child: pw.Column(
+                              child: pw.Row(
                                 children: (garden.whereType<String>().toList()
                                         as List<String>)
-                                    .map((item) => pw.Text(item))
+                                    .map(
+                                      (item) => pw.Row(
+                                        children: [
+                                          pw.Text(item),
+                                          pw.SizedBox(width: 5),
+                                          pw.Text('|'),
+                                          pw.SizedBox(width: 5),
+                                        ],
+                                      ),
+                                    )
                                     .toList(),
                               ),
                             ),
@@ -471,10 +601,19 @@ class _SiteReportState extends State<SiteReport> {
                           pw.Padding(
                             padding: const pw.EdgeInsets.only(bottom: 5.0),
                             child: pw.Container(
-                              child: pw.Column(
+                              child: pw.Row(
                                 children: (tree.whereType<String>().toList()
                                         as List<String>)
-                                    .map((item) => pw.Text(item))
+                                    .map(
+                                      (item) => pw.Row(
+                                        children: [
+                                          pw.Text(item),
+                                          pw.SizedBox(width: 5),
+                                          pw.Text('|'),
+                                          pw.SizedBox(width: 5),
+                                        ],
+                                      ),
+                                    )
                                     .toList(),
                               ),
                             ),
@@ -497,10 +636,19 @@ class _SiteReportState extends State<SiteReport> {
                           pw.Padding(
                             padding: const pw.EdgeInsets.only(bottom: 5.0),
                             child: pw.Container(
-                              child: pw.Column(
+                              child: pw.Row(
                                 children: (blow.whereType<String>().toList()
                                         as List<String>)
-                                    .map((item) => pw.Text(item))
+                                    .map(
+                                      (item) => pw.Row(
+                                        children: [
+                                          pw.Text(item),
+                                          pw.SizedBox(width: 5),
+                                          pw.Text('|'),
+                                          pw.SizedBox(width: 5),
+                                        ],
+                                      ),
+                                    )
                                     .toList(),
                               ),
                             ),
@@ -509,7 +657,113 @@ class _SiteReportState extends State<SiteReport> {
                       ),
                     ],
                   ),
-                )
+                ),
+                pw.Divider(),
+                // DESCRIPTION
+                pw.Container(
+                  alignment: pw.Alignment.topLeft,
+                  child: pw.Text("DESCRIPTION:",
+                      style: pw.TextStyle(
+                          fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                ),
+                pw.Container(
+                  alignment: pw.Alignment.topLeft,
+                  child:
+                      pw.Text(description, style: pw.TextStyle(fontSize: 14)),
+                ),
+                pw.Divider(),
+                // MATERIALS TABLE
+                pw.Container(
+                  margin: const pw.EdgeInsets.all(20.0),
+                  child: pw.Table(
+                    border: pw.TableBorder.all(),
+                    children: [
+                      pw.TableRow(children: [
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                          height: 20,
+                          child: pw.Text('MATERIAL',
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                          height: 20,
+                          child: pw.Text('VENDOR',
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        ),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                          height: 20,
+                          child: pw.Text('AMOUNT \$',
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                        ),
+                      ]),
+                      pw.TableRow(children: [
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(material1),
+                        ),
+                        pw.Container(
+                            alignment: pw.Alignment.center,
+                            child: pw.Text(vendor1)),
+                        pw.Container(
+                            alignment: pw.Alignment.center,
+                            child: pw.Text(amount1)),
+                      ]),
+                      pw.TableRow(children: [
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(material2),
+                        ),
+                        pw.Container(
+                            alignment: pw.Alignment.center,
+                            child: pw.Text(vendor2)),
+                        pw.Container(
+                            alignment: pw.Alignment.center,
+                            child: pw.Text(amount2)),
+                      ]),
+                      pw.TableRow(children: [
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          child: pw.Text(material3),
+                        ),
+                        pw.Container(
+                            alignment: pw.Alignment.center,
+                            child: pw.Text(vendor3)),
+                        pw.Container(
+                            alignment: pw.Alignment.center,
+                            child: pw.Text(amount3)),
+                      ]),
+                      pw.TableRow(
+                        children: [
+                          pw.Text(''),
+                          pw.Container(
+                            alignment: pw.Alignment.centerRight,
+                            child: pw.Text('Total:',
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    fontSize: 15)),
+                          ),
+                          pw.Container(
+                            alignment: pw.Alignment.center,
+                            child: pw.Text(
+                              '${totalAmount.toStringAsFixed(2)}',
+                              style: pw.TextStyle(
+                                  fontWeight: pw.FontWeight.bold, fontSize: 15),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                pw.Text('Submitted by: $currentUser'),
               ],
             ),
           );
