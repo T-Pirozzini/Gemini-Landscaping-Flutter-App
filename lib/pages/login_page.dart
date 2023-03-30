@@ -34,8 +34,11 @@ class _LoginPageState extends State<LoginPage> {
         email: emailController.text,
         password: passwordController.text,
       );
-      // pop the loading circle
-      Navigator.pop(context);
+      // check if the widget is still mounted before updating the state
+      if (mounted) {
+        // pop the loading circle
+        Navigator.pop(context);
+      }
     } on FirebaseAuthException catch (e) {
       // show error message
       if (e.code == 'user-not-found') {
@@ -46,6 +49,11 @@ class _LoginPageState extends State<LoginPage> {
         showErrorMessage('Invalid password');
       } else {
         showErrorMessage('Enter your email and password');
+      }
+      // check if the widget is still mounted before updating the state
+      if (mounted) {
+        // pop the loading circle
+        Navigator.pop(context);
       }
     }
   }
@@ -111,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                     hintText: 'Password',
                     obscureText: true,
                   ),
-                  const SizedBox(height: 10),                  
+                  const SizedBox(height: 10),
 
                   // sign in button
                   MyButton(
@@ -119,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                     // onTap: signUserIn,
                     onTap: signUserIn,
                   ),
-                  const SizedBox(height: 50),                  
+                  const SizedBox(height: 50),
                 ],
               ),
             ),

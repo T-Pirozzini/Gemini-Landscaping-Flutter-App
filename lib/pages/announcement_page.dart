@@ -13,6 +13,8 @@ class AnnouncementPage extends StatefulWidget {
 
 class _AnnouncementPageState extends State<AnnouncementPage> {
   String _messageText = '';
+  final currentUser = FirebaseAuth.instance.currentUser!;
+  final TextEditingController _messageController = TextEditingController();
 
   void _sendMessage() {
     try {
@@ -27,6 +29,8 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
             _messageText = '';
           },
         );
+        // Add this line to clear the TextField after sending the message
+        _messageController.clear();
       }
     } catch (e, stackTrace) {
       print('An error occurred while sending the message: $e\n$stackTrace');
@@ -60,10 +64,16 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                         messages[index].data() as Map<String, dynamic>;
                     return Expanded(
                       child: ChatBubble(
-                        clipper:
-                            ChatBubbleClipper7(type: BubbleType.receiverBubble),
+                        clipper: ChatBubbleClipper2(
+                            type: message['senderId'] == currentUser.email
+                                ? BubbleType.sendBubble
+                                : BubbleType.receiverBubble),
                         alignment: Alignment.center,
-                        backGroundColor: Colors.white,
+                        elevation: 4,
+                        backGroundColor:
+                            message['senderId'] == currentUser.email
+                                ? Colors.white
+                                : Colors.grey.shade500,
                         margin:
                             EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                         child: Column(
@@ -74,19 +84,30 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                               children: [
                                 Text(
                                   message['senderId'] ?? 'No user id',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: message['senderId'] ==
+                                          currentUser.email
+                                      ? TextStyle(fontWeight: FontWeight.bold)
+                                      : TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white),
                                 ),
                                 Text(
                                   DateFormat('MMM d, y h:mm a')
                                       .format(message['timestamp'].toDate()),
-                                  style: TextStyle(fontWeight: FontWeight.w300),
+                                  style: message['senderId'] ==
+                                          currentUser.email
+                                      ? TextStyle(fontWeight: FontWeight.w300)
+                                      : TextStyle(
+                                          fontWeight: FontWeight.w300,
+                                          color: Colors.white),
                                 ),
                               ],
                             ),
                             SizedBox(height: 10),
                             Text(
                               message['text'] ?? 'No message',
-                              style: TextStyle(fontSize: 18),
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.black),
                             ),
                           ],
                         ),
@@ -113,6 +134,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                       children: [
                         Expanded(
                           child: TextField(
+                            controller: _messageController,
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(

@@ -1,6 +1,7 @@
 # Firebase
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+lib/services/gemini-firebase-adminsdk.json
 
 # Miscellaneous
 *.class
