@@ -16,7 +16,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   final TextEditingController _messageController = TextEditingController();
 
-  void _sendMessage() {
+  void _sendMessage() async {
     try {
       if (_messageText.isNotEmpty) {
         FirebaseFirestore.instance.collection('announcements').add({
@@ -62,7 +62,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                   itemBuilder: (context, index) {
                     final message =
                         messages[index].data() as Map<String, dynamic>;
-                    return Expanded(
+                    return Center(
                       child: ChatBubble(
                         clipper: ChatBubbleClipper2(
                             type: message['senderId'] == currentUser.email
