@@ -750,6 +750,7 @@ DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
+  - FirebaseFirestore
   - Flutter (from `Flutter`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/ios`)
   - printing (from `.symlinks/plugins/printing/ios`)
@@ -815,6 +816,6 @@ SPEC CHECKSUMS:
   printing: eafa00acb682c0ca029d4d98d0798f55a1e27102
   PromisesObjC: 09985d6d70fbe7878040aa746d78236e6946d2ef
 
-PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
+PODFILE CHECKSUM: 087669bb8fd4208b8d5b2100ccd3adcb37597131
 
 COCOAPODS: 1.12.0
