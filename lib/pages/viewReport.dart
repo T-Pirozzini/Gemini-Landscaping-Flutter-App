@@ -20,6 +20,38 @@ class _ViewReportState extends State<ViewReport> {
   DocumentSnapshot docid;
   _ViewReportState({required this.docid});
 
+  void deleteReport() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Deletion'),          
+          content:
+              Text('Are you sure you would like to delete this site report?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                widget.docid.reference.delete().whenComplete(
+                  () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => Home()),
+                    );
+                  },
+                );
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -391,12 +423,7 @@ class _ViewReportState extends State<ViewReport> {
             FirebaseAuth.instance.currentUser?.uid ==
                     "5wwYztIxTifV0EQk3N7dfXsY0jm1"
                 ? MaterialButton(
-                    onPressed: () {
-                      widget.docid.reference.delete().whenComplete(() {
-                        Navigator.pushReplacement(
-                            context, MaterialPageRoute(builder: (_) => Home()));
-                      });
-                    },
+                    onPressed: deleteReport,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: const [
