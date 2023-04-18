@@ -6,6 +6,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+// ignore: must_be_immutable
 class SiteReport extends StatefulWidget {
   DocumentSnapshot docid;
   SiteReport({required this.docid});
@@ -54,7 +55,8 @@ class _SiteReportState extends State<SiteReport> {
   var amount2;
   var amount3;
 
-  final currentUser = FirebaseAuth.instance.currentUser!.email.toString();
+  //get current user
+  final currentUser = FirebaseAuth.instance.currentUser!;
 
   void initState() {
     setState(() {
@@ -113,12 +115,8 @@ class _SiteReportState extends State<SiteReport> {
       ),
       body: PdfPreview(
         maxPageWidth: 1000,
-        // useActions: false,
-        // canChangePageFormat: true,
         canChangeOrientation: false,
-        // pageFormats:pageformat,
         canDebug: false,
-
         build: (format) => generateDocument(
           format,
         ),
@@ -132,6 +130,7 @@ class _SiteReportState extends State<SiteReport> {
     final font1 = await PdfGoogleFonts.latoRegular();
     final font2 = await PdfGoogleFonts.latoBold();
 
+    // ignore: non_constant_identifier_names
     String? _gemini_logo =
         await rootBundle.loadString('assets/gemini_logo.svg');
 
@@ -271,17 +270,6 @@ class _SiteReportState extends State<SiteReport> {
                             ),
                           ],
                         ),
-                        // pw.Text(
-                        //   'SITE NAME: ',
-                        //   style: pw.TextStyle(
-                        //       fontSize: 20, fontWeight: pw.FontWeight.bold),
-                        // ),
-                        // pw.Text(
-                        //   siteName,
-                        //   style: const pw.TextStyle(
-                        //     fontSize: 20,
-                        //   ),
-                        // ),
                       ],
                     ),
                   ],
@@ -763,7 +751,7 @@ class _SiteReportState extends State<SiteReport> {
                     ],
                   ),
                 ),
-                pw.Text('Submitted by: $currentUser'),
+                pw.Text('Submitted by: ${currentUser.email}'),
               ],
             ),
           );

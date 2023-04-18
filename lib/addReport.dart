@@ -89,18 +89,30 @@ class _AddReportState extends State<AddReport> {
         'name4': name4.text,
       },
       "times": {
-        'timeOn1': timeOn1!.hour.toString() + ':' + timeOn1!.minute.toString(),
-        'timeOff1':
-            timeOff1!.hour.toString() + ':' + timeOff1!.minute.toString(),
-        'timeOn2': timeOn2!.hour.toString() + ':' + timeOn2!.minute.toString(),
-        'timeOff2':
-            timeOff2!.hour.toString() + ':' + timeOff2!.minute.toString(),
-        'timeOn3': timeOn3!.hour.toString() + ':' + timeOn3!.minute.toString(),
-        'timeOff3':
-            timeOff3!.hour.toString() + ':' + timeOff3!.minute.toString(),
-        'timeOn4': timeOn4!.hour.toString() + ':' + timeOn4!.minute.toString(),
-        'timeOff4':
-            timeOff4!.hour.toString() + ':' + timeOff4!.minute.toString(),
+        'timeOn1': timeOn1!.hour.toString() +
+            ':' +
+            timeOn1!.minute.toString().padLeft(2, '0'),
+        'timeOff1': timeOff1!.hour.toString() +
+            ':' +
+            timeOff1!.minute.toString().padLeft(2, '0'),
+        'timeOn2': timeOn2!.hour.toString() +
+            ':' +
+            timeOn2!.minute.toString().padLeft(2, '0'),
+        'timeOff2': timeOff2!.hour.toString() +
+            ':' +
+            timeOff2!.minute.toString().padLeft(2, '0'),
+        'timeOn3': timeOn3!.hour.toString() +
+            ':' +
+            timeOn3!.minute.toString().padLeft(2, '0'),
+        'timeOff3': timeOff3!.hour.toString() +
+            ':' +
+            timeOff3!.minute.toString().padLeft(2, '0'),
+        'timeOn4': timeOn4!.hour.toString() +
+            ':' +
+            timeOn4!.minute.toString().padLeft(2, '0'),
+        'timeOff4': timeOff4!.hour.toString() +
+            ':' +
+            timeOff4!.minute.toString().padLeft(2, '0'),
       },
       "service": {
         'garbage': _selectedGarbage,
@@ -175,9 +187,7 @@ class _AddReportState extends State<AddReport> {
         centerTitle: true,
         actions: [
           MaterialButton(
-            onPressed: () {
-              _submitForm();
-            },
+            onPressed: _submitForm,
             child: Row(
               children: const [
                 Text(
@@ -465,7 +475,7 @@ class _AddReportState extends State<AddReport> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(                   
+                  Expanded(
                     child: Container(
                       width: 100,
                       height: 40,
@@ -543,7 +553,7 @@ class _AddReportState extends State<AddReport> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(                    
+                  Expanded(
                     child: Container(
                       width: 100,
                       height: 40,

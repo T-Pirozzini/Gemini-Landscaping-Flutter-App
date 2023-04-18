@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
-import '../sitereport.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'pdf_page.dart';
 
 // ignore: must_be_immutable
 class ViewReport extends StatefulWidget {
@@ -19,6 +20,38 @@ CollectionReference ref =
 class _ViewReportState extends State<ViewReport> {
   DocumentSnapshot docid;
   _ViewReportState({required this.docid});
+
+  void deleteReport() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Deletion'),
+          content:
+              Text('Are you sure you would like to delete this site report?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                widget.docid.reference.delete().whenComplete(
+                  () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => Home()),
+                    );
+                  },
+                );
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,69 +83,120 @@ class _ViewReportState extends State<ViewReport> {
             color: Colors.white, fit: BoxFit.contain, height: 50),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
+      body: Container(
+        padding: EdgeInsets.all(10),
+        margin: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.shade400,
+              offset: Offset(2.0, 2.0),
+              blurRadius: 5.0,
+              spreadRadius: 1.0,
+            ),
+          ],
+        ),
         child: Column(
           children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  padding: EdgeInsets.all(2),
-                  decoration: BoxDecoration(border: Border.all()),
-                  child: Text(widget.docid["info"]['date']),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.docid["info"]['date'],
+                      style: GoogleFonts.lato(
+                        textStyle: TextStyle(
+                            letterSpacing: .5,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Text(
+                      '#${widget.docid.id.substring(docid.id.length - 5)}',
+                      style: GoogleFonts.lato(
+                        textStyle: TextStyle(letterSpacing: .5, fontSize: 14),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  widget.docid["info"]["siteName"].toUpperCase(),
-                  style: const TextStyle(
-                      fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                if (widget.docid["info"]["address"] != null)
-                  Text(
-                    widget.docid["info"]["address"].toUpperCase(),
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+                SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.docid["info"]["siteName"].toUpperCase(),
+                        style: GoogleFonts.lato(
+                          textStyle: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      if (widget.docid["info"]["address"] != null)
+                        Text(
+                          widget.docid["info"]["address"],
+                          style: GoogleFonts.lato(
+                            textStyle: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                    ],
                   ),
-                const SizedBox(height: 15.0),
+                ),
               ],
             ),
+            SizedBox(height: 15),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
               ),
               child: Table(
                 border: TableBorder.all(
-                  color: Color.fromARGB(255, 31, 182, 77),
+                  color: Colors.black,
                 ),
                 children: [
-                  TableRow(children: [
-                    Container(
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Name',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                  TableRow(
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(255, 31, 182, 77),
                       ),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      child: const Text('On',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      child: const Text('Off',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      child: const Text('Hours',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ]),
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(2),
+                          alignment: Alignment.center,
+                          child: const Text(
+                            'Name',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(2),
+                          alignment: Alignment.center,
+                          child: const Text('On',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(2),
+                          alignment: Alignment.center,
+                          child: const Text('Off',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(2),
+                          alignment: Alignment.center,
+                          child: const Text('Site Time',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                        ),
+                      ]),
                   TableRow(children: [
                     Container(
                       alignment: Alignment.center,
@@ -320,24 +404,17 @@ class _ViewReportState extends State<ViewReport> {
                   // Display items only if they exist
                   if (items.isNotEmpty) {
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 15.0),
+                      padding: const EdgeInsets.only(bottom: 10.0),
                       child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: Color.fromARGB(255, 31, 182, 77),
-                          ),
-                        ),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(
-                              height: 20,
-                              child: Text(
-                                label.toUpperCase(),
-                                style: const TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.w500),
+                            Divider(),
+                            Text(
+                              label.toUpperCase(),
+                              style: GoogleFonts.lato(
+                                textStyle: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                             ),
                             Wrap(
@@ -347,7 +424,11 @@ class _ViewReportState extends State<ViewReport> {
                                   .map(
                                     (item) => Text(
                                       item,
-                                      style: TextStyle(fontSize: 14),
+                                      style: GoogleFonts.lato(
+                                        textStyle: TextStyle(
+                                          fontSize: 14,
+                                        ),
+                                      ),
                                     ),
                                   )
                                   .toList(),
@@ -363,50 +444,49 @@ class _ViewReportState extends State<ViewReport> {
               ),
             ),
             SizedBox(height: 10),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Color.fromARGB(255, 20, 177, 54),
-              ),
-              child: MaterialButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => SiteReport(
-                        docid: docid,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Color.fromARGB(255, 20, 177, 54),
+                  ),
+                  child: MaterialButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SiteReport(
+                            docid: docid,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      "PDF REPORT",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Color.fromARGB(255, 251, 251, 251),
                       ),
                     ),
-                  );
-                },
-                child: const Text(
-                  "GENERATE REPORT",
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Color.fromARGB(255, 251, 251, 251),
                   ),
                 ),
-              ),
+                FirebaseAuth.instance.currentUser?.uid ==
+                        "5wwYztIxTifV0EQk3N7dfXsY0jm1"
+                    ? MaterialButton(
+                        onPressed: deleteReport,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: const [
+                            Text("Delete?"),
+                            Icon(Icons.delete),
+                          ],
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ],
             ),
-            FirebaseAuth.instance.currentUser?.uid ==
-                    "5wwYztIxTifV0EQk3N7dfXsY0jm1"
-                ? MaterialButton(
-                    onPressed: () {
-                      widget.docid.reference.delete().whenComplete(() {
-                        Navigator.pushReplacement(
-                            context, MaterialPageRoute(builder: (_) => Home()));
-                      });
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: const [
-                        SizedBox(height: 100),
-                        Text("Delete Report?"),
-                        Icon(Icons.delete),
-                      ],
-                    ),
-                  )
-                : const SizedBox.shrink(),
           ],
         ),
       ),
