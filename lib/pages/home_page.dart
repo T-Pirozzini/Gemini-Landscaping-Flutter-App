@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
 import 'package:gemini_landscaping_app/extraReport.dart';
 import 'package:gemini_landscaping_app/pages/announcement_page.dart';
+import 'package:gemini_landscaping_app/pages/files_page.dart';
+import 'package:gemini_landscaping_app/pages/folders_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
 import 'package:gemini_landscaping_app/pages/reports_page.dart';
 import '../addReport.dart';
@@ -42,6 +44,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   int currentIndex = 0;
   final pages = [
     ReportsPage(),
+    SiteFolders(),
+    SiteFiles(siteName: 'Bowen Estates'),
+    ReportsPage(),
     AnnouncementPage(),
     ProfilePage(),
   ];
@@ -58,6 +63,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       // Floating Action Button
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionBubble(
+        iconColor: Colors.white,
+        backGroundColor: const Color.fromARGB(255, 31, 182, 77),
+        animation: _animation,
+        onPress: () => _animationController.isCompleted
+            ? _animationController.reverse()
+            : _animationController.forward(),
+        iconData: Icons.add,
         items: <Bubble>[
           Bubble(
             title: "Site Report",
@@ -93,13 +105,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             },
           ),
         ],
-        iconColor: Colors.white,
-        backGroundColor: const Color.fromARGB(255, 31, 182, 77),
-        animation: _animation,
-        onPress: () => _animationController.isCompleted
-            ? _animationController.reverse()
-            : _animationController.forward(),
-        iconData: Icons.add,
       ),
       body: pages[currentIndex],
       // Bottom Navigator
@@ -113,6 +118,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         items: [
           Icon(
             Icons.folder_copy_outlined,
+            color: Colors.white,
+            size: 30,
+          ),
+          Icon(
+            Icons.sticky_note_2,
+            color: Colors.white,
+            size: 30,
+          ),
+          Icon(
+            Icons.auto_graph,
+            color: Colors.white,
+            size: 30,
+          ),
+          Icon(
+            Icons.photo_album_outlined,
             color: Colors.white,
             size: 30,
           ),
