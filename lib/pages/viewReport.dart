@@ -141,7 +141,7 @@ class _ViewReportState extends State<ViewReport> {
                     ),
                     Container(
                       alignment: Alignment.center,
-                      child: const Text('Hours',
+                      child: const Text('Site Time',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ]),
