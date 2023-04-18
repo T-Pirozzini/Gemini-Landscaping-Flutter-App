@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/files_page.dart';
+import 'package:banner_listtile/banner_listtile.dart';
 
 class SiteFolders extends StatefulWidget {
   const SiteFolders({super.key});
@@ -47,14 +48,14 @@ class _SiteFoldersState extends State<SiteFolders> {
                     return const SizedBox.shrink();
                   }
                   final reportsCount = snapshot.data!.size;
-                  
+
                   // Check if current index matches the index of first occurrence of site name in the list
                   final firstIndex = siteList
                       .indexWhere((doc) => doc['info']['siteName'] == siteName);
                   if (index != firstIndex) {
                     return SizedBox.shrink();
                   }
-                  return ListTile(
+                  return BannerListTile(
                     title: Text('$siteName'),
                     trailing: Text('$reportsCount reports'),
                     onTap: () {
@@ -62,7 +63,8 @@ class _SiteFoldersState extends State<SiteFolders> {
                         context,
                         MaterialPageRoute(
                           builder: (_) => SiteFiles(
-                              siteName: siteList[index]['info']['siteName']),
+                            siteName: siteList[index]['info']['siteName'],
+                          ),
                         ),
                       );
                     },
