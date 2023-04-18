@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/files_page.dart';
-import 'package:gemini_landscaping_app/pages/viewReport.dart';
 
 class SiteFolders extends StatefulWidget {
   const SiteFolders({super.key});
@@ -12,7 +11,7 @@ class SiteFolders extends StatefulWidget {
 
 class _SiteFoldersState extends State<SiteFolders> {
   final Stream<QuerySnapshot> _siteStream =
-      FirebaseFirestore.instance.collectionGroup('siteList').snapshots();  
+      FirebaseFirestore.instance.collectionGroup('SiteReports2023').snapshots();
 
   @override
   Widget build(BuildContext context) {
@@ -27,21 +26,46 @@ class _SiteFoldersState extends State<SiteFolders> {
             child: CircularProgressIndicator(),
           );
         }
-        List<QueryDocumentSnapshot> sites = snapshot.data!.docs;
+        List<QueryDocumentSnapshot> siteList = snapshot.data!.docs;
 
         return Container(
           child: ListView.builder(
-            itemCount: sites.length,
+            itemCount: siteList.length,
             itemBuilder: (BuildContext context, int index) {
-              return ListTile(
-                title: Text('${sites[index]['name']}'),
-                trailing: Text('${sites[index]['quantity']} reports'),
-                onTap: () {                  
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => SiteFiles(siteName: sites[index]['name']),
-                    ),
+              final siteName = siteList[index]['info']['siteName'];
+              return StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('SiteReports2023')
+                    .where('info.siteName', isEqualTo: siteName)
+                    .snapshots(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    return const Text('Something went wrong');
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox.shrink();
+                  }
+                  final reportsCount = snapshot.data!.size;
+                  
+                  // Check if current index matches the index of first occurrence of site name in the list
+                  final firstIndex = siteList
+                      .indexWhere((doc) => doc['info']['siteName'] == siteName);
+                  if (index != firstIndex) {
+                    return SizedBox.shrink();
+                  }
+                  return ListTile(
+                    title: Text('$siteName'),
+                    trailing: Text('$reportsCount reports'),
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SiteFiles(
+                              siteName: siteList[index]['info']['siteName']),
+                        ),
+                      );
+                    },
                   );
                 },
               );
