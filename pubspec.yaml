@@ -46,7 +46,8 @@ dependencies:
   lottie: ^2.3.0
   floating_action_bubble: ^1.1.4
   flutter_chat_bubble: ^2.0.2
-  google_fonts: ^4.0.3  
+  google_fonts: ^4.0.3
+  syncfusion_flutter_charts: ^21.1.41
 
 dev_dependencies:
   flutter_test:
