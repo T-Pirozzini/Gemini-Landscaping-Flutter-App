@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'viewReport.dart';
+import 'view_report_page.dart';
 import '../auth.dart';
 import 'auth_page.dart';
 
@@ -60,7 +60,7 @@ class _RecentReportsPageState extends State<RecentReportsPage> {
               itemBuilder: (_, index) {
                 return GestureDetector(
                   onTap: () {
-                    Navigator.pushReplacement(
+                    Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => ViewReport(docid: documents[index]),

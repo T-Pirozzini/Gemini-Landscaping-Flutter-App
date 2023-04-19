@@ -2,21 +2,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
 import 'package:gemini_landscaping_app/extraReport.dart';
 import 'package:gemini_landscaping_app/pages/announcement_page.dart';
-import 'package:gemini_landscaping_app/pages/files_page.dart';
 import 'package:gemini_landscaping_app/pages/folders_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
-import 'package:gemini_landscaping_app/pages/reports_page.dart';
+import 'package:gemini_landscaping_app/pages/recent_reports_page.dart';
 import '../addReport.dart';
 import '../auth.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
 
 import '../uploadPhotos.dart';
+import 'chart_page.dart';
 
-class Home extends StatefulWidget {  
+class Home extends StatefulWidget {
   const Home({super.key});
 
-  @override  
+  @override
   _HomeState createState() => _HomeState();
 }
 
@@ -45,7 +45,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   final pages = [
     RecentReportsPage(),
     SiteFolders(),
-    SiteFiles(siteName: 'Bowen Estates'),
+    Chart(),
     AnnouncementPage(),
     ProfilePage(),
   ];
@@ -116,7 +116,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         onTap: (index) => setState(() => currentIndex = index),
         items: [
           Icon(
-            Icons.grade,
+            Icons.grade_outlined,
             color: Colors.white,
             size: 30,
           ),
