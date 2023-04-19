@@ -48,8 +48,8 @@ class _ReportsPageState extends State<ReportsPage> {
 
           List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
 
-          documents.sort(
-              (a, b) => a['info']['siteName'].compareTo(b['info']['siteName']));
+          documents
+              .sort((a, b) => b['info']['date'].compareTo(a['info']['date']));
 
           return Container(
             decoration: BoxDecoration(
