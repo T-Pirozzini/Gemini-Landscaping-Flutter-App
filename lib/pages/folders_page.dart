@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/files_page.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:printing/printing.dart';
 
 class SiteFolders extends StatefulWidget {
   const SiteFolders({super.key});
@@ -71,7 +70,7 @@ class _SiteFoldersState extends State<SiteFolders> {
                               fontSize: 20, letterSpacing: .5),
                         ),
                         trailing: Text('$reportsCount reports'),
-                        tileColor: Colors.grey[850],
+                        tileColor: Colors.grey[800],
                         textColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),

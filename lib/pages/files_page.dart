@@ -59,40 +59,19 @@ class _SiteFilesState extends State<SiteFiles> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
-          print('siteName: $siteName');
           final reports = snapshot.data!.docs;
-          print(reports.length);
-          print('reports: $reports');
+          reports
+              .sort((a, b) => b['info']['date'].compareTo(a['info']['date']));
 
-          return ListView.builder(
+          return GridView.builder(
+            gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
             itemCount: reports.length,
             itemBuilder: (BuildContext context, int index) {
               final report = reports[index];
               return Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  title: Text(
-                    report['info']['siteName'],
-                    style:
-                        GoogleFonts.montserrat(fontSize: 20, letterSpacing: .5),
-                  ),
-                  subtitle: Text(
-                    report['info']['address'],
-                    style: GoogleFonts.montserrat(fontSize: 14),
-                  ),
-                  trailing: Text(
-                    report['info']['date'],
-                    style: GoogleFonts.montserrat(fontSize: 14),
-                  ),
-                  tileColor: Colors.white,
-                  textColor: Colors.grey[850],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(color: Colors.grey, width: 2),
-                  ),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
@@ -101,6 +80,45 @@ class _SiteFilesState extends State<SiteFiles> {
                       ),
                     );
                   },
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    height: 500,
+                    width: 500,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.grey.shade400,
+                        width: 2,
+                      ),
+                      color: Colors.white,
+                    ),
+                    child: GridTile(
+                      header: Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            report['info']['siteName'],
+                            style: GoogleFonts.montserrat(
+                              fontSize: 14,
+                              letterSpacing: .5,
+                            ),
+                          ),
+                        ),
+                      ),
+                      footer: Center(
+                        child: Text(
+                          report['info']['date'],
+                          style: GoogleFonts.montserrat(fontSize: 12),
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          report['info']['address'],
+                          style: GoogleFonts.montserrat(fontSize: 12),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               );
             },
