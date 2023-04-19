@@ -46,8 +46,7 @@ dependencies:
   lottie: ^2.3.0
   floating_action_bubble: ^1.1.4
   flutter_chat_bubble: ^2.0.2
-  google_fonts: ^4.0.3
-  banner_listtile: ^2.2.2
+  google_fonts: ^4.0.3  
 
 dev_dependencies:
   flutter_test:
