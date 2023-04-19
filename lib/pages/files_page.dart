@@ -18,9 +18,34 @@ class _SiteFilesState extends State<SiteFiles> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white38,
-      child: StreamBuilder<QuerySnapshot>(
+    return Scaffold(
+      backgroundColor: Colors.grey.shade200,
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+        leading: MaterialButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Row(
+            children: const [
+              Icon(Icons.arrow_circle_left_outlined,
+                  color: Colors.white, size: 18),
+              Text(
+                " Back",
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Color.fromARGB(255, 251, 251, 251),
+                ),
+              ),
+            ],
+          ),
+        ),
+        leadingWidth: 100,
+        title: Image.asset("assets/gemini-icon-transparent.png",
+            color: Colors.white, fit: BoxFit.contain, height: 50),
+        centerTitle: true,
+      ),
+      body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('SiteReports2023')
             .where('info.siteName', isEqualTo: siteName)
@@ -43,18 +68,28 @@ class _SiteFilesState extends State<SiteFiles> {
             itemCount: reports.length,
             itemBuilder: (BuildContext context, int index) {
               final report = reports[index];
-              return ListTile(
-                title: Text(report['info']['siteName']),
-                subtitle: Text(report['info']['address']),
-                leading: Text(report['info']['date']),
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ViewReport(docid: reports[index]),
-                    ),
-                  );
-                },
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListTile(
+                  title: Text(report['info']['siteName']),
+                  subtitle: Text(report['info']['address']),
+                  leading: Text(report['info']['date']),
+                  tileColor: Colors.grey[850],
+                  textColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ViewReport(docid: reports[index]),
+                      ),
+                    );
+                  },
+                ),
               );
             },
           );

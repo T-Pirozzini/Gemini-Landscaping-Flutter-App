@@ -5,14 +5,14 @@ import 'viewReport.dart';
 import '../auth.dart';
 import 'auth_page.dart';
 
-class ReportsPage extends StatefulWidget {
-  const ReportsPage({super.key});
+class RecentReportsPage extends StatefulWidget {
+  const RecentReportsPage({super.key});
 
   @override
-  State<ReportsPage> createState() => _ReportsPageState();
+  State<RecentReportsPage> createState() => _RecentReportsPageState();
 }
 
-class _ReportsPageState extends State<ReportsPage> {
+class _RecentReportsPageState extends State<RecentReportsPage> {
   // get current user
   final currentUser = FirebaseAuth.instance.currentUser!;
 

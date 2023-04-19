@@ -13,10 +13,10 @@ import 'package:floating_action_bubble/floating_action_bubble.dart';
 
 import '../uploadPhotos.dart';
 
-class Home extends StatefulWidget {
+class Home extends StatefulWidget {  
   const Home({super.key});
-  @override
-  // ignore: library_private_types_in_public_api
+
+  @override  
   _HomeState createState() => _HomeState();
 }
 
@@ -43,7 +43,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   // bottom navigation bar
   int currentIndex = 0;
   final pages = [
-    ReportsPage(),
+    RecentReportsPage(),
     SiteFolders(),
     SiteFiles(siteName: 'Bowen Estates'),
     AnnouncementPage(),

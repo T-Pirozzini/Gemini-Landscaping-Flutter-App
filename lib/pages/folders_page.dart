@@ -68,7 +68,7 @@ class _SiteFoldersState extends State<SiteFolders> {
                         title: Text(
                           '$siteName',
                           style: GoogleFonts.montserrat(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                              fontSize: 20, letterSpacing: .5),
                         ),
                         trailing: Text('$reportsCount reports'),
                         tileColor: Colors.grey[850],
@@ -79,7 +79,7 @@ class _SiteFoldersState extends State<SiteFolders> {
                         contentPadding:
                             EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         onTap: () {
-                          Navigator.pushReplacement(
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => SiteFiles(
