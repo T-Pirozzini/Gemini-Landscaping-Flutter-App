@@ -65,10 +65,17 @@ class _SiteFoldersState extends State<SiteFolders> {
                             ? Image.network(siteList[index]['info']['imageURL'],
                                 fit: BoxFit.cover, height: 40, width: 40)
                             : Icon(Icons.grass_outlined, color: Colors.green),
-                        title: Text('$siteName', style: GoogleFonts.adamina()),
+                        title: Text(
+                          '$siteName',
+                          style: GoogleFonts.montserrat(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
                         trailing: Text('$reportsCount reports'),
                         tileColor: Colors.grey[850],
                         textColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         contentPadding:
                             EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         onTap: () {

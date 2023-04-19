@@ -46,7 +46,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     ReportsPage(),
     SiteFolders(),
     SiteFiles(siteName: 'Bowen Estates'),
-    ReportsPage(),
     AnnouncementPage(),
     ProfilePage(),
   ];
@@ -117,22 +116,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         onTap: (index) => setState(() => currentIndex = index),
         items: [
           Icon(
+            Icons.grade,
+            color: Colors.white,
+            size: 30,
+          ),
+          Icon(
             Icons.folder_copy_outlined,
             color: Colors.white,
             size: 30,
           ),
           Icon(
-            Icons.sticky_note_2,
-            color: Colors.white,
-            size: 30,
-          ),
-          Icon(
             Icons.auto_graph,
-            color: Colors.white,
-            size: 30,
-          ),
-          Icon(
-            Icons.photo_album_outlined,
             color: Colors.white,
             size: 30,
           ),
