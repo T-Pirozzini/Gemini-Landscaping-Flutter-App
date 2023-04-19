@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
 import 'package:gemini_landscaping_app/extraReport.dart';
 import 'package:gemini_landscaping_app/pages/announcement_page.dart';
+import 'package:gemini_landscaping_app/pages/files_page.dart';
+import 'package:gemini_landscaping_app/pages/folders_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
 import 'package:gemini_landscaping_app/pages/reports_page.dart';
 import '../addReport.dart';
@@ -11,10 +13,10 @@ import 'package:floating_action_bubble/floating_action_bubble.dart';
 
 import '../uploadPhotos.dart';
 
-class Home extends StatefulWidget {
+class Home extends StatefulWidget {  
   const Home({super.key});
-  @override
-  // ignore: library_private_types_in_public_api
+
+  @override  
   _HomeState createState() => _HomeState();
 }
 
@@ -41,7 +43,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   // bottom navigation bar
   int currentIndex = 0;
   final pages = [
-    ReportsPage(),
+    RecentReportsPage(),
+    SiteFolders(),
+    SiteFiles(siteName: 'Bowen Estates'),
     AnnouncementPage(),
     ProfilePage(),
   ];
@@ -58,6 +62,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       // Floating Action Button
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionBubble(
+        iconColor: Colors.white,
+        backGroundColor: const Color.fromARGB(255, 31, 182, 77),
+        animation: _animation,
+        onPress: () => _animationController.isCompleted
+            ? _animationController.reverse()
+            : _animationController.forward(),
+        iconData: Icons.add,
         items: <Bubble>[
           Bubble(
             title: "Site Report",
@@ -93,13 +104,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             },
           ),
         ],
-        iconColor: Colors.white,
-        backGroundColor: const Color.fromARGB(255, 31, 182, 77),
-        animation: _animation,
-        onPress: () => _animationController.isCompleted
-            ? _animationController.reverse()
-            : _animationController.forward(),
-        iconData: Icons.add,
       ),
       body: pages[currentIndex],
       // Bottom Navigator
@@ -112,7 +116,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         onTap: (index) => setState(() => currentIndex = index),
         items: [
           Icon(
+            Icons.grade,
+            color: Colors.white,
+            size: 30,
+          ),
+          Icon(
             Icons.folder_copy_outlined,
+            color: Colors.white,
+            size: 30,
+          ),
+          Icon(
+            Icons.auto_graph,
             color: Colors.white,
             size: 30,
           ),
