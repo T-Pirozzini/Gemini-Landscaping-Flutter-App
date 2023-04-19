@@ -61,8 +61,7 @@ class _ViewReportState extends State<ViewReport> {
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         leading: MaterialButton(
           onPressed: () {
-            Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (_) => Home()));
+            Navigator.pop(context);
           },
           child: Row(
             children: const [
