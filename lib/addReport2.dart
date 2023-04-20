@@ -3,36 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'package:intl/intl.dart';
 
-List<String> siteList = [
-  // 'Enter Site Name', implement this functionality in future versions
-  // 'Merewood Apartments',
-  // 'Uplands Terrace',
-  'North Point Apartments',
-  'Country Grocer',
-  'Alderwood',
-  'Prideaux Manor',
-  'Sandscapes',
-  'Bowen Estates',
-  'Riverbend Terrace',
-  'Valley View Terrace',
-  'Woodgrove Pines',
-  'Pinewood Estates',
-  'Lancelot Gardens',
-  'Harwell Place',
-  'Peartree Meadows',
-  'Nanaimo Liquor Plus',
-  'Azalea Apartments',
-  'Westhill Centre',
-  'The Chemainus',
-  'Legacy Place',
-  'Nuko',
-  'Guillevin',
-  'Bowen Terrace',
-];
-
-String dropdownValue = siteList.first;
-String enteredSiteName = '';
-
 List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
 List<String> _selectedGarbage = [];
 List<String> debris = ['grassed areas', 'garden beds', 'tree wells'];
@@ -46,14 +16,40 @@ List<String> _selectedTree = [];
 List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
 List<String> _selectedBlow = [];
 
-class AddReport extends StatefulWidget {
-  const AddReport({super.key});
+class AddReport2 extends StatefulWidget {
+  const AddReport2({super.key});
 
   @override
-  State<AddReport> createState() => _AddReportState();
+  State<AddReport2> createState() => _AddReport2State();
 }
 
-class _AddReportState extends State<AddReport> {
+class _AddReport2State extends State<AddReport2> {
+  // site list
+  List<String> siteList = [];
+  // drop down site menu
+  String dropdownValue = '';
+  String enteredSiteName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // add site names to siteList
+    FirebaseFirestore.instance
+        .collection('SiteReports2023')
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        if (!siteList.contains(doc["info"]["siteName"])) {
+          setState(() {
+            siteList.add(doc["info"]["siteName"]);
+          });
+        }
+      });
+      print(siteList.first);
+      dropdownValue = siteList.first;
+    });
+  }
+
   TextEditingController dateController = TextEditingController();
   TextEditingController siteNameController = TextEditingController();
   TextEditingController _addressController = TextEditingController();
@@ -276,41 +272,39 @@ class _AddReportState extends State<AddReport> {
                           child: Text(site),
                         );
                       }).toList(),
-                      onChanged: (String? value) {
-                        setState(() {
-                          dropdownValue = value!;
-                          if (value == 'Enter site name') {
-                            enteredSiteName = '';
+                      onChanged: (String? value) async {
+                        setState(
+                          () {
+                            dropdownValue = value!;
+                            if (value == "Add New Site") {
+                              enteredSiteName = '';
+                            }
+                          },
+                        );
+                        if (value != null) {
+                          final querySnapshot = await FirebaseFirestore.instance
+                              .collection('SiteReports2023')
+                              .where('siteName', isEqualTo: value)
+                              .get();
+                          if (querySnapshot.docs.isNotEmpty) {
+                            final doc = querySnapshot.docs.first;
+                            print(doc);
+                            final address = doc["info"]['address'] as String;
+                            print(address);
+                            _addressController.text = address;
                           }
-                        });
+                        }
                       },
                     ),
-                    if (dropdownValue == 'Enter site name')
-                      Container(
-                        height: 45,
-                        margin: const EdgeInsets.only(left: 10, right: 10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: Colors.red,
-                          ),
-                        ),
-                        child: TextField(
-                          onChanged: (String value) {
-                            setState(() {
-                              enteredSiteName = value;
-                            });
-                            getData();
-                          },
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
-
+              TextFormField(
+                controller: _addressController,
+                decoration: InputDecoration(
+                  hintText: 'Enter address',
+                ),
+              ),
               const SizedBox(
                 height: 10,
               ),
