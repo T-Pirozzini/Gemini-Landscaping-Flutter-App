@@ -61,8 +61,19 @@ class _SiteFoldersState extends State<SiteFolders> {
                       padding: const EdgeInsets.all(8.0),
                       child: ListTile(
                         leading: siteList[index]['info']['imageURL'] != null
-                            ? Image.network(siteList[index]['info']['imageURL'],
-                                fit: BoxFit.cover, height: 40, width: 40)
+                            ? Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: Image.network(
+                                  siteList[index]['info']['imageURL'],
+                                  fit: BoxFit.contain,
+                                  height: 40,
+                                  width: 40,
+                                ),
+                              )
                             : Icon(Icons.grass_outlined, color: Colors.green),
                         title: FittedBox(
                           fit: BoxFit.scaleDown,
