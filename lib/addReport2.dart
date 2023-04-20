@@ -276,24 +276,8 @@ class _AddReport2State extends State<AddReport2> {
                         setState(
                           () {
                             dropdownValue = value!;
-                            if (value == "Add New Site") {
-                              enteredSiteName = '';
-                            }
                           },
                         );
-                        if (value != null) {
-                          final querySnapshot = await FirebaseFirestore.instance
-                              .collection('SiteReports2023')
-                              .where('siteName', isEqualTo: value)
-                              .get();
-                          if (querySnapshot.docs.isNotEmpty) {
-                            final doc = querySnapshot.docs.first;
-                            print(doc);
-                            final address = doc["info"]['address'] as String;
-                            print(address);
-                            _addressController.text = address;
-                          }
-                        }
                       },
                     ),
                   ],
