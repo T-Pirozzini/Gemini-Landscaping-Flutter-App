@@ -112,10 +112,24 @@ class _SiteFilesState extends State<SiteFiles> {
                         ),
                       ),
                       child: Center(
-                        child: Text(
-                          report['info']['address'],
-                          style: GoogleFonts.montserrat(fontSize: 12),
-                        ),
+                        child: report['info']['imageURL'] != null
+                            ? Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: Image.network(
+                                  report['info']['imageURL'],
+                                  fit: BoxFit.contain,
+                                  height: 100,
+                                ),
+                              )
+                            : Icon(
+                                Icons.grass_outlined,
+                                color: Colors.green,
+                                size: 100,
+                              ),
                       ),
                     ),
                   ),

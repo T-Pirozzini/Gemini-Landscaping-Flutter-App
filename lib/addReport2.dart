@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
@@ -212,13 +213,14 @@ class _AddReport2State extends State<AddReport2> {
               SizedBox(
                 height: 55,
                 child: TextField(
-                  controller: dateController,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.calendar_month_rounded),
+                  controller: dateController,                  
+                  style: GoogleFonts.montserrat(fontSize: 20),
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.calendar_month_rounded, size: 40),
                     prefixIconColor: Colors.green,
                     labelText: "Date:",
-                    labelStyle: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.bold),
+                    labelStyle: GoogleFonts.montserrat(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey),
                     ),
@@ -269,7 +271,10 @@ class _AddReport2State extends State<AddReport2> {
                       items: siteList.map((site) {
                         return DropdownMenuItem<String>(
                           value: site,
-                          child: Text(site),
+                          child: Text(
+                            site,
+                            style: GoogleFonts.montserrat(fontSize: 18),
+                          ),
                         );
                       }).toList(),
                       onChanged: (String? value) async {
@@ -285,6 +290,7 @@ class _AddReport2State extends State<AddReport2> {
               ),
               TextFormField(
                 controller: _addressController,
+                style: GoogleFonts.montserrat(fontSize: 18),
                 decoration: InputDecoration(
                   hintText: 'Enter address',
                 ),
@@ -298,9 +304,10 @@ class _AddReport2State extends State<AddReport2> {
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 40,
+                      height: 50,
                       child: TextField(
                         controller: name1,
+                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -320,7 +327,7 @@ class _AddReport2State extends State<AddReport2> {
                           heroTag: "btn1On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn1!.hour.toString()}:${timeOn1!.minute.toString()}'),
+                              '${timeOn1!.hour.toString()}:${timeOn1!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -352,7 +359,7 @@ class _AddReport2State extends State<AddReport2> {
                           heroTag: "btn1Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff1!.hour.toString()}:${timeOff1!.minute.toString()}'),
+                              '${timeOff1!.hour.toString()}:${timeOff1!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -378,9 +385,10 @@ class _AddReport2State extends State<AddReport2> {
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 40,
+                      height: 50,
                       child: TextField(
                         controller: name2,
+                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -399,7 +407,7 @@ class _AddReport2State extends State<AddReport2> {
                           heroTag: "btn2On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn2!.hour.toString()}:${timeOn2!.minute.toString()}'),
+                              '${timeOn2!.hour.toString()}:${timeOn2!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -430,7 +438,7 @@ class _AddReport2State extends State<AddReport2> {
                           heroTag: "btn2Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff2!.hour.toString()}:${timeOff2!.minute.toString()}'),
+                              '${timeOff2!.hour.toString()}:${timeOff2!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -456,9 +464,10 @@ class _AddReport2State extends State<AddReport2> {
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 40,
+                      height: 50,
                       child: TextField(
                         controller: name3,
+                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -477,7 +486,7 @@ class _AddReport2State extends State<AddReport2> {
                           heroTag: "btn3On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn3!.hour.toString()}:${timeOn3!.minute.toString()}'),
+                              '${timeOn3!.hour.toString()}:${timeOn3!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -508,7 +517,7 @@ class _AddReport2State extends State<AddReport2> {
                           heroTag: "btn3Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff3!.hour.toString()}:${timeOff3!.minute.toString()}'),
+                              '${timeOff3!.hour.toString()}:${timeOff3!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -534,9 +543,10 @@ class _AddReport2State extends State<AddReport2> {
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 40,
+                      height: 50,
                       child: TextField(
                         controller: name4,
+                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -555,7 +565,7 @@ class _AddReport2State extends State<AddReport2> {
                           heroTag: "btn4On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn4!.hour.toString()}:${timeOn4!.minute.toString()}'),
+                              '${timeOn4!.hour.toString()}:${timeOn4!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -586,7 +596,7 @@ class _AddReport2State extends State<AddReport2> {
                           heroTag: "btn4Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff4!.hour.toString()}:${timeOff4!.minute.toString()}'),
+                              '${timeOff4!.hour.toString()}:${timeOff4!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -606,9 +616,12 @@ class _AddReport2State extends State<AddReport2> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              const Text('Pick up loose garbage:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 15),
+              Text(
+                'Pick Up Loose Garbage:',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -632,11 +645,18 @@ class _AddReport2State extends State<AddReport2> {
                 isSelected: garbage
                     .map((value) => _selectedGarbage.contains(value))
                     .toList(),
-                children: garbage.map((value) => Text(value)).toList(),
+                children: garbage
+                    .map((value) => Text(
+                          value,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ))
+                    .toList(),
               ),
-              // const SizedBox(height: 5),
-              const Text('Rake yard debris:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Rake Yard Debris:',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -660,11 +680,18 @@ class _AddReport2State extends State<AddReport2> {
                 isSelected: debris
                     .map((value) => _selectedDebris.contains(value))
                     .toList(),
-                children: debris.map((value) => Text(value)).toList(),
+                children: debris
+                    .map((value) => Text(
+                          value,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ))
+                    .toList(),
               ),
-              // const SizedBox(height: 5),
-              const Text('Lawn care:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Lawn Care:',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -687,11 +714,18 @@ class _AddReport2State extends State<AddReport2> {
                 ),
                 isSelected:
                     lawn.map((value) => _selectedLawn.contains(value)).toList(),
-                children: lawn.map((value) => Text(value)).toList(),
+                children: lawn
+                    .map((value) => Text(
+                          value,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ))
+                    .toList(),
               ),
-              const SizedBox(height: 5),
-              const Text('Gardens:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Gardens:',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -715,11 +749,18 @@ class _AddReport2State extends State<AddReport2> {
                 isSelected: garden
                     .map((value) => _selectedGarden.contains(value))
                     .toList(),
-                children: garden.map((value) => Text(value)).toList(),
+                children: garden
+                    .map((value) => Text(
+                          value,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ))
+                    .toList(),
               ),
-              const SizedBox(height: 5),
-              const Text('Trees:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Trees:',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -742,11 +783,18 @@ class _AddReport2State extends State<AddReport2> {
                 ),
                 isSelected:
                     tree.map((value) => _selectedTree.contains(value)).toList(),
-                children: tree.map((value) => Text(value)).toList(),
+                children: tree
+                    .map((value) => Text(
+                          value,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ))
+                    .toList(),
               ),
-              const SizedBox(height: 5),
-              const Text('Blow dust/debris:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Blow Dust/Debris:',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -769,9 +817,13 @@ class _AddReport2State extends State<AddReport2> {
                 ),
                 isSelected:
                     blow.map((value) => _selectedBlow.contains(value)).toList(),
-                children: blow.map((value) => Text(value)).toList(),
+                children: blow
+                    .map((value) => Text(
+                          value,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ))
+                    .toList(),
               ),
-              const SizedBox(height: 15),
               Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
