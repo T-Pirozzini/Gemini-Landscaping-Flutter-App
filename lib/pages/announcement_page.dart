@@ -96,22 +96,28 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                               children: [
                                 Text(
                                   message['senderId'] ?? 'No user id',
-                                  style: message['senderId'] ==
-                                          currentUser.email
-                                      ? TextStyle(fontWeight: FontWeight.bold)
-                                      : TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white),
+                                  style:
+                                      message['senderId'] == currentUser.email
+                                          ? GoogleFonts.montserrat(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold)
+                                          : GoogleFonts.montserrat(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
                                 ),
                                 Text(
                                   DateFormat('MMM d, y h:mm a')
                                       .format(message['timestamp'].toDate()),
-                                  style: message['senderId'] ==
-                                          currentUser.email
-                                      ? TextStyle(fontWeight: FontWeight.w300)
-                                      : TextStyle(
-                                          fontWeight: FontWeight.w300,
-                                          color: Colors.white),
+                                  style:
+                                      message['senderId'] == currentUser.email
+                                          ? GoogleFonts.montserrat(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w300)
+                                          : GoogleFonts.montserrat(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w300,
+                                              color: Colors.white),
                                 ),
                               ],
                             ),
@@ -119,9 +125,11 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                             Text(
                               message['text'] ?? 'No message',
                               style: message['senderId'] == currentUser.email
-                                  ? TextStyle(fontSize: 20, color: Colors.black)
-                                  : TextStyle(
-                                      fontSize: 20, color: Colors.white),
+                                  ? GoogleFonts.montserrat(
+                                      fontSize: 16,
+                                    )
+                                  : GoogleFonts.montserrat(
+                                      fontSize: 16, color: Colors.white),
                             ),
                           ],
                         ),

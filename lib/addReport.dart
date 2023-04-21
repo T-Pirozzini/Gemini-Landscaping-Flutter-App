@@ -30,6 +30,7 @@ class _AddReportState extends State<AddReport> {
   // drop down site menu
   String dropdownValue = '';
   String enteredSiteName = '';
+  String imageURL = '';
 
   @override
   void initState() {
@@ -49,6 +50,19 @@ class _AddReportState extends State<AddReport> {
       print(siteList.first);
       dropdownValue = siteList.first;
     });
+  }
+
+  void _updateImageURL(String siteName) {
+    if (siteName == 'Merewood Apartments') {
+      setState(() {
+        imageURL =
+            'https://www.northpointnanaimo.ca/theme/orca/images/logos/Logo-Skyline-Living.png';
+      });
+    } else {
+      setState(() {
+        imageURL = ''; // or set some default image URL here
+      });
+    }
   }
 
   TextEditingController dateController = TextEditingController();
@@ -78,6 +92,7 @@ class _AddReportState extends State<AddReport> {
         'date': dateController.text,
         'siteName': dropdownValue,
         'address': _addressController.text,
+        'imageURL': imageURL,
       },
       "names": {
         'name1': name1.text,
@@ -314,6 +329,8 @@ class _AddReportState extends State<AddReport> {
                         setState(
                           () {
                             dropdownValue = value!;
+                            _updateImageURL(dropdownValue);
+                            // _updateAddress(dropdownValue);
                           },
                         );
                       },
