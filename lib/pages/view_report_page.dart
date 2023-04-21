@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gemini_landscaping_app/pages/folders_page.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'pdf_page.dart';
@@ -164,130 +165,170 @@ class _ViewReportState extends State<ViewReport> {
                         Container(
                           padding: EdgeInsets.all(2),
                           alignment: Alignment.center,
-                          child: const Text(
+                          child: Text(
                             'Name',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                            style: GoogleFonts.montserrat(
+                                fontSize: 18, color: Colors.white),
                           ),
                         ),
                         Container(
                           padding: EdgeInsets.all(2),
                           alignment: Alignment.center,
-                          child: const Text('On',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                          child: Text('On',
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 18, color: Colors.white)),
                         ),
                         Container(
                           padding: EdgeInsets.all(2),
                           alignment: Alignment.center,
-                          child: const Text('Off',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                          child: Text('Off',
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 18, color: Colors.white)),
                         ),
                         Container(
                           padding: EdgeInsets.all(2),
                           alignment: Alignment.center,
-                          child: const Text('Site Time',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                          child: Text('Site Time',
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 18, color: Colors.white)),
                         ),
                       ]),
                   TableRow(children: [
                     Container(
                       alignment: Alignment.center,
-                      child: Text(widget.docid["names"]["name1"]),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      child: Text(widget.docid["times"]["timeOn1"]),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      child: Text(widget.docid["times"]["timeOff1"]),
+                      child: Text(
+                        widget.docid["names"]["name1"],
+                        style: GoogleFonts.montserrat(fontSize: 14),
+                      ),
                     ),
                     Container(
                       alignment: Alignment.center,
                       child: Text(
-                          "${(Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1]))).toString().substring(0, 4)}"),
+                        widget.docid["times"]["timeOn1"],
+                        style: GoogleFonts.montserrat(fontSize: 14),
+                      ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                        widget.docid["times"]["timeOff1"],
+                        style: GoogleFonts.montserrat(fontSize: 14),
+                      ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "${(Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1]))).toString().substring(0, 4)}",
+                        style: GoogleFonts.montserrat(fontSize: 14),
+                      ),
                     ),
                   ]),
                   TableRow(children: [
                     Container(
                       alignment: Alignment.center,
-                      child: Text(widget.docid["names"]["name2"]),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      child: widget.docid["names"]["name2"] == ""
-                          ? Text("")
-                          : Text(widget.docid["times"]["timeOn2"]),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      child: widget.docid["names"]["name2"] == ""
-                          ? Text("")
-                          : Text(widget.docid["times"]["timeOff2"]),
+                      child: Text(
+                        widget.docid["names"]["name2"],
+                        style: GoogleFonts.montserrat(fontSize: 14),
+                      ),
                     ),
                     Container(
                       alignment: Alignment.center,
                       child: widget.docid["names"]["name2"] == ""
                           ? Text("")
                           : Text(
-                              "${(Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))).toString().substring(0, 4)}"),
+                              widget.docid["times"]["timeOn2"],
+                              style: GoogleFonts.montserrat(fontSize: 14),
+                            ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: widget.docid["names"]["name2"] == ""
+                          ? Text("")
+                          : Text(
+                              widget.docid["times"]["timeOff2"],
+                              style: GoogleFonts.montserrat(fontSize: 14),
+                            ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: widget.docid["names"]["name2"] == ""
+                          ? Text("")
+                          : Text(
+                              "${(Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))).toString().substring(0, 4)}",
+                              style: GoogleFonts.montserrat(fontSize: 14),
+                            ),
                     ),
                   ]),
                   TableRow(children: [
                     Container(
                       alignment: Alignment.center,
-                      child: Text(widget.docid["names"]["name3"]),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      child: widget.docid["names"]["name3"] == ""
-                          ? Text("")
-                          : Text(widget.docid["times"]["timeOn3"]),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      child: widget.docid["names"]["name3"] == ""
-                          ? Text("")
-                          : Text(widget.docid["times"]["timeOff3"]),
+                      child: Text(
+                        widget.docid["names"]["name3"],
+                        style: GoogleFonts.montserrat(fontSize: 14),
+                      ),
                     ),
                     Container(
                       alignment: Alignment.center,
                       child: widget.docid["names"]["name3"] == ""
                           ? Text("")
                           : Text(
-                              "${(Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))).toString().substring(0, 4)}"),
+                              widget.docid["times"]["timeOn3"],
+                              style: GoogleFonts.montserrat(fontSize: 14),
+                            ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: widget.docid["names"]["name3"] == ""
+                          ? Text("")
+                          : Text(
+                              widget.docid["times"]["timeOff3"],
+                              style: GoogleFonts.montserrat(fontSize: 14),
+                            ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: widget.docid["names"]["name3"] == ""
+                          ? Text("")
+                          : Text(
+                              "${(Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))).toString().substring(0, 4)}",
+                              style: GoogleFonts.montserrat(fontSize: 14),
+                            ),
                     ),
                   ]),
                   TableRow(children: [
                     Container(
                       alignment: Alignment.center,
-                      child: Text(widget.docid["names"]["name4"]),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      child: widget.docid["names"]["name4"] == ""
-                          ? Text("")
-                          : Text(widget.docid["times"]["timeOn4"]),
-                    ),
-                    Container(
-                      alignment: Alignment.center,
-                      child: widget.docid["names"]["name4"] == ""
-                          ? Text("")
-                          : Text(widget.docid["times"]["timeOff4"]),
+                      child: Text(
+                        widget.docid["names"]["name4"],
+                        style: GoogleFonts.montserrat(fontSize: 14),
+                      ),
                     ),
                     Container(
                       alignment: Alignment.center,
                       child: widget.docid["names"]["name4"] == ""
                           ? Text("")
                           : Text(
-                              "${(Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1]))).toString().substring(0, 4)}"),
+                              widget.docid["times"]["timeOn4"],
+                              style: GoogleFonts.montserrat(fontSize: 14),
+                            ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: widget.docid["names"]["name4"] == ""
+                          ? Text("")
+                          : Text(
+                              widget.docid["times"]["timeOff4"],
+                              style: GoogleFonts.montserrat(fontSize: 14),
+                            ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: widget.docid["names"]["name4"] == ""
+                          ? Text("")
+                          : Text(
+                              "${(Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1]))).toString().substring(0, 4)}",
+                              style: GoogleFonts.montserrat(fontSize: 14),
+                            ),
                     ),
                   ]),
                   TableRow(
@@ -296,13 +337,19 @@ class _ViewReportState extends State<ViewReport> {
                       Container(),
                       Container(
                         alignment: Alignment.center,
-                        child: const Text("Total",
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text(
+                          "Total",
+                          style: GoogleFonts.montserrat(
+                            fontSize: 18,
+                          ),
+                        ),
                       ),
                       Container(
                         alignment: Alignment.center,
                         child: Text(
-                            "${(((Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1])))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1])))).toString().padLeft(2, '0').substring(0, 4)}"),
+                          "${(((Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1])))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1])))).toString().padLeft(2, '0').substring(0, 4)}",
+                          style: GoogleFonts.montserrat(fontSize: 18),
+                        ),
                       ),
                     ],
                   ),
@@ -411,10 +458,8 @@ class _ViewReportState extends State<ViewReport> {
                             Divider(),
                             Text(
                               label.toUpperCase(),
-                              style: GoogleFonts.lato(
-                                textStyle: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 16, fontWeight: FontWeight.w600),
                             ),
                             Wrap(
                               spacing: 8.0,
@@ -423,7 +468,7 @@ class _ViewReportState extends State<ViewReport> {
                                   .map(
                                     (item) => Text(
                                       item,
-                                      style: GoogleFonts.lato(
+                                      style: GoogleFonts.montserrat(
                                         textStyle: TextStyle(
                                           fontSize: 14,
                                         ),
@@ -471,16 +516,25 @@ class _ViewReportState extends State<ViewReport> {
                     ),
                   ),
                 ),
+                SizedBox(width: 15),
                 FirebaseAuth.instance.currentUser?.uid ==
                         "5wwYztIxTifV0EQk3N7dfXsY0jm1"
-                    ? MaterialButton(
-                        onPressed: deleteReport,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: const [
-                            Text("Delete?"),
-                            Icon(Icons.delete),
-                          ],
+                    ? Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[600],
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: MaterialButton(
+                          onPressed: deleteReport,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: const [
+                              Icon(Icons.delete, color: Colors.white),
+                              SizedBox(width: 5),
+                              Text("Delete",
+                                  style: TextStyle(color: Colors.white)),
+                            ],
+                          ),
                         ),
                       )
                     : const SizedBox.shrink(),

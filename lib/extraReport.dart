@@ -12,6 +12,146 @@ class ExtraReport extends StatefulWidget {
 }
 
 class _ExtraReportState extends State<ExtraReport> {
+  String imageURL =
+      'https://static.vecteezy.com/system/resources/thumbnails/007/688/937/small/grass-logo-free-vector.jpg';
+
+  void _updateImageURL(String siteName) {
+    if (siteName == 'Merewood Apartments' ||
+        siteName == 'North Point Apartments' ||
+        siteName == 'Uplands Terrace') {
+      setState(
+        () {
+          imageURL =
+              'https://www.northpointnanaimo.ca/theme/orca/images/logos/Logo-Skyline-Living.png';
+        },
+      );
+    } else if (siteName == 'Country Grocer') {
+      setState(
+        () {
+          imageURL =
+              'https://www.lifetimenetworks.org/wp-content/uploads/2016/02/Country-Grocer-logo.png';
+        },
+      );
+    } else if (siteName == 'Lancelot Gardens' ||
+        siteName == 'Peartree Meadows' ||
+        siteName == 'Pinewood Estates' ||
+        siteName == 'Harwell Place' ||
+        siteName == 'Bowen Terrace' ||
+        siteName == 'Alderwood' ||
+        siteName == 'Woodgrove Pines') {
+      setState(
+        () {
+          imageURL =
+              'https://colyvanpacific.com/wp-content/uploads/2021/02/cropped-cp-web-logo-500px-200x200-1.png';
+        },
+      );
+    } else if (siteName == 'Bowen Estates' ||
+        siteName == 'Riverbend Terrace' ||
+        siteName == 'Sandscapes' ||
+        siteName == 'Valley View Terrace' ||
+        siteName == 'Prideaux Manor' ||
+        siteName == 'Alderwood' ||
+        siteName == 'Woodgrove Pines') {
+      setState(
+        () {
+          imageURL =
+              'https://storage.googleapis.com/rent-canada/logos/256/1619204444_devon-logo.png';
+        },
+      );
+    } else if (siteName == 'Nuko') {
+      setState(
+        () {
+          imageURL =
+              'https://images.squarespace-cdn.com/content/v1/55fbc84fe4b08176c3bcd7c3/1462002339453-UE4VWYNONOMBC9WBQQND/image-asset.png';
+        },
+      );
+    } else if (siteName == 'Nanaimo Liquor Plus') {
+      setState(
+        () {
+          imageURL =
+              'https://pbs.twimg.com/profile_images/1539393532779122688/vyn5Lr1x_400x400.jpg';
+        },
+      );
+    } else {
+      setState(() {
+        imageURL =
+            'https://static.vecteezy.com/system/resources/thumbnails/007/688/937/small/grass-logo-free-vector.jpg';
+      });
+    }
+  }
+
+  void _updateSiteAddress(String siteName) {
+    String address;
+    switch (siteName) {
+      case "Merewood Apartments":
+        address = "411 & 423 Despard Avenue";
+        break;
+      case "North Point Apartments":
+        address = "6971/6973/6975 Island Highway North";
+        break;
+      case "Uplands Terrace":
+        address = "6117 Uplands Drive";
+        break;
+      case "Alderwood":
+        address = "579 Rosehill Street";
+        break;
+      case "Prideaux Manor":
+        address = "21 Prideaux Street";
+        break;
+      case "Sandscapes":
+        address = "155 Moilliet";
+        break;
+      case "Bowen Estates":
+        address = "149-155 Wakesiah Avenue";
+        break;
+      case "Riverbend Terrace":
+        address = "309 - 357 Millstone Avenue, 631 - 669 Rosehill Street";
+        break;
+      case "Valley View Terrace":
+        address = "847 Howard Avenue";
+        break;
+      case "Woodgrove Pines":
+        address = "6597 6599 & 6601 Applecross Rd & 6439 Portsmouth Rd";
+        break;
+      case "Pinewood Estates":
+        address = "3053 Pine Street";
+        break;
+      case "Lancelot Gardens":
+        address = "2544-2596 Highland Boulevard";
+        break;
+      case "Harwell Place":
+        address = "260 Harwell Place";
+        break;
+      case "Peartree Meadows":
+        address = "444 Bruce Avenue";
+        break;
+      case "Bowen Terrace":
+        address = "995, 997, 999, 1007 & 1097 Bowen Road";
+        break;
+      case "Country Grocer":
+        address = "1800 Dufferin Crescent";
+        break;
+      case "Nanaimo Liquor Plus":
+        address = "508 Eighth Street";
+        break;
+      case "Westhill Centre":
+        address = "1816, 1808, 1812 Bowen road";
+        break;
+      case "The Chemainus":
+        address = "9958 Daniel Street";
+        break;
+      case "Nuko":
+        address = "60 Needham Street";
+        break;
+      case "Guillevin":
+        address = "1965 Bollinger Road";
+        break;
+      default:
+        address = "";
+    }
+    _addressController.text = address;
+  }
+
   TextEditingController dateController = TextEditingController();
   TextEditingController _siteNameController = TextEditingController();
   TextEditingController _addressController = TextEditingController();
@@ -52,6 +192,7 @@ class _ExtraReportState extends State<ExtraReport> {
         'date': dateController.text,
         'siteName': _siteNameController.text,
         'address': _addressController.text,
+        'imageURL': imageURL,
       },
       "names": {
         'name1': name1.text,
@@ -128,6 +269,28 @@ class _ExtraReportState extends State<ExtraReport> {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Home()));
     });
+  }
+
+  @override
+  void dispose() {
+    dateController.dispose();
+    _siteNameController.dispose();
+    _addressController.dispose();
+    name1.dispose();
+    name2.dispose();
+    name3.dispose();
+    name4.dispose();
+    _descriptionController.dispose();
+    _materialController1.dispose();
+    _vendorController1.dispose();
+    _amountController1.dispose();
+    _materialController2.dispose();
+    _vendorController2.dispose();
+    _amountController2.dispose();
+    _materialController3.dispose();
+    _vendorController3.dispose();
+    _amountController3.dispose();
+    super.dispose();
   }
 
   TimeOfDay? timeOn1 = TimeOfDay.now();
@@ -262,6 +425,14 @@ class _ExtraReportState extends State<ExtraReport> {
                     height: 50,
                     child: TextField(
                       controller: _siteNameController,
+                      onChanged: (_siteNameController) {
+                        setState(
+                          () {
+                            _updateImageURL(_siteNameController);
+                            _updateSiteAddress(_siteNameController);
+                          },
+                        );
+                      },
                       style: GoogleFonts.montserrat(fontSize: 18),
                       maxLines: null,
                       keyboardType: TextInputType.text,
