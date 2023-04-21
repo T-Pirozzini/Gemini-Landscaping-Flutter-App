@@ -53,14 +53,25 @@ class _AddReportState extends State<AddReport> {
   }
 
   void _updateImageURL(String siteName) {
-    if (siteName == 'Merewood Apartments') {
-      setState(() {
-        imageURL =
-            'https://www.northpointnanaimo.ca/theme/orca/images/logos/Logo-Skyline-Living.png';
-      });
+    if (siteName == 'Merewood Apartments' ||
+        siteName == 'North Point Apartments' ||
+        siteName == 'Uplands Terrace') {
+      setState(
+        () {
+          imageURL =
+              'https://www.northpointnanaimo.ca/theme/orca/images/logos/Logo-Skyline-Living.png';
+        },
+      );
+    } else if (siteName == 'Country Grocer') {
+      setState(
+        () {
+          imageURL =
+              'https://www.lifetimenetworks.org/wp-content/uploads/2016/02/Country-Grocer-logo.png';
+        },
+      );
     } else {
       setState(() {
-        imageURL = ''; // or set some default image URL here
+        imageURL = '';
       });
     }
   }
