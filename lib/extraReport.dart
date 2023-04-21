@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class ExtraReport extends StatefulWidget {
@@ -169,8 +170,9 @@ class _ExtraReportState extends State<ExtraReport> {
                 height: 55,
                 child: TextField(
                   controller: dateController,
+                  style: GoogleFonts.montserrat(fontSize: 20),
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.calendar_month_rounded),
+                    prefixIcon: Icon(Icons.calendar_month_rounded, size: 40),
                     prefixIconColor: Colors.green,
                     labelText: "Date:",
                     labelStyle: TextStyle(
@@ -229,6 +231,7 @@ class _ExtraReportState extends State<ExtraReport> {
                     height: 50,
                     child: TextField(
                       controller: _siteNameController,
+                      style: GoogleFonts.montserrat(fontSize: 18),
                       maxLines: null,
                       keyboardType: TextInputType.text,
                       decoration: const InputDecoration(
@@ -248,6 +251,7 @@ class _ExtraReportState extends State<ExtraReport> {
                     height: 50,
                     child: TextField(
                       controller: _addressController,
+                      style: GoogleFonts.montserrat(fontSize: 18),
                       maxLines: null,
                       keyboardType: TextInputType.text,
                       decoration: InputDecoration(
@@ -271,6 +275,7 @@ class _ExtraReportState extends State<ExtraReport> {
                       height: 40,
                       child: TextField(
                         controller: name1,
+                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -290,7 +295,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn1On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn1!.hour.toString()}:${timeOn1!.minute.toString()}'),
+                              '${timeOn1!.hour.toString()}:${timeOn1!.minute.toString().padLeft(2, "0")}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -322,7 +327,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn1Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff1!.hour.toString()}:${timeOff1!.minute.toString()}'),
+                              '${timeOff1!.hour.toString()}:${timeOff1!.minute.toString().padLeft(2, "0")}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -351,6 +356,7 @@ class _ExtraReportState extends State<ExtraReport> {
                       height: 40,
                       child: TextField(
                         controller: name2,
+                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -369,7 +375,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn2On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn2!.hour.toString()}:${timeOn2!.minute.toString()}'),
+                              '${timeOn2!.hour.toString()}:${timeOn2!.minute.toString().padLeft(2, "0")}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -400,7 +406,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn2Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff2!.hour.toString()}:${timeOff2!.minute.toString()}'),
+                              '${timeOff2!.hour.toString()}:${timeOff2!.minute.toString().padLeft(2, "0")}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -429,6 +435,7 @@ class _ExtraReportState extends State<ExtraReport> {
                       height: 40,
                       child: TextField(
                         controller: name3,
+                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -447,7 +454,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn3On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn3!.hour.toString()}:${timeOn3!.minute.toString()}'),
+                              '${timeOn3!.hour.toString()}:${timeOn3!.minute.toString().padLeft(2, "0")}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -478,7 +485,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn3Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff3!.hour.toString()}:${timeOff3!.minute.toString()}'),
+                              '${timeOff3!.hour.toString()}:${timeOff3!.minute.toString().padLeft(2, "0")}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -507,6 +514,7 @@ class _ExtraReportState extends State<ExtraReport> {
                       height: 40,
                       child: TextField(
                         controller: name4,
+                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -525,7 +533,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn4On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn4!.hour.toString()}:${timeOn4!.minute.toString()}'),
+                              '${timeOn4!.hour.toString()}:${timeOn4!.minute.toString().padLeft(2, "0")}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -556,7 +564,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn4Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff4!.hour.toString()}:${timeOff4!.minute.toString()}'),
+                              '${timeOff4!.hour.toString()}:${timeOff4!.minute.toString().padLeft(2, "0")}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -608,19 +616,23 @@ class _ExtraReportState extends State<ExtraReport> {
                       Center(
                         child: Text(
                           'MATERIALS',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 14),
+                          style: GoogleFonts.montserrat(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
                       Center(
-                        child: Text('VENDOR',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14)),
+                        child: Text(
+                          'VENDOR',
+                          style: GoogleFonts.montserrat(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                       ),
                       Center(
-                        child: Text('AMOUNT',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14)),
+                        child: Text(
+                          'AMOUNT',
+                          style: GoogleFonts.montserrat(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),
@@ -630,10 +642,11 @@ class _ExtraReportState extends State<ExtraReport> {
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         child: TextField(
                           controller: _materialController1,
+                          style: GoogleFonts.montserrat(fontSize: 14),
                           maxLines: null,
                           keyboardType: TextInputType.text,
                           decoration: InputDecoration(
-                            hintText: 'Item #1',
+                            hintText: 'enter item',
                             border: InputBorder.none,
                           ),
                         ),
@@ -642,10 +655,11 @@ class _ExtraReportState extends State<ExtraReport> {
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         child: TextField(
                           controller: _vendorController1,
+                          style: GoogleFonts.montserrat(fontSize: 14),
                           maxLines: null,
                           keyboardType: TextInputType.text,
                           decoration: InputDecoration(
-                            hintText: 'Vendor',
+                            hintText: 'enter vendor',
                             border: InputBorder.none,
                           ),
                         ),
@@ -654,10 +668,11 @@ class _ExtraReportState extends State<ExtraReport> {
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         child: TextField(
                           controller: _amountController1,
+                          style: GoogleFonts.montserrat(fontSize: 14),
                           maxLines: null,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            hintText: 'Amount',
+                            hintText: 'enter amount',
                             border: InputBorder.none,
                           ),
                         ),
@@ -670,10 +685,11 @@ class _ExtraReportState extends State<ExtraReport> {
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         child: TextField(
                           controller: _materialController2,
+                          style: GoogleFonts.montserrat(fontSize: 14),
                           maxLines: null,
                           keyboardType: TextInputType.text,
                           decoration: InputDecoration(
-                            hintText: 'Item #2',
+                            hintText: 'enter item',
                             border: InputBorder.none,
                           ),
                         ),
@@ -682,10 +698,11 @@ class _ExtraReportState extends State<ExtraReport> {
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         child: TextField(
                           controller: _vendorController2,
+                          style: GoogleFonts.montserrat(fontSize: 14),
                           maxLines: null,
                           keyboardType: TextInputType.text,
                           decoration: InputDecoration(
-                            hintText: 'Vendor',
+                            hintText: 'enter vendor',
                             border: InputBorder.none,
                           ),
                         ),
@@ -694,10 +711,11 @@ class _ExtraReportState extends State<ExtraReport> {
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         child: TextField(
                           controller: _amountController2,
+                          style: GoogleFonts.montserrat(fontSize: 14),
                           maxLines: null,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            hintText: 'Amount',
+                            hintText: 'enter amount',
                             border: InputBorder.none,
                           ),
                         ),
@@ -710,10 +728,11 @@ class _ExtraReportState extends State<ExtraReport> {
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         child: TextField(
                           controller: _materialController3,
+                          style: GoogleFonts.montserrat(fontSize: 14),
                           maxLines: null,
                           keyboardType: TextInputType.text,
                           decoration: InputDecoration(
-                            hintText: 'Item #3',
+                            hintText: 'enter item',
                             border: InputBorder.none,
                           ),
                         ),
@@ -722,10 +741,11 @@ class _ExtraReportState extends State<ExtraReport> {
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         child: TextField(
                           controller: _vendorController3,
+                          style: GoogleFonts.montserrat(fontSize: 14),
                           maxLines: null,
                           keyboardType: TextInputType.text,
                           decoration: InputDecoration(
-                            hintText: 'Vendor',
+                            hintText: 'enter vendor',
                             border: InputBorder.none,
                           ),
                         ),
@@ -734,10 +754,11 @@ class _ExtraReportState extends State<ExtraReport> {
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         child: TextField(
                           controller: _amountController3,
+                          style: GoogleFonts.montserrat(fontSize: 14),
                           maxLines: null,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            hintText: 'Amount',
+                            hintText: 'enter amount',
                             border: InputBorder.none,
                           ),
                         ),
