@@ -71,19 +71,19 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             : _animationController.forward(),
         iconData: Icons.add,
         items: <Bubble>[
+          // Bubble(
+          //   title: "Site Report",
+          //   iconColor: Colors.white,
+          //   bubbleColor: Color.fromARGB(255, 31, 182, 77),
+          //   icon: Icons.note_add_rounded,
+          //   titleStyle: TextStyle(fontSize: 16, color: Colors.white),
+          //   onPress: () {
+          //     Navigator.pushReplacement(context,
+          //         MaterialPageRoute(builder: (_) => const AddReport()));
+          //   },
+          // ),
           Bubble(
             title: "Site Report",
-            iconColor: Colors.white,
-            bubbleColor: Color.fromARGB(255, 31, 182, 77),
-            icon: Icons.note_add_rounded,
-            titleStyle: TextStyle(fontSize: 16, color: Colors.white),
-            onPress: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const AddReport()));
-            },
-          ),
-          Bubble(
-            title: "Site Report - testing",
             iconColor: Colors.white,
             bubbleColor: Color.fromARGB(255, 31, 182, 77),
             icon: Icons.note_add_rounded,
