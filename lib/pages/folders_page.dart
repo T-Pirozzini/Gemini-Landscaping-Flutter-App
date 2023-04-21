@@ -18,6 +18,17 @@ class _SiteFoldersState extends State<SiteFolders> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
+      appBar: AppBar(
+        title: Text("Site Reports",
+            style: GoogleFonts.montserrat(
+                fontSize: 18,
+                color: Colors.black,
+                fontWeight: FontWeight.w500)),
+        toolbarHeight: 25,
+        backgroundColor: Colors.green.shade100,
+        elevation: 0,
+        centerTitle: true,
+      ),
       body: StreamBuilder(
         stream: _siteStream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {

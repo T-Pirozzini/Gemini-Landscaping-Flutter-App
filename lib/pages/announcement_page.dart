@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class AnnouncementPage extends StatefulWidget {
@@ -41,6 +42,17 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
+      appBar: AppBar(
+        title: Text("Announcements",
+            style: GoogleFonts.montserrat(
+                fontSize: 18,
+                color: Colors.black,
+                fontWeight: FontWeight.w500)),
+        toolbarHeight: 25,
+        backgroundColor: Colors.green.shade100,
+        elevation: 0,
+        centerTitle: true,
+      ),
       body: Column(
         children: [
           Expanded(

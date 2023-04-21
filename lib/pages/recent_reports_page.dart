@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'view_report_page.dart';
 import '../auth.dart';
 import 'auth_page.dart';
@@ -34,6 +35,17 @@ class _RecentReportsPageState extends State<RecentReportsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
+      appBar: AppBar(
+        title: Text("Most Recent Reports",
+            style: GoogleFonts.montserrat(
+                fontSize: 18,
+                color: Colors.black,
+                fontWeight: FontWeight.w500)),
+        toolbarHeight: 25,
+        backgroundColor: Colors.green.shade100,
+        elevation: 0,
+        centerTitle: true,
+      ),
       body: StreamBuilder(
         stream: _reportStream2023,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {

@@ -5,6 +5,7 @@ import 'package:gemini_landscaping_app/pages/announcement_page.dart';
 import 'package:gemini_landscaping_app/pages/folders_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
 import 'package:gemini_landscaping_app/pages/recent_reports_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../addReport.dart';
 import '../auth.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
@@ -56,8 +57,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       backgroundColor: Colors.grey.shade600,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-        title: const Text('SITE REPORTS 2023'),
-        centerTitle: true,
+        title: Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset("assets/gemini-icon-transparent.png",
+                  color: Colors.white, fit: BoxFit.contain, height: 50),
+              SizedBox(width: 10),
+              Text('Gemini Landscaping',
+                  style: GoogleFonts.pathwayGothicOne(
+                      fontSize: 38,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w500)),
+            ],
+          ),
+        ),
       ),
       // Floating Action Button
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
