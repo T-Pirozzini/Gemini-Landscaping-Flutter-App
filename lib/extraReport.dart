@@ -12,7 +12,8 @@ class ExtraReport extends StatefulWidget {
 }
 
 class _ExtraReportState extends State<ExtraReport> {
-  String imageURL = '';
+  String imageURL =
+      'https://static.vecteezy.com/system/resources/thumbnails/007/688/937/small/grass-logo-free-vector.jpg';
 
   void _updateImageURL(String siteName) {
     if (siteName == 'Merewood Apartments' ||
@@ -73,7 +74,8 @@ class _ExtraReportState extends State<ExtraReport> {
       );
     } else {
       setState(() {
-        imageURL = '';
+        imageURL =
+            'https://static.vecteezy.com/system/resources/thumbnails/007/688/937/small/grass-logo-free-vector.jpg';
       });
     }
   }

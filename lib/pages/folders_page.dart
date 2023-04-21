@@ -41,6 +41,8 @@ class _SiteFoldersState extends State<SiteFolders> {
             );
           }
           List<QueryDocumentSnapshot> siteList = snapshot.data!.docs;
+          siteList.sort(
+              (a, b) => a['info']['siteName'].compareTo(b['info']['siteName']));
 
           return Container(
             child: ListView.builder(
