@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class AnnouncementPage extends StatefulWidget {
@@ -41,6 +42,17 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
+      appBar: AppBar(
+        title: Text("Announcements",
+            style: GoogleFonts.montserrat(
+                fontSize: 18,
+                color: Colors.black,
+                fontWeight: FontWeight.w500)),
+        toolbarHeight: 25,
+        backgroundColor: Colors.green.shade100,
+        elevation: 0,
+        centerTitle: true,
+      ),
       body: Column(
         children: [
           Expanded(
@@ -84,22 +96,28 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                               children: [
                                 Text(
                                   message['senderId'] ?? 'No user id',
-                                  style: message['senderId'] ==
-                                          currentUser.email
-                                      ? TextStyle(fontWeight: FontWeight.bold)
-                                      : TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white),
+                                  style:
+                                      message['senderId'] == currentUser.email
+                                          ? GoogleFonts.montserrat(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold)
+                                          : GoogleFonts.montserrat(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
                                 ),
                                 Text(
                                   DateFormat('MMM d, y h:mm a')
                                       .format(message['timestamp'].toDate()),
-                                  style: message['senderId'] ==
-                                          currentUser.email
-                                      ? TextStyle(fontWeight: FontWeight.w300)
-                                      : TextStyle(
-                                          fontWeight: FontWeight.w300,
-                                          color: Colors.white),
+                                  style:
+                                      message['senderId'] == currentUser.email
+                                          ? GoogleFonts.montserrat(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w300)
+                                          : GoogleFonts.montserrat(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w300,
+                                              color: Colors.white),
                                 ),
                               ],
                             ),
@@ -107,9 +125,11 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                             Text(
                               message['text'] ?? 'No message',
                               style: message['senderId'] == currentUser.email
-                                  ? TextStyle(fontSize: 20, color: Colors.black)
-                                  : TextStyle(
-                                      fontSize: 20, color: Colors.white),
+                                  ? GoogleFonts.montserrat(
+                                      fontSize: 16,
+                                    )
+                                  : GoogleFonts.montserrat(
+                                      fontSize: 16, color: Colors.white),
                             ),
                           ],
                         ),

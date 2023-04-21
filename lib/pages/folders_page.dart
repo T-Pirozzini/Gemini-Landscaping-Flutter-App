@@ -18,6 +18,17 @@ class _SiteFoldersState extends State<SiteFolders> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
+      appBar: AppBar(
+        title: Text("Site Reports",
+            style: GoogleFonts.montserrat(
+                fontSize: 18,
+                color: Colors.black,
+                fontWeight: FontWeight.w500)),
+        toolbarHeight: 25,
+        backgroundColor: Colors.green.shade100,
+        elevation: 0,
+        centerTitle: true,
+      ),
       body: StreamBuilder(
         stream: _siteStream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -61,9 +72,30 @@ class _SiteFoldersState extends State<SiteFolders> {
                       padding: const EdgeInsets.all(8.0),
                       child: ListTile(
                         leading: siteList[index]['info']['imageURL'] != null
-                            ? Image.network(siteList[index]['info']['imageURL'],
-                                fit: BoxFit.cover, height: 40, width: 40)
-                            : Icon(Icons.grass_outlined, color: Colors.green),
+                            ? Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: Image.network(
+                                  siteList[index]['info']['imageURL'],
+                                  fit: BoxFit.contain,
+                                  height: 40,
+                                  width: 40,
+                                ),
+                              )
+                            : Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: Icon(
+                                  Icons.grass_outlined,
+                                  color: Colors.green,
+                                  size: 40,
+                                )),
                         title: FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: AlignmentDirectional.centerStart,

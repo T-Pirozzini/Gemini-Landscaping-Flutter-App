@@ -5,6 +5,7 @@ import 'package:gemini_landscaping_app/pages/announcement_page.dart';
 import 'package:gemini_landscaping_app/pages/folders_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
 import 'package:gemini_landscaping_app/pages/recent_reports_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../addReport.dart';
 import '../auth.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
@@ -45,7 +46,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   final pages = [
     RecentReportsPage(),
     SiteFolders(),
-    Chart(),
+    // Chart(), Add when completed
     AnnouncementPage(),
     ProfilePage(),
   ];
@@ -56,8 +57,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       backgroundColor: Colors.grey.shade600,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-        title: const Text('SITE REPORTS 2023'),
-        centerTitle: true,
+        title: Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset("assets/gemini-icon-transparent.png",
+                  color: Colors.white, fit: BoxFit.contain, height: 50),
+              SizedBox(width: 10),
+              Text('Gemini Landscaping',
+                  style: GoogleFonts.pathwayGothicOne(
+                      fontSize: 38,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w500)),
+            ],
+          ),
+        ),
       ),
       // Floating Action Button
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -70,11 +84,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             : _animationController.forward(),
         iconData: Icons.add,
         items: <Bubble>[
+          // Bubble(
+          //   title: "Site Report",
+          //   iconColor: Colors.white,
+          //   bubbleColor: Color.fromARGB(255, 31, 182, 77),
+          //   icon: Icons.note_add_rounded,
+          //   titleStyle: TextStyle(fontSize: 16, color: Colors.white),
+          //   onPress: () {
+          //     Navigator.pushReplacement(context,
+          //         MaterialPageRoute(builder: (_) => const AddReport()));
+          //   },
+          // ),
           Bubble(
             title: "Site Report",
             iconColor: Colors.white,
             bubbleColor: Color.fromARGB(255, 31, 182, 77),
-            icon: Icons.note_add_rounded,
+            icon: Icons.note_add_outlined,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
               Navigator.pushReplacement(context,
@@ -85,7 +110,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             title: "Extras Report",
             iconColor: Colors.white,
             bubbleColor: Color.fromARGB(255, 31, 182, 77),
-            icon: Icons.note_add_rounded,
+            icon: Icons.add_circle_outline,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
               Navigator.pushReplacement(context,
@@ -125,11 +150,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             color: Colors.white,
             size: 30,
           ),
-          Icon(
-            Icons.auto_graph,
-            color: Colors.white,
-            size: 30,
-          ),
+          // Icon(
+          //   Icons.auto_graph,
+          //   color: Colors.white,
+          //   size: 30,
+          // ),
           Icon(
             Icons.message_outlined,
             color: Colors.white,

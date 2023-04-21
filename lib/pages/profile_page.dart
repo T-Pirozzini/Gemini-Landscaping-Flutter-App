@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../auth.dart';
 import 'auth_page.dart';
 import 'package:lottie/lottie.dart';
@@ -27,24 +28,35 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Profile",
+            style: GoogleFonts.montserrat(
+                fontSize: 18,
+                color: Colors.black,
+                fontWeight: FontWeight.w500)),
+        toolbarHeight: 25,
+        backgroundColor: Colors.green.shade100,
+        elevation: 0,
+        centerTitle: true,
+      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Center(
             child: Lottie.network(
-              'https://assets1.lottiefiles.com/packages/lf20_aL00NpAjvC.json',
-              height: 200,
+                'https://assets1.lottiefiles.com/packages/lf20_aL00NpAjvC.json',
+                height: 200,
             ),
           ),
           SizedBox(height: 10),
           Text(
             'You are signed in as:',
-            style: TextStyle(fontSize: 24),
+            style: GoogleFonts.montserrat(fontSize: 24),
           ),
           SizedBox(height: 10),
           Text(
             '${currentUser.email}',
-            style: TextStyle(fontSize: 18),
+            style: GoogleFonts.montserrat(fontSize: 18),
           ),
           SizedBox(height: 50),
           GestureDetector(
@@ -63,7 +75,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   Text(
                     'Sign Out ',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+                    style: GoogleFonts.montserrat(
+                        fontSize: 18, color: Colors.white),
                   ),
                   Icon(Icons.logout_outlined, color: Colors.white),
                 ],

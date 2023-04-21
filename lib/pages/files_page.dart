@@ -62,6 +62,9 @@ class _SiteFilesState extends State<SiteFiles> {
           final reports = snapshot.data!.docs;
           reports
               .sort((a, b) => b['info']['date'].compareTo(a['info']['date']));
+          final report = reports.isNotEmpty ? reports.first : null;
+          final imageURL = (report?.data() as Map<String, dynamic>?)?['info']
+              ?['imageURL'] as String?;
 
           return GridView.builder(
             gridDelegate:
@@ -112,10 +115,24 @@ class _SiteFilesState extends State<SiteFiles> {
                         ),
                       ),
                       child: Center(
-                        child: Text(
-                          report['info']['address'],
-                          style: GoogleFonts.montserrat(fontSize: 12),
-                        ),
+                        child: imageURL != null
+                            ? Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: Image.network(
+                                  imageURL,
+                                  fit: BoxFit.contain,
+                                  height: 100,
+                                ),
+                              )
+                            : Icon(
+                                Icons.grass_outlined,
+                                color: Colors.green,
+                                size: 100,
+                              ),
                       ),
                     ),
                   ),

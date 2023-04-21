@@ -1,37 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-
-List<String> siteList = [
-  // 'Enter Site Name', implement this functionality in future versions
-  'Merewood Apartments',
-  'Uplands Terrace',
-  'North Point Apartments',
-  'Country Grocer',
-  'Alderwood',
-  'Prideaux Manor',
-  'Sandscapes',
-  'Bowen Estates',
-  'Riverbend Terrace',
-  'Valley View Terrace',
-  'Woodgrove Pines',
-  'Pinewood Estates',
-  'Lancelot Gardens',
-  'Harwell Place',
-  'Peartree Meadows',
-  'Nanaimo Liquor Plus',
-  'Azalea Apartments',
-  'Westhill Centre',
-  'The Chemainus',
-  'Legacy Place',
-  'Nuko',
-  'Guillevin',
-  'Bowen Terrace',
-];
-
-String dropdownValue = siteList.first;
-String enteredSiteName = '';
 
 List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
 List<String> _selectedGarbage = [];
@@ -54,6 +25,57 @@ class AddReport extends StatefulWidget {
 }
 
 class _AddReportState extends State<AddReport> {
+  // site list
+  List<String> siteList = [];
+  // drop down site menu
+  String dropdownValue = '';
+  String enteredSiteName = '';
+  String imageURL = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // add site names to siteList
+    FirebaseFirestore.instance
+        .collection('SiteReports2023')
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        if (!siteList.contains(doc["info"]["siteName"])) {
+          setState(() {
+            siteList.add(doc["info"]["siteName"]);
+          });
+        }
+      });
+      print(siteList.first);
+      dropdownValue = siteList.first;
+    });
+  }
+
+  void _updateImageURL(String siteName) {
+    if (siteName == 'Merewood Apartments' ||
+        siteName == 'North Point Apartments' ||
+        siteName == 'Uplands Terrace') {
+      setState(
+        () {
+          imageURL =
+              'https://www.northpointnanaimo.ca/theme/orca/images/logos/Logo-Skyline-Living.png';
+        },
+      );
+    } else if (siteName == 'Country Grocer') {
+      setState(
+        () {
+          imageURL =
+              'https://www.lifetimenetworks.org/wp-content/uploads/2016/02/Country-Grocer-logo.png';
+        },
+      );
+    } else {
+      setState(() {
+        imageURL = '';
+      });
+    }
+  }
+
   TextEditingController dateController = TextEditingController();
   TextEditingController siteNameController = TextEditingController();
   TextEditingController _addressController = TextEditingController();
@@ -81,6 +103,7 @@ class _AddReportState extends State<AddReport> {
         'date': dateController.text,
         'siteName': dropdownValue,
         'address': _addressController.text,
+        'imageURL': imageURL,
       },
       "names": {
         'name1': name1.text,
@@ -135,18 +158,51 @@ class _AddReportState extends State<AddReport> {
         "amount3": _amountController3.text,
       },
     }).whenComplete(() {
+      // reset all the form fields
+      dateController.clear();
+      dropdownValue = 'Select a site';
+      _addressController.clear();
+      name1.clear();
+      name2.clear();
+      name3.clear();
+      name4.clear();
+      timeOn1 = null;
+      timeOff1 = null;
+      timeOn2 = null;
+      timeOff2 = null;
+      timeOn3 = null;
+      timeOff3 = null;
+      timeOn4 = null;
+      timeOff4 = null;
+      _selectedGarbage = [];
+      _selectedDebris = [];
+      _selectedLawn = [];
+      _selectedGarden = [];
+      _selectedTree = [];
+      _selectedBlow = [];
+      _descriptionController.clear();
+      _materialController1.clear();
+      _vendorController1.clear();
+      _amountController1.clear();
+      _materialController2.clear();
+      _vendorController2.clear();
+      _amountController2.clear();
+      _materialController3.clear();
+      _vendorController3.clear();
+      _amountController3.clear();
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Home()));
     });
   }
 
-  Future<void> getData() async {
-    // Get docs from collection reference
-    QuerySnapshot querySnapshot = await reportRef.get();
+// I dont think this is being used - delete if no bug testing errors
+  // Future<void> getData() async {
+  //   // Get docs from collection reference
+  //   QuerySnapshot querySnapshot = await reportRef.get();
 
-    // Get data from docs and convert map to List
-    final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
-  }
+  //   // Get data from docs and convert map to List
+  //   final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
+  // }
 
   TimeOfDay? timeOn1 = TimeOfDay.now();
   TimeOfDay? timeOff1 = TimeOfDay.now();
@@ -217,12 +273,13 @@ class _AddReportState extends State<AddReport> {
                 height: 55,
                 child: TextField(
                   controller: dateController,
-                  decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.calendar_month_rounded),
+                  style: GoogleFonts.montserrat(fontSize: 20),
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.calendar_month_rounded, size: 40),
                     prefixIconColor: Colors.green,
                     labelText: "Date:",
-                    labelStyle: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.bold),
+                    labelStyle: GoogleFonts.montserrat(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey),
                     ),
@@ -273,44 +330,32 @@ class _AddReportState extends State<AddReport> {
                       items: siteList.map((site) {
                         return DropdownMenuItem<String>(
                           value: site,
-                          child: Text(site),
+                          child: Text(
+                            site,
+                            style: GoogleFonts.montserrat(fontSize: 18),
+                          ),
                         );
                       }).toList(),
-                      onChanged: (String? value) {
-                        setState(() {
-                          dropdownValue = value!;
-                          if (value == 'Enter site name') {
-                            enteredSiteName = '';
-                          }
-                        });
+                      onChanged: (String? value) async {
+                        setState(
+                          () {
+                            dropdownValue = value!;
+                            _updateImageURL(dropdownValue);
+                            // _updateAddress(dropdownValue);
+                          },
+                        );
                       },
                     ),
-                    if (dropdownValue == 'Enter site name')
-                      Container(
-                        height: 45,
-                        margin: const EdgeInsets.only(left: 10, right: 10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: Colors.red,
-                          ),
-                        ),
-                        child: TextField(
-                          onChanged: (String value) {
-                            setState(() {
-                              enteredSiteName = value;
-                            });
-                            getData();
-                          },
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
-
+              TextFormField(
+                controller: _addressController,
+                style: GoogleFonts.montserrat(fontSize: 18),
+                decoration: InputDecoration(
+                  hintText: 'Enter address',
+                ),
+              ),
               const SizedBox(
                 height: 10,
               ),
@@ -320,9 +365,10 @@ class _AddReportState extends State<AddReport> {
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 40,
+                      height: 50,
                       child: TextField(
                         controller: name1,
+                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -342,7 +388,7 @@ class _AddReportState extends State<AddReport> {
                           heroTag: "btn1On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn1!.hour.toString()}:${timeOn1!.minute.toString()}'),
+                              '${timeOn1!.hour.toString()}:${timeOn1!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -374,7 +420,7 @@ class _AddReportState extends State<AddReport> {
                           heroTag: "btn1Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff1!.hour.toString()}:${timeOff1!.minute.toString()}'),
+                              '${timeOff1!.hour.toString()}:${timeOff1!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -400,9 +446,10 @@ class _AddReportState extends State<AddReport> {
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 40,
+                      height: 50,
                       child: TextField(
                         controller: name2,
+                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -421,7 +468,7 @@ class _AddReportState extends State<AddReport> {
                           heroTag: "btn2On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn2!.hour.toString()}:${timeOn2!.minute.toString()}'),
+                              '${timeOn2!.hour.toString()}:${timeOn2!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -452,7 +499,7 @@ class _AddReportState extends State<AddReport> {
                           heroTag: "btn2Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff2!.hour.toString()}:${timeOff2!.minute.toString()}'),
+                              '${timeOff2!.hour.toString()}:${timeOff2!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -478,9 +525,10 @@ class _AddReportState extends State<AddReport> {
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 40,
+                      height: 50,
                       child: TextField(
                         controller: name3,
+                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -499,7 +547,7 @@ class _AddReportState extends State<AddReport> {
                           heroTag: "btn3On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn3!.hour.toString()}:${timeOn3!.minute.toString()}'),
+                              '${timeOn3!.hour.toString()}:${timeOn3!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -530,7 +578,7 @@ class _AddReportState extends State<AddReport> {
                           heroTag: "btn3Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff3!.hour.toString()}:${timeOff3!.minute.toString()}'),
+                              '${timeOff3!.hour.toString()}:${timeOff3!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -556,9 +604,10 @@ class _AddReportState extends State<AddReport> {
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 40,
+                      height: 50,
                       child: TextField(
                         controller: name4,
+                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -577,7 +626,7 @@ class _AddReportState extends State<AddReport> {
                           heroTag: "btn4On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn4!.hour.toString()}:${timeOn4!.minute.toString()}'),
+                              '${timeOn4!.hour.toString()}:${timeOn4!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -608,7 +657,7 @@ class _AddReportState extends State<AddReport> {
                           heroTag: "btn4Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff4!.hour.toString()}:${timeOff4!.minute.toString()}'),
+                              '${timeOff4!.hour.toString()}:${timeOff4!.minute.toString().padLeft(2, '0')}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -628,9 +677,12 @@ class _AddReportState extends State<AddReport> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              const Text('Pick up loose garbage:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 15),
+              Text(
+                'Pick Up Loose Garbage:',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -654,11 +706,18 @@ class _AddReportState extends State<AddReport> {
                 isSelected: garbage
                     .map((value) => _selectedGarbage.contains(value))
                     .toList(),
-                children: garbage.map((value) => Text(value)).toList(),
+                children: garbage
+                    .map((value) => Text(
+                          value,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ))
+                    .toList(),
               ),
-              // const SizedBox(height: 5),
-              const Text('Rake yard debris:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Rake Yard Debris:',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -682,11 +741,18 @@ class _AddReportState extends State<AddReport> {
                 isSelected: debris
                     .map((value) => _selectedDebris.contains(value))
                     .toList(),
-                children: debris.map((value) => Text(value)).toList(),
+                children: debris
+                    .map((value) => Text(
+                          value,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ))
+                    .toList(),
               ),
-              // const SizedBox(height: 5),
-              const Text('Lawn care:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Lawn Care:',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -709,11 +775,18 @@ class _AddReportState extends State<AddReport> {
                 ),
                 isSelected:
                     lawn.map((value) => _selectedLawn.contains(value)).toList(),
-                children: lawn.map((value) => Text(value)).toList(),
+                children: lawn
+                    .map((value) => Text(
+                          value,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ))
+                    .toList(),
               ),
-              const SizedBox(height: 5),
-              const Text('Gardens:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Gardens:',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -737,11 +810,18 @@ class _AddReportState extends State<AddReport> {
                 isSelected: garden
                     .map((value) => _selectedGarden.contains(value))
                     .toList(),
-                children: garden.map((value) => Text(value)).toList(),
+                children: garden
+                    .map((value) => Text(
+                          value,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ))
+                    .toList(),
               ),
-              const SizedBox(height: 5),
-              const Text('Trees:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Trees:',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -764,11 +844,18 @@ class _AddReportState extends State<AddReport> {
                 ),
                 isSelected:
                     tree.map((value) => _selectedTree.contains(value)).toList(),
-                children: tree.map((value) => Text(value)).toList(),
+                children: tree
+                    .map((value) => Text(
+                          value,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ))
+                    .toList(),
               ),
-              const SizedBox(height: 5),
-              const Text('Blow dust/debris:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Blow Dust/Debris:',
+                style: GoogleFonts.montserrat(
+                    fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               ToggleButtons(
                 onPressed: (int index) {
                   // All buttons are selectable.
@@ -791,9 +878,13 @@ class _AddReportState extends State<AddReport> {
                 ),
                 isSelected:
                     blow.map((value) => _selectedBlow.contains(value)).toList(),
-                children: blow.map((value) => Text(value)).toList(),
+                children: blow
+                    .map((value) => Text(
+                          value,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ))
+                    .toList(),
               ),
-              const SizedBox(height: 15),
               Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),

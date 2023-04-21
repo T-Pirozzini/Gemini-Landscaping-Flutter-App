@@ -1,19 +1,61 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-class ExtraReport extends StatefulWidget {
-  const ExtraReport({super.key});
+List<String> siteList = [
+  // 'Enter Site Name', implement this functionality in future versions
+  // 'Merewood Apartments',
+  // 'Uplands Terrace',
+  'North Point Apartments',
+  'Country Grocer',
+  'Alderwood',
+  'Prideaux Manor',
+  'Sandscapes',
+  'Bowen Estates',
+  'Riverbend Terrace',
+  'Valley View Terrace',
+  'Woodgrove Pines',
+  'Pinewood Estates',
+  'Lancelot Gardens',
+  'Harwell Place',
+  'Peartree Meadows',
+  'Nanaimo Liquor Plus',
+  'Azalea Apartments',
+  'Westhill Centre',
+  'The Chemainus',
+  'Legacy Place',
+  'Nuko',
+  'Guillevin',
+  'Bowen Terrace',
+];
+
+String dropdownValue = siteList.first;
+String enteredSiteName = '';
+
+List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
+List<String> _selectedGarbage = [];
+List<String> debris = ['grassed areas', 'garden beds', 'tree wells'];
+List<String> _selectedDebris = [];
+List<String> lawn = ['mow', 'trim', 'edge', 'lime', 'aerate', 'fertilize'];
+List<String> _selectedLawn = [];
+List<String> garden = ['blow debris', 'weed', 'prune', 'fertilize'];
+List<String> _selectedGarden = [];
+List<String> tree = ['< 8ft', '> 8ft'];
+List<String> _selectedTree = [];
+List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
+List<String> _selectedBlow = [];
+
+class AddReport extends StatefulWidget {
+  const AddReport({super.key});
 
   @override
-  State<ExtraReport> createState() => _ExtraReportState();
+  State<AddReport> createState() => _AddReportState();
 }
 
-class _ExtraReportState extends State<ExtraReport> {
+class _AddReportState extends State<AddReport> {
   TextEditingController dateController = TextEditingController();
-  TextEditingController _siteNameController = TextEditingController();
+  TextEditingController siteNameController = TextEditingController();
   TextEditingController _addressController = TextEditingController();
   TextEditingController name1 = TextEditingController();
   TextEditingController name2 = TextEditingController();
@@ -30,27 +72,14 @@ class _ExtraReportState extends State<ExtraReport> {
   TextEditingController _vendorController3 = TextEditingController();
   TextEditingController _amountController3 = TextEditingController();
 
-  List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
-  List<String> _selectedGarbage = [];
-  List<String> debris = ['grassed areas', 'garden beds', 'tree wells'];
-  List<String> _selectedDebris = [];
-  List<String> lawn = ['mow', 'trim', 'edge', 'lime', 'aerate', 'fertilize'];
-  List<String> _selectedLawn = [];
-  List<String> garden = ['blow debris', 'weed', 'prune', 'fertilize'];
-  List<String> _selectedGarden = [];
-  List<String> tree = ['< 8ft', '> 8ft'];
-  List<String> _selectedTree = [];
-  List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
-  List<String> _selectedBlow = [];
-
-  CollectionReference extraReportRef =
+  CollectionReference reportRef =
       FirebaseFirestore.instance.collection('SiteReports2023');
 
   void _submitForm() {
-    extraReportRef.add({
+    reportRef.add({
       "info": {
         'date': dateController.text,
-        'siteName': _siteNameController.text,
+        'siteName': dropdownValue,
         'address': _addressController.text,
       },
       "names": {
@@ -60,18 +89,30 @@ class _ExtraReportState extends State<ExtraReport> {
         'name4': name4.text,
       },
       "times": {
-        'timeOn1': timeOn1!.hour.toString() + ':' + timeOn1!.minute.toString(),
-        'timeOff1':
-            timeOff1!.hour.toString() + ':' + timeOff1!.minute.toString(),
-        'timeOn2': timeOn2!.hour.toString() + ':' + timeOn2!.minute.toString(),
-        'timeOff2':
-            timeOff2!.hour.toString() + ':' + timeOff2!.minute.toString(),
-        'timeOn3': timeOn3!.hour.toString() + ':' + timeOn3!.minute.toString(),
-        'timeOff3':
-            timeOff3!.hour.toString() + ':' + timeOff3!.minute.toString(),
-        'timeOn4': timeOn4!.hour.toString() + ':' + timeOn4!.minute.toString(),
-        'timeOff4':
-            timeOff4!.hour.toString() + ':' + timeOff4!.minute.toString(),
+        'timeOn1': timeOn1!.hour.toString() +
+            ':' +
+            timeOn1!.minute.toString().padLeft(2, '0'),
+        'timeOff1': timeOff1!.hour.toString() +
+            ':' +
+            timeOff1!.minute.toString().padLeft(2, '0'),
+        'timeOn2': timeOn2!.hour.toString() +
+            ':' +
+            timeOn2!.minute.toString().padLeft(2, '0'),
+        'timeOff2': timeOff2!.hour.toString() +
+            ':' +
+            timeOff2!.minute.toString().padLeft(2, '0'),
+        'timeOn3': timeOn3!.hour.toString() +
+            ':' +
+            timeOn3!.minute.toString().padLeft(2, '0'),
+        'timeOff3': timeOff3!.hour.toString() +
+            ':' +
+            timeOff3!.minute.toString().padLeft(2, '0'),
+        'timeOn4': timeOn4!.hour.toString() +
+            ':' +
+            timeOn4!.minute.toString().padLeft(2, '0'),
+        'timeOff4': timeOff4!.hour.toString() +
+            ':' +
+            timeOff4!.minute.toString().padLeft(2, '0'),
       },
       "service": {
         'garbage': _selectedGarbage,
@@ -94,40 +135,17 @@ class _ExtraReportState extends State<ExtraReport> {
         "amount3": _amountController3.text,
       },
     }).whenComplete(() {
-      // reset all the form fields
-      dateController.clear();
-      _addressController.clear();
-      name1.clear();
-      name2.clear();
-      name3.clear();
-      name4.clear();
-      timeOn1 = null;
-      timeOff1 = null;
-      timeOn2 = null;
-      timeOff2 = null;
-      timeOn3 = null;
-      timeOff3 = null;
-      timeOn4 = null;
-      timeOff4 = null;
-      _selectedGarbage = [];
-      _selectedDebris = [];
-      _selectedLawn = [];
-      _selectedGarden = [];
-      _selectedTree = [];
-      _selectedBlow = [];
-      _descriptionController.clear();
-      _materialController1.clear();
-      _vendorController1.clear();
-      _amountController1.clear();
-      _materialController2.clear();
-      _vendorController2.clear();
-      _amountController2.clear();
-      _materialController3.clear();
-      _vendorController3.clear();
-      _amountController3.clear();
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Home()));
     });
+  }
+
+  Future<void> getData() async {
+    // Get docs from collection reference
+    QuerySnapshot querySnapshot = await reportRef.get();
+
+    // Get data from docs and convert map to List
+    final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
   }
 
   TimeOfDay? timeOn1 = TimeOfDay.now();
@@ -169,9 +187,7 @@ class _ExtraReportState extends State<ExtraReport> {
         centerTitle: true,
         actions: [
           MaterialButton(
-            onPressed: () {
-              _submitForm();
-            },
+            onPressed: _submitForm,
             child: Row(
               children: const [
                 Text(
@@ -201,9 +217,8 @@ class _ExtraReportState extends State<ExtraReport> {
                 height: 55,
                 child: TextField(
                   controller: dateController,
-                  style: GoogleFonts.montserrat(fontSize: 20),
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.calendar_month_rounded, size: 40),
+                    prefixIcon: Icon(Icons.calendar_month_rounded),
                     prefixIconColor: Colors.green,
                     labelText: "Date:",
                     labelStyle: TextStyle(
@@ -248,50 +263,52 @@ class _ExtraReportState extends State<ExtraReport> {
               const SizedBox(
                 height: 10,
               ),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(10),
+              // site list drop down
+              SizedBox(
+                height: 45,
+                child: Stack(
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: dropdownValue,
+                      items: siteList.map((site) {
+                        return DropdownMenuItem<String>(
+                          value: site,
+                          child: Text(site),
+                        );
+                      }).toList(),
+                      onChanged: (String? value) {
+                        setState(() {
+                          dropdownValue = value!;
+                          if (value == 'Enter site name') {
+                            enteredSiteName = '';
+                          }
+                        });
+                      },
                     ),
-                    width: 250,
-                    height: 50,
-                    child: TextField(
-                      controller: _siteNameController,
-                      style: GoogleFonts.montserrat(fontSize: 18),
-                      maxLines: null,
-                      keyboardType: TextInputType.text,
-                      decoration: const InputDecoration(
-                        hintText: 'Site Name',
-                        border: InputBorder.none,
+                    if (dropdownValue == 'Enter site name')
+                      Container(
+                        height: 45,
+                        margin: const EdgeInsets.only(left: 10, right: 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(
+                            color: Colors.red,
+                          ),
+                        ),
+                        child: TextField(
+                          onChanged: (String value) {
+                            setState(() {
+                              enteredSiteName = value;
+                            });
+                            getData();
+                          },
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    width: 350,
-                    height: 50,
-                    child: TextField(
-                      controller: _addressController,
-                      style: GoogleFonts.montserrat(fontSize: 18),
-                      maxLines: null,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        hintText: 'Address',
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
               const SizedBox(
@@ -306,7 +323,6 @@ class _ExtraReportState extends State<ExtraReport> {
                       height: 40,
                       child: TextField(
                         controller: name1,
-                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -326,7 +342,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn1On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn1!.hour.toString()}:${timeOn1!.minute.toString().padLeft(2, "0")}'),
+                              '${timeOn1!.hour.toString()}:${timeOn1!.minute.toString()}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -358,7 +374,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn1Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff1!.hour.toString()}:${timeOff1!.minute.toString().padLeft(2, "0")}'),
+                              '${timeOff1!.hour.toString()}:${timeOff1!.minute.toString()}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -387,7 +403,6 @@ class _ExtraReportState extends State<ExtraReport> {
                       height: 40,
                       child: TextField(
                         controller: name2,
-                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -406,7 +421,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn2On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn2!.hour.toString()}:${timeOn2!.minute.toString().padLeft(2, "0")}'),
+                              '${timeOn2!.hour.toString()}:${timeOn2!.minute.toString()}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -437,7 +452,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn2Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff2!.hour.toString()}:${timeOff2!.minute.toString().padLeft(2, "0")}'),
+                              '${timeOff2!.hour.toString()}:${timeOff2!.minute.toString()}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -466,7 +481,6 @@ class _ExtraReportState extends State<ExtraReport> {
                       height: 40,
                       child: TextField(
                         controller: name3,
-                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -485,7 +499,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn3On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn3!.hour.toString()}:${timeOn3!.minute.toString().padLeft(2, "0")}'),
+                              '${timeOn3!.hour.toString()}:${timeOn3!.minute.toString()}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -516,7 +530,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn3Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff3!.hour.toString()}:${timeOff3!.minute.toString().padLeft(2, "0")}'),
+                              '${timeOff3!.hour.toString()}:${timeOff3!.minute.toString()}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -545,7 +559,6 @@ class _ExtraReportState extends State<ExtraReport> {
                       height: 40,
                       child: TextField(
                         controller: name4,
-                        style: GoogleFonts.montserrat(fontSize: 16),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -564,7 +577,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn4On",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOn4!.hour.toString()}:${timeOn4!.minute.toString().padLeft(2, "0")}'),
+                              '${timeOn4!.hour.toString()}:${timeOn4!.minute.toString()}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -595,7 +608,7 @@ class _ExtraReportState extends State<ExtraReport> {
                           heroTag: "btn4Off",
                           icon: const Icon(Icons.access_time_outlined),
                           label: Text(
-                              '${timeOff4!.hour.toString()}:${timeOff4!.minute.toString().padLeft(2, "0")}'),
+                              '${timeOff4!.hour.toString()}:${timeOff4!.minute.toString()}'),
                           backgroundColor:
                               const Color.fromARGB(255, 31, 182, 77),
                           onPressed: () async {
@@ -614,6 +627,171 @@ class _ExtraReportState extends State<ExtraReport> {
                     ],
                   ),
                 ],
+              ),
+              const SizedBox(height: 10),
+              const Text('Pick up loose garbage:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              ToggleButtons(
+                onPressed: (int index) {
+                  // All buttons are selectable.
+                  setState(() {
+                    if (_selectedGarbage.contains(garbage[index])) {
+                      _selectedGarbage.remove(garbage[index]);
+                    } else {
+                      _selectedGarbage.add(garbage[index]);
+                    }
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: Colors.green[700],
+                selectedColor: Colors.white,
+                fillColor: Colors.green[200],
+                color: Colors.green[700],
+                constraints: const BoxConstraints(
+                  minHeight: 25.0,
+                  minWidth: 110.0,
+                ),
+                isSelected: garbage
+                    .map((value) => _selectedGarbage.contains(value))
+                    .toList(),
+                children: garbage.map((value) => Text(value)).toList(),
+              ),
+              // const SizedBox(height: 5),
+              const Text('Rake yard debris:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              ToggleButtons(
+                onPressed: (int index) {
+                  // All buttons are selectable.
+                  setState(() {
+                    if (_selectedDebris.contains(debris[index])) {
+                      _selectedDebris.remove(debris[index]);
+                    } else {
+                      _selectedDebris.add(debris[index]);
+                    }
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: Colors.green[700],
+                selectedColor: Colors.white,
+                fillColor: Colors.green[200],
+                color: Colors.green[700],
+                constraints: const BoxConstraints(
+                  minHeight: 25.0,
+                  minWidth: 110.0,
+                ),
+                isSelected: debris
+                    .map((value) => _selectedDebris.contains(value))
+                    .toList(),
+                children: debris.map((value) => Text(value)).toList(),
+              ),
+              // const SizedBox(height: 5),
+              const Text('Lawn care:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              ToggleButtons(
+                onPressed: (int index) {
+                  // All buttons are selectable.
+                  setState(() {
+                    if (_selectedLawn.contains(lawn[index])) {
+                      _selectedLawn.remove(lawn[index]);
+                    } else {
+                      _selectedLawn.add(lawn[index]);
+                    }
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: Colors.green[700],
+                selectedColor: Colors.white,
+                fillColor: Colors.green[200],
+                color: Colors.green[700],
+                constraints: const BoxConstraints(
+                  minHeight: 25.0,
+                  minWidth: 55.0,
+                ),
+                isSelected:
+                    lawn.map((value) => _selectedLawn.contains(value)).toList(),
+                children: lawn.map((value) => Text(value)).toList(),
+              ),
+              const SizedBox(height: 5),
+              const Text('Gardens:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              ToggleButtons(
+                onPressed: (int index) {
+                  // All buttons are selectable.
+                  setState(() {
+                    if (_selectedGarden.contains(garden[index])) {
+                      _selectedGarden.remove(garden[index]);
+                    } else {
+                      _selectedGarden.add(garden[index]);
+                    }
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: Colors.green[700],
+                selectedColor: Colors.white,
+                fillColor: Colors.green[200],
+                color: Colors.green[700],
+                constraints: const BoxConstraints(
+                  minHeight: 25.0,
+                  minWidth: 85.0,
+                ),
+                isSelected: garden
+                    .map((value) => _selectedGarden.contains(value))
+                    .toList(),
+                children: garden.map((value) => Text(value)).toList(),
+              ),
+              const SizedBox(height: 5),
+              const Text('Trees:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              ToggleButtons(
+                onPressed: (int index) {
+                  // All buttons are selectable.
+                  setState(() {
+                    if (_selectedTree.contains(tree[index])) {
+                      _selectedTree.remove(tree[index]);
+                    } else {
+                      _selectedTree.add(tree[index]);
+                    }
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: Colors.green[700],
+                selectedColor: Colors.white,
+                fillColor: Colors.green[200],
+                color: Colors.green[700],
+                constraints: const BoxConstraints(
+                  minHeight: 25.0,
+                  minWidth: 110.0,
+                ),
+                isSelected:
+                    tree.map((value) => _selectedTree.contains(value)).toList(),
+                children: tree.map((value) => Text(value)).toList(),
+              ),
+              const SizedBox(height: 5),
+              const Text('Blow dust/debris:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              ToggleButtons(
+                onPressed: (int index) {
+                  // All buttons are selectable.
+                  setState(() {
+                    if (_selectedBlow.contains(blow[index])) {
+                      _selectedBlow.remove(blow[index]);
+                    } else {
+                      _selectedBlow.add(blow[index]);
+                    }
+                  });
+                },
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                selectedBorderColor: Colors.green[700],
+                selectedColor: Colors.white,
+                fillColor: Colors.green[200],
+                color: Colors.green[700],
+                constraints: const BoxConstraints(
+                  minHeight: 25.0,
+                  minWidth: 110.0,
+                ),
+                isSelected:
+                    blow.map((value) => _selectedBlow.contains(value)).toList(),
+                children: blow.map((value) => Text(value)).toList(),
               ),
               const SizedBox(height: 15),
               Container(
@@ -634,169 +812,6 @@ class _ExtraReportState extends State<ExtraReport> {
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Table(
-                border: TableBorder.all(
-                  color: Color.fromARGB(255, 31, 182, 77),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                children: [
-                  TableRow(
-                    children: [
-                      Center(
-                        child: Text(
-                          'MATERIALS',
-                          style: GoogleFonts.montserrat(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Center(
-                        child: Text(
-                          'VENDOR',
-                          style: GoogleFonts.montserrat(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Center(
-                        child: Text(
-                          'AMOUNT',
-                          style: GoogleFonts.montserrat(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: TextField(
-                          controller: _materialController1,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                          maxLines: null,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                            hintText: 'enter item',
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: TextField(
-                          controller: _vendorController1,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                          maxLines: null,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                            hintText: 'enter vendor',
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: TextField(
-                          controller: _amountController1,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                          maxLines: null,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: 'enter amount',
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: TextField(
-                          controller: _materialController2,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                          maxLines: null,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                            hintText: 'enter item',
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: TextField(
-                          controller: _vendorController2,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                          maxLines: null,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                            hintText: 'enter vendor',
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: TextField(
-                          controller: _amountController2,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                          maxLines: null,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: 'enter amount',
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: TextField(
-                          controller: _materialController3,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                          maxLines: null,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                            hintText: 'enter item',
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: TextField(
-                          controller: _vendorController3,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                          maxLines: null,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                            hintText: 'enter vendor',
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: TextField(
-                          controller: _amountController3,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                          maxLines: null,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            hintText: 'enter amount',
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ),
             ],
           ),
