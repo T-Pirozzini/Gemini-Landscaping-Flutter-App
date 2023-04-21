@@ -94,6 +94,37 @@ class _ExtraReportState extends State<ExtraReport> {
         "amount3": _amountController3.text,
       },
     }).whenComplete(() {
+      // reset all the form fields
+      dateController.clear();
+      _addressController.clear();
+      name1.clear();
+      name2.clear();
+      name3.clear();
+      name4.clear();
+      timeOn1 = null;
+      timeOff1 = null;
+      timeOn2 = null;
+      timeOff2 = null;
+      timeOn3 = null;
+      timeOff3 = null;
+      timeOn4 = null;
+      timeOff4 = null;
+      _selectedGarbage = [];
+      _selectedDebris = [];
+      _selectedLawn = [];
+      _selectedGarden = [];
+      _selectedTree = [];
+      _selectedBlow = [];
+      _descriptionController.clear();
+      _materialController1.clear();
+      _vendorController1.clear();
+      _amountController1.clear();
+      _materialController2.clear();
+      _vendorController2.clear();
+      _amountController2.clear();
+      _materialController3.clear();
+      _vendorController3.clear();
+      _amountController3.clear();
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Home()));
     });

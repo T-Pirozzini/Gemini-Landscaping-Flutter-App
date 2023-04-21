@@ -6,7 +6,6 @@ import 'package:gemini_landscaping_app/pages/folders_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
 import 'package:gemini_landscaping_app/pages/recent_reports_page.dart';
 import '../addReport.dart';
-import '../addReport2.dart';
 import '../auth.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
@@ -46,7 +45,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   final pages = [
     RecentReportsPage(),
     SiteFolders(),
-    Chart(),
+    // Chart(), Add when completed
     AnnouncementPage(),
     ProfilePage(),
   ];
@@ -90,7 +89,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
               Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const AddReport2()));
+                  MaterialPageRoute(builder: (_) => const AddReport()));
             },
           ),
           Bubble(
@@ -137,11 +136,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             color: Colors.white,
             size: 30,
           ),
-          Icon(
-            Icons.auto_graph,
-            color: Colors.white,
-            size: 30,
-          ),
+          // Icon(
+          //   Icons.auto_graph,
+          //   color: Colors.white,
+          //   size: 30,
+          // ),
           Icon(
             Icons.message_outlined,
             color: Colors.white,
