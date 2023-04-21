@@ -195,6 +195,28 @@ class _AddReportState extends State<AddReport> {
     });
   }
 
+  @override
+  void dispose() {
+    dateController.dispose();
+    siteNameController.dispose();
+    _addressController.dispose();
+    name1.dispose();
+    name2.dispose();
+    name3.dispose();
+    name4.dispose();
+    _descriptionController.dispose();
+    _materialController1.dispose();
+    _vendorController1.dispose();
+    _amountController1.dispose();
+    _materialController2.dispose();
+    _vendorController2.dispose();
+    _amountController2.dispose();
+    _materialController3.dispose();
+    _vendorController3.dispose();
+    _amountController3.dispose();
+    super.dispose();
+  }
+
 // I dont think this is being used - delete if no bug testing errors
   // Future<void> getData() async {
   //   // Get docs from collection reference
