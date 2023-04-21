@@ -95,7 +95,8 @@ class _SiteFoldersState extends State<SiteFolders> {
                                   Icons.grass_outlined,
                                   color: Colors.green,
                                   size: 40,
-                                )),
+                                ),
+                              ),
                         title: FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: AlignmentDirectional.centerStart,
