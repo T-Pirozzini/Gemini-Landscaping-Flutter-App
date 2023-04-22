@@ -108,7 +108,7 @@ class _ViewReportState extends State<ViewReport> {
                   children: [
                     Text(
                       widget.docid["info"]['date'],
-                      style: GoogleFonts.lato(
+                      style: GoogleFonts.montserrat(
                         textStyle: TextStyle(
                             letterSpacing: .5,
                             fontSize: 14,
@@ -117,7 +117,7 @@ class _ViewReportState extends State<ViewReport> {
                     ),
                     Text(
                       '#${widget.docid.id.substring(docid.id.length - 5)}',
-                      style: GoogleFonts.lato(
+                      style: GoogleFonts.montserrat(
                         textStyle: TextStyle(letterSpacing: .5, fontSize: 14),
                       ),
                     ),
@@ -130,7 +130,7 @@ class _ViewReportState extends State<ViewReport> {
                     children: [
                       Text(
                         widget.docid["info"]["siteName"].toUpperCase(),
-                        style: GoogleFonts.lato(
+                        style: GoogleFonts.montserrat(
                           textStyle: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
@@ -138,7 +138,7 @@ class _ViewReportState extends State<ViewReport> {
                       if (widget.docid["info"]["address"] != null)
                         Text(
                           widget.docid["info"]["address"],
-                          style: GoogleFonts.lato(
+                          style: GoogleFonts.montserrat(
                             textStyle: TextStyle(fontSize: 16),
                           ),
                         ),
@@ -168,7 +168,7 @@ class _ViewReportState extends State<ViewReport> {
                           child: Text(
                             'Name',
                             style: GoogleFonts.montserrat(
-                                fontSize: 18, color: Colors.white),
+                                fontSize: 16, color: Colors.white),
                           ),
                         ),
                         Container(
@@ -176,21 +176,21 @@ class _ViewReportState extends State<ViewReport> {
                           alignment: Alignment.center,
                           child: Text('On',
                               style: GoogleFonts.montserrat(
-                                  fontSize: 18, color: Colors.white)),
+                                  fontSize: 16, color: Colors.white)),
                         ),
                         Container(
                           padding: EdgeInsets.all(2),
                           alignment: Alignment.center,
                           child: Text('Off',
                               style: GoogleFonts.montserrat(
-                                  fontSize: 18, color: Colors.white)),
+                                  fontSize: 16, color: Colors.white)),
                         ),
                         Container(
                           padding: EdgeInsets.all(2),
                           alignment: Alignment.center,
                           child: Text('Site Time',
                               style: GoogleFonts.montserrat(
-                                  fontSize: 18, color: Colors.white)),
+                                  fontSize: 16, color: Colors.white)),
                         ),
                       ]),
                   TableRow(children: [
