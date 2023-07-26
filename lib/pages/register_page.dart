@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/components/my_button.dart';
 import 'package:gemini_landscaping_app/components/my_textfield.dart';
-import 'package:gemini_landscaping_app/components/square_tile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterPage extends StatefulWidget {
