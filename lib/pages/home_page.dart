@@ -12,6 +12,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
 
 import '../uploadPhotos.dart';
+import 'equipment_page.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -45,6 +46,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   final pages = [
     RecentReportsPage(),
     SiteFolders(),
+    EquipmentPage(),
     // Chart(), Add when completed
     AnnouncementPage(),
     ProfilePage(),
@@ -144,6 +146,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           ),
           Icon(
             Icons.folder_copy_outlined,
+            color: Colors.white,
+            size: 30,
+          ),
+          Icon(
+            Icons.handyman_outlined,
             color: Colors.white,
             size: 30,
           ),
