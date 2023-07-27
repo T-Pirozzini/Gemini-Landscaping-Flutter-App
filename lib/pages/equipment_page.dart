@@ -12,7 +12,12 @@ class EquipmentPage extends StatefulWidget {
   State<EquipmentPage> createState() => _EquipmentPageState();
 }
 
+// Add this enum for priority options
+enum Priority { low, medium, high }
+
 class _EquipmentPageState extends State<EquipmentPage> {
+  String priority = 'low';
+
   @override
   Widget build(BuildContext context) {
     // Firestore collection reference
@@ -89,7 +94,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
                           onPressed: () {
                             // Perform action when the icon is clicked
                             _addRepairReport(
-                                context, equipment.name, document.id);
+                                context, equipment.name, document.id, priority);
                           },
                         ),
                       ],
@@ -148,9 +153,9 @@ void _showRepairEntriesDialog(
                       icon: Icon(Icons.warning),
                       onPressed: () {
                         // Delete repair entry
-                        repairEntriesCollection
-                            .doc(documents[index].id)
-                            .update();
+                        // repairEntriesCollection
+                        //     .doc(documents[index].id)
+                        //     .update();
                       },
                     ),
                   );
@@ -173,8 +178,8 @@ void _showRepairEntriesDialog(
 }
 
 // Function to add a repair report
-void _addRepairReport(
-    BuildContext context, String equipmentName, String documentId) {
+void _addRepairReport(BuildContext context, String equipmentName,
+    String documentId, String priority) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -184,60 +189,85 @@ void _addRepairReport(
           DateFormat('MMMM d, y (EEEE)').format(currentDateTime);
       String formattedTime = DateFormat('h:mm a').format(currentDateTime);
 
-      return AlertDialog(
-        title: Column(
-          children: [
-            Text('Attention Required:'),
-            Text('$equipmentName'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Column(
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Column(
               children: [
-                Text('$formattedDate'),
-                Text('$formattedTime'),
+                Text('Attention Required:'),
+                Text('$equipmentName'),
               ],
             ),
-            SizedBox(height: 8),
-            TextField(
-              controller: descriptionController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
-              ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Column(
+                  children: [
+                    Text('$formattedDate'),
+                    Text('$formattedTime'),
+                  ],
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: descriptionController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 16),
+                // DropdownButton to select priority
+                DropdownButton<String>(
+                  value: priority,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      priority = newValue!;
+                    });
+                  },
+                  items: <String>['low', 'medium', 'high'].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Row(
+                        children: [
+                          Text('Priority: '),
+                          Text(value),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              String description = descriptionController.text;
-              if (description.isNotEmpty) {
-                // Add the new repair entry to Firestore
-                await FirebaseFirestore.instance
-                    .collection('equipment')
-                    .doc(documentId)
-                    .collection('repair_entries')
-                    .add({
-                  'dateTime': '$formattedDate @ $formattedTime',
-                  'description': description,
-                  'priority': priority,
-                });
-              }
-              Navigator.of(context).pop();
-            },
-            child: Text('Submit'),
-          ),
-        ],
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  String description = descriptionController.text;
+                  if (description.isNotEmpty) {
+                    // Add the new repair entry to Firestore
+                    await FirebaseFirestore.instance
+                        .collection('equipment')
+                        .doc(documentId)
+                        .collection('repair_entries')
+                        .add({
+                      'dateTime': '$formattedDate @ $formattedTime',
+                      'description': description,
+                      'priority': priority,
+                    });
+                  }
+                  Navigator.of(context).pop();
+                },
+                child: Text('Submit'),
+              ),
+            ],
+          );
+        },
       );
     },
   );
