@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
+import 'package:intl/intl.dart';
+
+import '../models/repair_model.dart';
 
 class EquipmentPage extends StatefulWidget {
   const EquipmentPage({super.key});
@@ -39,10 +42,13 @@ class _EquipmentPageState extends State<EquipmentPage> {
             );
           }).toList();
 
+          List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
+
           return ListView.builder(
-            itemCount: equipmentList.length,
+            itemCount: documents.length,
             itemBuilder: (context, index) {
               Equipment equipment = equipmentList[index];
+              QueryDocumentSnapshot document = documents[index];
               return Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
@@ -52,7 +58,8 @@ class _EquipmentPageState extends State<EquipmentPage> {
                 child: InkWell(
                   onTap: () {
                     // Open dialog with a list of dated repair entries log
-                    _showRepairEntriesDialog(context, equipment.name);
+                    _showRepairEntriesDialog(
+                        context, equipment.name, document.id);
                   },
                   child: ListTile(
                     tileColor: Colors.white,
@@ -81,7 +88,8 @@ class _EquipmentPageState extends State<EquipmentPage> {
                           color: Colors.red.shade400, // Add repair report icon
                           onPressed: () {
                             // Perform action when the icon is clicked
-                            _addRepairReport(context, equipment.name);
+                            _addRepairReport(
+                                context, equipment.name, document.id);
                           },
                         ),
                       ],
@@ -98,29 +106,163 @@ class _EquipmentPageState extends State<EquipmentPage> {
 }
 
 // Function to show the dialog with a list of dated repair entries log
-void _showRepairEntriesDialog(BuildContext context, String equipmentName) {
-  // Implement your dialog here
-  // You can use showDialog() or a custom dialog widget.
-  // Retrieve and display the repair entries for the selected equipment.
+void _showRepairEntriesDialog(
+    BuildContext context, String equipmentName, String documentId) {
+  // Firestore collection reference for repair entries
+  CollectionReference repairEntriesCollection = FirebaseFirestore.instance
+      .collection('equipment')
+      .doc(documentId)
+      .collection('repair_entries');
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Repair Entries for $equipmentName'),
+        content: Container(
+          width: double.maxFinite,
+          child: StreamBuilder<QuerySnapshot>(
+            // Fetch repair entries for the specific equipment
+            stream: repairEntriesCollection.snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              }
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              }
+
+              List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
+              return ListView.builder(
+                itemCount: documents.length,
+                itemBuilder: (context, index) {
+                  Map<String, dynamic> data =
+                      documents[index].data() as Map<String, dynamic>;
+                  String description = data['description'] ?? '';
+                  String dateTime = data['dateTime'] ?? '';
+
+                  return ListTile(
+                    title: Text('#${index + 1}: $dateTime'),
+                    subtitle: Text('$description'),
+                    trailing: IconButton(
+                      icon: Icon(Icons.warning),
+                      onPressed: () {
+                        // Delete repair entry
+                        repairEntriesCollection
+                            .doc(documents[index].id)
+                            .update();
+                      },
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Close'),
+          ),
+        ],
+      );
+    },
+  );
 }
 
 // Function to add a repair report
-void _addRepairReport(BuildContext context, String equipmentName) {
-  // Implement the functionality to add a repair report here.
+void _addRepairReport(
+    BuildContext context, String equipmentName, String documentId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      TextEditingController descriptionController = TextEditingController();
+      DateTime currentDateTime = DateTime.now();
+      String formattedDate =
+          DateFormat('MMMM d, y (EEEE)').format(currentDateTime);
+      String formattedTime = DateFormat('h:mm a').format(currentDateTime);
+
+      return AlertDialog(
+        title: Column(
+          children: [
+            Text('Attention Required:'),
+            Text('$equipmentName'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Column(
+              children: [
+                Text('$formattedDate'),
+                Text('$formattedTime'),
+              ],
+            ),
+            SizedBox(height: 8),
+            TextField(
+              controller: descriptionController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: 'Description',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              String description = descriptionController.text;
+              if (description.isNotEmpty) {
+                // Add the new repair entry to Firestore
+                await FirebaseFirestore.instance
+                    .collection('equipment')
+                    .doc(documentId)
+                    .collection('repair_entries')
+                    .add({
+                  'dateTime': '$formattedDate @ $formattedTime',
+                  'description': description,
+                  'priority': priority,
+                });
+              }
+              Navigator.of(context).pop();
+            },
+            child: Text('Submit'),
+          ),
+        ],
+      );
+    },
+  );
 }
 
 // Function to get the icon based on the type of equipment
 Widget _getEquipmentIcon(String equipment) {
   switch (equipment) {
-    case "excavator":
-      return Icon(Icons.front_loader,
-          size: 32); // Replace with appropriate icon
-    case "vehicle":
-      return Icon(Icons.local_shipping,
-          size: 32); // Replace with appropriate icon
-    // Add more cases for other equipment types
+    case "mower_small":
+      return Image.asset('assets/equipment/mower_small.png',
+          width: 32, height: 32);
+    case "mower_large":
+      return Image.asset('assets/equipment/mower_large.png',
+          width: 32, height: 32);
+    case "blower":
+      return Image.asset('assets/equipment/blower.png', width: 32, height: 32);
+    case "trimmer":
+      return Image.asset('assets/equipment/trimmer.png', width: 32, height: 32);
+    case "saw":
+      return Image.asset('assets/equipment/saw.png', width: 32, height: 32);
+    case "truck":
+      return Image.asset('assets/equipment/truck.png', width: 32, height: 32);
+    case "trailer":
+      return Image.asset('assets/equipment/trailer.png', width: 32, height: 32);
     default:
-      return Icon(Icons.device_unknown,
-          size: 32); // Default icon for unknown types
+      return Icon(Icons.device_unknown, size: 32);
   }
 }
