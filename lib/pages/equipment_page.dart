@@ -122,7 +122,7 @@ void _showRepairEntriesDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Repair Entries for $equipmentName'),
+        title: Text('Repair Entries: $equipmentName'),
         content: Container(
           width: double.maxFinite,
           child: StreamBuilder<QuerySnapshot>(
@@ -145,18 +145,37 @@ void _showRepairEntriesDialog(
                       documents[index].data() as Map<String, dynamic>;
                   String description = data['description'] ?? '';
                   String dateTime = data['dateTime'] ?? '';
+                  String priority = data['priority'] ?? 'low';
+
+                  IconData iconData;
+                  Color iconColor;
+
+                  // Set the icon based on the priority value
+                  switch (priority) {
+                    case 'low':
+                      iconData = Icons.error;
+                      iconColor = Colors.yellow;
+                      break;
+                    case 'medium':
+                      // Add an appropriate medium priority icon and color
+                      iconData = Icons.warning;
+                      iconColor = Colors.orange;
+                      break;
+                    case 'high':
+                      iconData = Icons.report;
+                      iconColor = Colors.red;
+                      break;
+                    default:
+                      iconData = Icons.device_unknown;
+                      iconColor = Colors.grey;
+                  }
 
                   return ListTile(
                     title: Text('#${index + 1}: $dateTime'),
                     subtitle: Text('$description'),
-                    trailing: IconButton(
-                      icon: Icon(Icons.warning),
-                      onPressed: () {
-                        // Delete repair entry
-                        // repairEntriesCollection
-                        //     .doc(documents[index].id)
-                        //     .update();
-                      },
+                    trailing: Icon(
+                      iconData,
+                      color: iconColor,
                     ),
                   );
                 },
