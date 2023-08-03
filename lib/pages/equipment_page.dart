@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:intl/intl.dart';
-
-import '../models/repair_model.dart';
+// import '../models/repair_model.dart';
 
 class EquipmentPage extends StatefulWidget {
   const EquipmentPage({super.key});
@@ -105,6 +104,15 @@ class _EquipmentPageState extends State<EquipmentPage> {
             },
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        mini: true,
+        shape: ShapeBorder.lerp(RoundedRectangleBorder(), CircleBorder(), 0.5),
+        onPressed: () {
+          // Add your code to handle the button press here
+          print('Add equipment clicked!!');
+        },
+        child: Icon(Icons.add),
       ),
     );
   }
