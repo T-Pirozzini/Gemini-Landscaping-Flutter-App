@@ -1,17 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
-import 'package:gemini_landscaping_app/extraReport.dart';
+// import 'package:gemini_landscaping_app/extraReport.dart';
 import 'package:gemini_landscaping_app/pages/announcement_page.dart';
 import 'package:gemini_landscaping_app/pages/folders_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
 import 'package:gemini_landscaping_app/pages/recent_reports_page.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../addReport.dart';
+// import '../addReport.dart';
 import '../auth.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:floating_action_bubble/floating_action_bubble.dart';
+// import 'package:floating_action_bubble/floating_action_bubble.dart';
 
-import '../uploadPhotos.dart';
+// import '../uploadPhotos.dart';
 import 'equipment_page.dart';
 
 class Home extends StatefulWidget {
@@ -23,23 +23,23 @@ class Home extends StatefulWidget {
 
 final User? user = Auth().currentUser;
 
-class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
-  // floating action bubble
-  late Animation<double> _animation;
-  late AnimationController _animationController;
-  @override
-  void initState() {
-    _animationController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 260),
-    );
+class _HomeState extends State<Home> {
+  // // floating action bubble
+  // late Animation<double> _animation;
+  // late AnimationController _animationController;
+  // @override
+  // void initState() {
+  //   _animationController = AnimationController(
+  //     vsync: this,
+  //     duration: Duration(milliseconds: 260),
+  //   );
 
-    final curvedAnimation =
-        CurvedAnimation(curve: Curves.easeInOut, parent: _animationController);
-    _animation = Tween<double>(begin: 0, end: 1).animate(curvedAnimation);
+  //   final curvedAnimation =
+  //       CurvedAnimation(curve: Curves.easeInOut, parent: _animationController);
+  //   _animation = Tween<double>(begin: 0, end: 1).animate(curvedAnimation);
 
-    super.initState();
-  }
+  //   super.initState();
+  // }
 
   // bottom navigation bar
   int currentIndex = 0;
@@ -72,63 +72,63 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           ],
         ),
       ),
-      // Floating Action Button
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionBubble(
-        iconColor: Colors.white,
-        backGroundColor: const Color.fromARGB(255, 31, 182, 77),
-        animation: _animation,
-        onPress: () => _animationController.isCompleted
-            ? _animationController.reverse()
-            : _animationController.forward(),
-        iconData: Icons.add,
-        items: <Bubble>[
-          // Bubble(
-          //   title: "Site Report",
-          //   iconColor: Colors.white,
-          //   bubbleColor: Color.fromARGB(255, 31, 182, 77),
-          //   icon: Icons.note_add_rounded,
-          //   titleStyle: TextStyle(fontSize: 16, color: Colors.white),
-          //   onPress: () {
-          //     Navigator.pushReplacement(context,
-          //         MaterialPageRoute(builder: (_) => const AddReport()));
-          //   },
-          // ),
-          Bubble(
-            title: "Site Report",
-            iconColor: Colors.white,
-            bubbleColor: Color.fromARGB(255, 31, 182, 77),
-            icon: Icons.note_add_outlined,
-            titleStyle: TextStyle(fontSize: 16, color: Colors.white),
-            onPress: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const AddReport()));
-            },
-          ),
-          Bubble(
-            title: "Extras Report",
-            iconColor: Colors.white,
-            bubbleColor: Color.fromARGB(255, 31, 182, 77),
-            icon: Icons.add_circle_outline,
-            titleStyle: TextStyle(fontSize: 16, color: Colors.white),
-            onPress: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const ExtraReport()));
-            },
-          ),
-          Bubble(
-            title: "Pictures",
-            iconColor: Colors.white,
-            bubbleColor: Color.fromARGB(255, 31, 182, 77),
-            icon: Icons.add_a_photo_outlined,
-            titleStyle: TextStyle(fontSize: 16, color: Colors.white),
-            onPress: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const UploadPhotos()));
-            },
-          ),
-        ],
-      ),
+      // // Floating Action Button
+      // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      // floatingActionButton: FloatingActionBubble(
+      //   iconColor: Colors.white,
+      //   backGroundColor: const Color.fromARGB(255, 31, 182, 77),
+      //   animation: _animation,
+      //   onPress: () => _animationController.isCompleted
+      //       ? _animationController.reverse()
+      //       : _animationController.forward(),
+      //   iconData: Icons.add,
+      //   items: <Bubble>[
+      //     // Bubble(
+      //     //   title: "Site Report",
+      //     //   iconColor: Colors.white,
+      //     //   bubbleColor: Color.fromARGB(255, 31, 182, 77),
+      //     //   icon: Icons.note_add_rounded,
+      //     //   titleStyle: TextStyle(fontSize: 16, color: Colors.white),
+      //     //   onPress: () {
+      //     //     Navigator.pushReplacement(context,
+      //     //         MaterialPageRoute(builder: (_) => const AddReport()));
+      //     //   },
+      //     // ),
+      //     Bubble(
+      //       title: "Site Report",
+      //       iconColor: Colors.white,
+      //       bubbleColor: Color.fromARGB(255, 31, 182, 77),
+      //       icon: Icons.note_add_outlined,
+      //       titleStyle: TextStyle(fontSize: 16, color: Colors.white),
+      //       onPress: () {
+      //         Navigator.pushReplacement(context,
+      //             MaterialPageRoute(builder: (_) => const AddReport()));
+      //       },
+      //     ),
+      //     Bubble(
+      //       title: "Extras Report",
+      //       iconColor: Colors.white,
+      //       bubbleColor: Color.fromARGB(255, 31, 182, 77),
+      //       icon: Icons.add_circle_outline,
+      //       titleStyle: TextStyle(fontSize: 16, color: Colors.white),
+      //       onPress: () {
+      //         Navigator.pushReplacement(context,
+      //             MaterialPageRoute(builder: (_) => const ExtraReport()));
+      //       },
+      //     ),
+      //     Bubble(
+      //       title: "Pictures",
+      //       iconColor: Colors.white,
+      //       bubbleColor: Color.fromARGB(255, 31, 182, 77),
+      //       icon: Icons.add_a_photo_outlined,
+      //       titleStyle: TextStyle(fontSize: 16, color: Colors.white),
+      //       onPress: () {
+      //         Navigator.pushReplacement(context,
+      //             MaterialPageRoute(builder: (_) => const UploadPhotos()));
+      //       },
+      //     ),
+      //   ],
+      // ),
       body: pages[currentIndex],
       // Bottom Navigator
       bottomNavigationBar: CurvedNavigationBar(
