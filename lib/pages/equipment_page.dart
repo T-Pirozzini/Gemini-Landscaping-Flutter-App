@@ -42,7 +42,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
             return Equipment(
               name: data['name'] ?? '',
               year: data['year'] ?? 0,
-              equipment: data['equipment'] ?? '',
+              equipment: data['equipmentType'] ?? '',
               serialNumber: data['serialNumber'] ?? '',
             );
           }).toList();
@@ -175,9 +175,10 @@ class _EquipmentPageState extends State<EquipmentPage> {
                               ),
                               DropdownButton<String>(
                                 value: selectedEquipmentType,
-                                hint: Text('Select Equipment'),
+                                hint: Text(selectedEquipmentType ??
+                                    'Select Equipment'),
                                 items: <String>[
-                                  'Vehicle',
+                                  'Truck',
                                   'trailer',
                                   'Mower (push)',
                                   'Mower (ride-on)',
@@ -312,17 +313,54 @@ void _showRepairEntriesDialog(
                       iconData = Icons.report;
                       iconColor = Colors.red;
                       break;
+                    case 'resolved':
+                      iconData = Icons.check_circle;
+                      iconColor = Colors.green;
+                      break;
                     default:
                       iconData = Icons.device_unknown;
                       iconColor = Colors.grey;
                   }
 
                   return ListTile(
-                    title: Text('#${index + 1}: $dateTime'),
+                    title: Text(
+                      '#${index + 1}: $dateTime',
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
                     subtitle: Text('$description'),
-                    trailing: Icon(
-                      iconData,
-                      color: iconColor,
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          iconData,
+                          color: iconColor,
+                        ),
+                        SizedBox(width: 10),
+                        if (priority != 'resolved')
+                          ElevatedButton(
+                            onPressed: () async {
+                              // Update the repair status to "resolved" in the database
+                              await repairEntriesCollection
+                                  .doc(documents[index].id)
+                                  .update({
+                                'priority': 'resolved',
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.grey, // Button background color
+                              onPrimary: Colors.white, // Text color
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 12), // Button padding
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    8), // Button border radius
+                              ),
+                            ),
+                            child: Text('Repaired?'),
+                          ),
+                      ],
                     ),
                   );
                 },
