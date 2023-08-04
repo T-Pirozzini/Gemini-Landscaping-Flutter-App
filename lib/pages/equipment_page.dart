@@ -24,6 +24,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
         FirebaseFirestore.instance.collection('equipment');
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.grey.shade200,
       body: StreamBuilder<QuerySnapshot>(
         stream: equipmentCollection.snapshots(),
@@ -106,11 +107,106 @@ class _EquipmentPageState extends State<EquipmentPage> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.black45,
         mini: true,
         shape: ShapeBorder.lerp(RoundedRectangleBorder(), CircleBorder(), 0.5),
         onPressed: () {
           // Add your code to handle the button press here
           print('Add equipment clicked!!');
+          showModalBottomSheet(
+              isScrollControlled: true,
+              context: context,
+              builder: (BuildContext context) {
+                String? selectedEquipmentType;
+
+                return SingleChildScrollView(
+                  child: Container(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    height: 600,
+                    child: Column(
+                      children: [
+                        Text(
+                          'Equipment/Vehicle Information',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Container(
+                              width: 200,
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'Name',
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Container(
+                              width: 100,
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'Year',
+                                ),
+                                keyboardType: TextInputType.number,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            SizedBox(
+                              width: 200,
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'Serial Number',
+                                ),
+                              ),
+                            ),
+                            DropdownButton<String>(
+                              value: selectedEquipmentType,
+                              hint: Text('Select Equipment'),
+                              items: <String>[
+                                'Vehicle',
+                                'Small Mower',
+                                'Large Mower',
+                                'Leaf Blower',
+                              ].map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedEquipmentType = newValue!;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              primary: Colors.black45,
+                              onPrimary: Colors.white,
+                              textStyle: TextStyle(fontSize: 18)),
+                          onPressed: () {
+                            // Access the selected dropdown value here
+                            print('Selected Equipment: $selectedEquipmentType');
+                            // Add your code for the button press here
+                            print('Add equipment clicked!!');
+                          },
+                          child: Text('Add New Equipment'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              });
         },
         child: Icon(Icons.add),
       ),
