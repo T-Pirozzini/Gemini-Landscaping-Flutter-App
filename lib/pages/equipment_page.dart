@@ -16,6 +16,7 @@ enum Priority { low, medium, high }
 
 class _EquipmentPageState extends State<EquipmentPage> {
   String priority = 'low';
+  String dropdownValue = 'Truck';
 
   @override
   Widget build(BuildContext context) {
@@ -115,142 +116,142 @@ class _EquipmentPageState extends State<EquipmentPage> {
           TextEditingController yearController = TextEditingController();
           TextEditingController serialNumberController =
               TextEditingController();
+
           showModalBottomSheet(
-              isScrollControlled: true,
-              context: context,
-              builder: (BuildContext context) {
-                String? selectedEquipmentType;
-
-                return SingleChildScrollView(
-                  child: Container(
-                    padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).viewInsets.bottom,
-                    ),
-                    height: 600,
-                    child: Padding(
-                      padding: const EdgeInsets.all(18.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Equipment/Vehicle Information',
-                            style: TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Container(
-                                width: 200,
-                                child: TextField(
-                                  controller: nameController,
-                                  decoration: InputDecoration(
-                                    labelText: 'Name',
+            isScrollControlled: true,
+            context: context,
+            builder: (BuildContext context) {
+              return StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return SingleChildScrollView(
+                    child: Container(
+                      padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom,
+                      ),
+                      height: 600,
+                      child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Equipment/Vehicle Information',
+                              style: TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Container(
+                                  width: 200,
+                                  child: TextField(
+                                    controller: nameController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Name',
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(width: 10),
-                              Container(
-                                width: 100,
-                                child: TextField(
-                                  controller: yearController,
-                                  decoration: InputDecoration(
-                                    labelText: 'Year',
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              SizedBox(
-                                width: 200,
-                                child: TextField(
-                                  controller: serialNumberController,
-                                  decoration: InputDecoration(
-                                    labelText: 'Serial Number',
+                                SizedBox(width: 10),
+                                Container(
+                                  width: 100,
+                                  child: TextField(
+                                    controller: yearController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Year',
+                                    ),
+                                    keyboardType: TextInputType.number,
                                   ),
                                 ),
-                              ),
-                              DropdownButton<String>(
-                                value: selectedEquipmentType,
-                                hint: Text(selectedEquipmentType ??
-                                    'Select Equipment'),
-                                items: <String>[
-                                  'Truck',
-                                  'trailer',
-                                  'Mower (push)',
-                                  'Mower (ride-on)',
-                                  'Blower',
-                                  'Trimmer',
-                                  'Hedger',
-                                  'Edger',
-                                  'Tool (other)',
-                                  'Machine (other)',
-                                  'Vehicle (other)',
-                                ].map((String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                                onChanged: (String? newValue) {
-                                  setState(() {
-                                    selectedEquipmentType = newValue!;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 20),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                primary: Colors.black45,
-                                onPrimary: Colors.white,
-                                textStyle: TextStyle(fontSize: 18)),
-                            onPressed: () async {
-                              // Access the selected dropdown value here
-                              print(
-                                  'Selected Equipment: $selectedEquipmentType');
-                              // Add your code for the button press here
-                              print('Add equipment clicked!!');
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                SizedBox(
+                                  width: 200,
+                                  child: TextField(
+                                    controller: serialNumberController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Serial Number',
+                                    ),
+                                  ),
+                                ),
+                                DropdownButton<String>(
+                                  value: dropdownValue,
+                                  hint: Text(
+                                    'Select Equipment',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                  items: <String>[
+                                    'Truck',
+                                    'Trailer',
+                                    'Mower (push)',
+                                    'Mower (ride-on)',
+                                    'Blower',
+                                    'Trimmer',
+                                    'Hedger',
+                                    'Edger',
+                                    'Tool (other)',
+                                    'Machine (other)',
+                                    'Vehicle (other)',
+                                  ].map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      dropdownValue = newValue!;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 20),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  primary: Colors.black45,
+                                  onPrimary: Colors.white,
+                                  textStyle: TextStyle(fontSize: 18)),
+                              onPressed: () async {
+                                CollectionReference equipmentCollection =
+                                    FirebaseFirestore.instance
+                                        .collection('equipment');
 
-                              // Assuming you have a reference to your 'equipment' collection
-                              CollectionReference equipmentCollection =
-                                  FirebaseFirestore.instance
-                                      .collection('equipment');
-
-                              // Validate and parse the year input
-                              int? year;
-                              if (yearController.text.isNotEmpty) {
-                                year = int.tryParse(yearController.text);
-                                if (year == null) {
-                                  // Show an error message or handle the validation failure
-                                  print('Invalid year input');
-                                  return;
+                                // Validate and parse the year input
+                                int? year;
+                                if (yearController.text.isNotEmpty) {
+                                  year = int.tryParse(yearController.text);
+                                  if (year == null) {
+                                    // Show an error message or handle the validation failure
+                                    print('Invalid year input');
+                                    return;
+                                  }
                                 }
-                              }
 
-                              // Create a new document and set its data
-                              await equipmentCollection.add({
-                                'name': nameController.text,
-                                'year': year,
-                                'serialNumber': serialNumberController.text,
-                                'equipmentType': selectedEquipmentType,
-                              });
+                                // Create a new document and set its data
+                                await equipmentCollection.add({
+                                  'name': nameController.text,
+                                  'year': year,
+                                  'serialNumber': serialNumberController.text,
+                                  'equipmentType': dropdownValue,
+                                });
 
-                              // Close the bottom sheet after adding equipment
-                              Navigator.pop(context);
-                            },
-                            child: Text('Add New Equipment'),
-                          ),
-                        ],
+                                // Close the bottom sheet after adding equipment
+                                Navigator.pop(context);
+                              },
+                              child: Text('Add New Equipment'),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              });
+                  );
+                },
+              );
+            },
+          );
         },
         child: Icon(Icons.add),
       ),
@@ -273,99 +274,108 @@ void _showRepairEntriesDialog(
         title: Text('Repair Entries: $equipmentName'),
         content: Container(
           width: double.maxFinite,
-          child: StreamBuilder<QuerySnapshot>(
-            // Fetch repair entries for the specific equipment
-            stream: repairEntriesCollection.snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              }
+          height: 400,
+          child: SingleChildScrollView(
+            child: StreamBuilder<QuerySnapshot>(
+              // Fetch repair entries for the specific equipment
+              stream: repairEntriesCollection
+                  .orderBy('dateTime', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
 
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                }
 
-              List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
-              return ListView.builder(
-                itemCount: documents.length,
-                itemBuilder: (context, index) {
-                  Map<String, dynamic> data =
-                      documents[index].data() as Map<String, dynamic>;
-                  String description = data['description'] ?? '';
-                  String dateTime = data['dateTime'] ?? '';
-                  String priority = data['priority'] ?? 'low';
+                List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
 
-                  IconData iconData;
-                  Color iconColor;
+                return Column(
+                  children: [
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: documents.length,
+                      itemBuilder: (context, index) {
+                        Map<String, dynamic> data =
+                            documents[index].data() as Map<String, dynamic>;
+                        String description = data['description'] ?? '';
+                        String dateTime = data['dateTime'] ?? '';
+                        String priority = data['priority'] ?? 'low';
 
-                  // Set the icon based on the priority value
-                  switch (priority) {
-                    case 'low':
-                      iconData = Icons.error;
-                      iconColor = Colors.yellow;
-                      break;
-                    case 'medium':
-                      // Add an appropriate medium priority icon and color
-                      iconData = Icons.warning;
-                      iconColor = Colors.orange;
-                      break;
-                    case 'high':
-                      iconData = Icons.report;
-                      iconColor = Colors.red;
-                      break;
-                    case 'resolved':
-                      iconData = Icons.check_circle;
-                      iconColor = Colors.green;
-                      break;
-                    default:
-                      iconData = Icons.device_unknown;
-                      iconColor = Colors.grey;
-                  }
+                        IconData iconData;
+                        Color iconColor;
 
-                  return ListTile(
-                    title: Text(
-                      '#${index + 1}: $dateTime',
-                      style: TextStyle(
-                        fontSize: 14,
-                      ),
-                    ),
-                    subtitle: Text('$description'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          iconData,
-                          color: iconColor,
-                        ),
-                        SizedBox(width: 10),
-                        if (priority != 'resolved')
-                          ElevatedButton(
-                            onPressed: () async {
-                              // Update the repair status to "resolved" in the database
-                              await repairEntriesCollection
-                                  .doc(documents[index].id)
-                                  .update({
-                                'priority': 'resolved',
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.grey, // Button background color
-                              onPrimary: Colors.white, // Text color
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 12), // Button padding
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    8), // Button border radius
-                              ),
+                        // Set the icon based on the priority value
+                        switch (priority) {
+                          case 'low':
+                            iconData = Icons.error;
+                            iconColor = Colors.yellow;
+                            break;
+                          case 'medium':
+                            iconData = Icons.warning;
+                            iconColor = Colors.orange;
+                            break;
+                          case 'high':
+                            iconData = Icons.report;
+                            iconColor = Colors.red;
+                            break;
+                          case 'resolved':
+                            iconData = Icons.check_circle;
+                            iconColor = Colors.green;
+                            break;
+                          default:
+                            iconData = Icons.device_unknown;
+                            iconColor = Colors.grey;
+                        }
+
+                        return ListTile(
+                          title: Text(
+                            '#${index + 1}: $dateTime',
+                            style: TextStyle(
+                              fontSize: 14,
                             ),
-                            child: Text('Repaired?'),
                           ),
-                      ],
+                          subtitle: Text('$description'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                iconData,
+                                color: iconColor,
+                              ),
+                              SizedBox(width: 10),
+                              if (priority != 'resolved')
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    // Update the repair status to "resolved" in the database
+                                    await repairEntriesCollection
+                                        .doc(documents[index].id)
+                                        .update({
+                                      'priority': 'resolved',
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.grey,
+                                    onPrimary: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Icon(Icons.check, size: 16),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              );
-            },
+                    SizedBox(height: 20),
+                  ],
+                );
+              },
+            ),
           ),
         ),
         actions: <Widget>[
