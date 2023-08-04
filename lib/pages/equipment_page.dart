@@ -43,7 +43,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
               name: data['name'] ?? '',
               year: data['year'] ?? 0,
               equipment: data['equipment'] ?? '',
-              serialNumber: data['serialNumber'] ?? 0,
+              serialNumber: data['serialNumber'] ?? '',
             );
           }).toList();
 
@@ -111,8 +111,10 @@ class _EquipmentPageState extends State<EquipmentPage> {
         mini: true,
         shape: ShapeBorder.lerp(RoundedRectangleBorder(), CircleBorder(), 0.5),
         onPressed: () {
-          // Add your code to handle the button press here
-          print('Add equipment clicked!!');
+          TextEditingController nameController = TextEditingController();
+          TextEditingController yearController = TextEditingController();
+          TextEditingController serialNumberController =
+              TextEditingController();
           showModalBottomSheet(
               isScrollControlled: true,
               context: context,
@@ -125,84 +127,125 @@ class _EquipmentPageState extends State<EquipmentPage> {
                       bottom: MediaQuery.of(context).viewInsets.bottom,
                     ),
                     height: 600,
-                    child: Column(
-                      children: [
-                        Text(
-                          'Equipment/Vehicle Information',
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Container(
-                              width: 200,
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  labelText: 'Name',
+                    child: Padding(
+                      padding: const EdgeInsets.all(18.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Equipment/Vehicle Information',
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Container(
+                                width: 200,
+                                child: TextField(
+                                  controller: nameController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Name',
+                                  ),
                                 ),
                               ),
-                            ),
-                            SizedBox(width: 10),
-                            Container(
-                              width: 100,
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  labelText: 'Year',
-                                ),
-                                keyboardType: TextInputType.number,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            SizedBox(
-                              width: 200,
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  labelText: 'Serial Number',
+                              SizedBox(width: 10),
+                              Container(
+                                width: 100,
+                                child: TextField(
+                                  controller: yearController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Year',
+                                  ),
+                                  keyboardType: TextInputType.number,
                                 ),
                               ),
-                            ),
-                            DropdownButton<String>(
-                              value: selectedEquipmentType,
-                              hint: Text('Select Equipment'),
-                              items: <String>[
-                                'Vehicle',
-                                'Small Mower',
-                                'Large Mower',
-                                'Leaf Blower',
-                              ].map((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  selectedEquipmentType = newValue!;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              primary: Colors.black45,
-                              onPrimary: Colors.white,
-                              textStyle: TextStyle(fontSize: 18)),
-                          onPressed: () {
-                            // Access the selected dropdown value here
-                            print('Selected Equipment: $selectedEquipmentType');
-                            // Add your code for the button press here
-                            print('Add equipment clicked!!');
-                          },
-                          child: Text('Add New Equipment'),
-                        ),
-                      ],
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              SizedBox(
+                                width: 200,
+                                child: TextField(
+                                  controller: serialNumberController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Serial Number',
+                                  ),
+                                ),
+                              ),
+                              DropdownButton<String>(
+                                value: selectedEquipmentType,
+                                hint: Text('Select Equipment'),
+                                items: <String>[
+                                  'Vehicle',
+                                  'trailer',
+                                  'Mower (push)',
+                                  'Mower (ride-on)',
+                                  'Blower',
+                                  'Trimmer',
+                                  'Hedger',
+                                  'Edger',
+                                  'Tool (other)',
+                                  'Machine (other)',
+                                  'Vehicle (other)',
+                                ].map((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    selectedEquipmentType = newValue!;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 20),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                primary: Colors.black45,
+                                onPrimary: Colors.white,
+                                textStyle: TextStyle(fontSize: 18)),
+                            onPressed: () async {
+                              // Access the selected dropdown value here
+                              print(
+                                  'Selected Equipment: $selectedEquipmentType');
+                              // Add your code for the button press here
+                              print('Add equipment clicked!!');
+
+                              // Assuming you have a reference to your 'equipment' collection
+                              CollectionReference equipmentCollection =
+                                  FirebaseFirestore.instance
+                                      .collection('equipment');
+
+                              // Validate and parse the year input
+                              int? year;
+                              if (yearController.text.isNotEmpty) {
+                                year = int.tryParse(yearController.text);
+                                if (year == null) {
+                                  // Show an error message or handle the validation failure
+                                  print('Invalid year input');
+                                  return;
+                                }
+                              }
+
+                              // Create a new document and set its data
+                              await equipmentCollection.add({
+                                'name': nameController.text,
+                                'year': year,
+                                'serialNumber': serialNumberController.text,
+                                'equipmentType': selectedEquipmentType,
+                              });
+
+                              // Close the bottom sheet after adding equipment
+                              Navigator.pop(context);
+                            },
+                            child: Text('Add New Equipment'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -399,21 +442,32 @@ void _addRepairReport(BuildContext context, String equipmentName,
 // Function to get the icon based on the type of equipment
 Widget _getEquipmentIcon(String equipment) {
   switch (equipment) {
-    case "mower_small":
+    case "Mower (ride-on)":
       return Image.asset('assets/equipment/mower_small.png',
           width: 32, height: 32);
-    case "mower_large":
+    case "Mower (push)":
       return Image.asset('assets/equipment/mower_large.png',
           width: 32, height: 32);
-    case "blower":
+    case "Blower":
       return Image.asset('assets/equipment/blower.png', width: 32, height: 32);
-    case "trimmer":
+    case "Trimmer":
       return Image.asset('assets/equipment/trimmer.png', width: 32, height: 32);
-    case "saw":
+    case "Hedger":
       return Image.asset('assets/equipment/saw.png', width: 32, height: 32);
-    case "truck":
+    case "Edger":
+      return Image.asset('assets/equipment/saw.png', width: 32, height: 32);
+    case "Tool (other)":
+      return Image.asset('assets/equipment/tool_other.png',
+          width: 32, height: 32);
+    case "Vehicle (other)":
+      return Image.asset('assets/equipment/vehicle_other.png',
+          width: 32, height: 32);
+    case "Machine (other)":
+      return Image.asset('assets/equipment/machine_other.png',
+          width: 32, height: 32);
+    case "Truck":
       return Image.asset('assets/equipment/truck.png', width: 32, height: 32);
-    case "trailer":
+    case "Trailer":
       return Image.asset('assets/equipment/trailer.png', width: 32, height: 32);
     default:
       return Icon(Icons.device_unknown, size: 32);
