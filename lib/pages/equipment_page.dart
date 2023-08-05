@@ -82,20 +82,36 @@ class _EquipmentPageState extends State<EquipmentPage> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("Submit"),
-                            Text("Report"),
-                          ],
-                        ),
                         IconButton(
                           icon: Icon(Icons.add_box_outlined),
-                          color: Colors.red.shade400, // Add repair report icon
+                          color: Colors.green.shade400,
                           onPressed: () {
                             // Perform action when the icon is clicked
                             _addRepairReport(
                                 context, equipment.name, document.id, priority);
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.edit),
+                          color: Colors.grey.shade600, // Add repair report icon
+                          onPressed: () {
+                            // Perform action when the icon is clicked
+                            _editEquipment(
+                                context,
+                                equipment.name,
+                                equipment.year,
+                                equipment.serialNumber,
+                                equipment.equipment,
+                                document.id);
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          color: Colors.grey, // Add repair report icon
+                          onPressed: () {
+                            // Perform action when the icon is clicked
+                            _deleteEquipment(
+                                context, equipment.name, document.id);
                           },
                         ),
                       ],
@@ -482,6 +498,149 @@ void _addRepairReport(BuildContext context, String equipmentName,
             ],
           );
         },
+      );
+    },
+  );
+}
+
+void _editEquipment(context, String equipmentName, int equipmentYear,
+    String equipmentSerialNum, String equipmentType, String documentId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      TextEditingController equipmentNameController =
+          TextEditingController(text: equipmentName);
+      TextEditingController equipmentYearController =
+          TextEditingController(text: equipmentYear.toString());
+      TextEditingController equipmentSerialNumController =
+          TextEditingController(text: equipmentSerialNum);
+      String dropdownValue = equipmentType;
+
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return AlertDialog(
+            title: Text('Edit Equipment'),
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextField(
+                    controller: equipmentNameController,
+                    decoration: InputDecoration(
+                      labelText: 'Equipment Name',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: equipmentYearController,
+                    decoration: InputDecoration(
+                      labelText: 'Equipment Year',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: equipmentSerialNumController,
+                    decoration: InputDecoration(
+                      labelText: 'Serial Number',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  DropdownButton<String>(
+                    value: dropdownValue,
+                    hint: Text(
+                      'Select Equipment Type',
+                    ),
+                    items: <String>[
+                      'Truck',
+                      'Trailer',
+                      'Mower (push)',
+                      'Mower (ride-on)',
+                      'Blower',
+                      'Trimmer',
+                      'Hedger',
+                      'Edger',
+                      'Tool (other)',
+                      'Machine (other)',
+                      'Vehicle (other)',
+                    ].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        dropdownValue = newValue!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  String newEquipmentName = equipmentNameController.text;
+                  if (newEquipmentName.isNotEmpty) {
+                    // Update the equipment name in Firestore
+                    await FirebaseFirestore.instance
+                        .collection('equipment')
+                        .doc(documentId)
+                        .update({
+                      'name': newEquipmentName,
+                      'year': int.parse(equipmentYearController.text),
+                      'serialNumber': equipmentSerialNumController.text,
+                      'equipmentType': dropdownValue,
+                    });
+                  }
+                  Navigator.of(context).pop();
+                },
+                child: Text('Submit'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+void _deleteEquipment(
+    BuildContext context, String equipmentName, String documentId) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Delete Equipment', textAlign: TextAlign.center),
+        content:
+            Text('Are you sure you want to delete this equipment/vehicle?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              // Delete the equipment from Firestore
+              await FirebaseFirestore.instance
+                  .collection('equipment')
+                  .doc(documentId)
+                  .delete();
+              Navigator.of(context).pop();
+            },
+            child: Text('Delete'),
+          ),
+        ],
       );
     },
   );
