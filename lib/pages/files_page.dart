@@ -114,25 +114,39 @@ class _SiteFilesState extends State<SiteFiles> {
                           style: GoogleFonts.montserrat(fontSize: 12),
                         ),
                       ),
-                      child: Center(
-                        child: imageURL != null
-                            ? Container(
-                                padding: EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Image.network(
-                                  imageURL,
-                                  fit: BoxFit.contain,
-                                  height: 100,
-                                ),
-                              )
-                            : Icon(
-                                Icons.grass_outlined,
-                                color: Colors.green,
-                                size: 100,
-                              ),
+                      child: Stack(
+                        children: [
+                          Center(
+                            child: imageURL != null
+                                ? Container(
+                                    padding: EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    child: Image.network(
+                                      imageURL,
+                                      fit: BoxFit.contain,
+                                      height: 100,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.grass_outlined,
+                                    color: Colors.green,
+                                    size: 100,
+                                  ),
+                          ),
+                          Align(
+                            alignment: Alignment.bottomRight,
+                            child: IconButton(
+                              icon: Icon(Icons.edit),
+                              onPressed: () {
+                                // Call your edit function here
+                                _editReport(context, report, imageURL);
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -144,4 +158,69 @@ class _SiteFilesState extends State<SiteFiles> {
       ),
     );
   }
+}
+
+void _editReport(
+    BuildContext context, DocumentSnapshot report, String? imageURL) {
+  List<String> iconUrls = [
+    // Add your list of network URLs here
+    'https://www.northpointnanaimo.ca/theme/orca/images/logos/Logo-Skyline-Living.png',
+    'https://www.lifetimenetworks.org/wp-content/uploads/2016/02/Country-Grocer-logo.png',
+    'https://colyvanpacific.com/wp-content/uploads/2021/02/cropped-cp-web-logo-500px-200x200-1.png',
+    'https://shared-s3.property.ca/public/images/managements/pacific-quorum-properties-inc/pacific-quorum-properties-inc-original-1.jpg'
+    // ...
+  ];
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Edit Report'),
+        content: Container(
+          width: 300, // Adjust the width as needed
+          height: 300, // Adjust the height as needed
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+            ),
+            itemCount: iconUrls.length,
+            itemBuilder: (BuildContext context, int index) {
+              String iconUrl = iconUrls[index];
+              return GestureDetector(
+                onTap: () async {
+                  // Update the imageURL in the database
+                  await report.reference.update({
+                    'info.imageURL': iconUrl,
+                  });
+
+                  Navigator.of(context).pop(); // Close the dialog
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Image.network(
+                    iconUrl,
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel'),
+          ),
+        ],
+      );
+    },
+  );
 }
