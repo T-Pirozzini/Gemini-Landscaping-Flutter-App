@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'edit_report_page.dart';
 import 'pdf_page.dart';
 
 // ignore: must_be_immutable
@@ -507,7 +508,33 @@ class _ViewReportState extends State<ViewReport> {
                       );
                     },
                     child: const Text(
-                      "PDF REPORT",
+                      "GENERATE PDF",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Color.fromARGB(255, 251, 251, 251),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 15),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Color.fromARGB(255, 20, 177, 54),
+                  ),
+                  child: MaterialButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => EditReport(
+                            docid: docid,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      "EDIT REPORT",
                       style: TextStyle(
                         fontSize: 18,
                         color: Color.fromARGB(255, 251, 251, 251),

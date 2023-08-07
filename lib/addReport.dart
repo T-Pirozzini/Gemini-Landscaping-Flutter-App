@@ -329,15 +329,6 @@ class _AddReportState extends State<AddReport> {
     super.dispose();
   }
 
-// I dont think this is being used - delete if no bug testing errors
-  // Future<void> getData() async {
-  //   // Get docs from collection reference
-  //   QuerySnapshot querySnapshot = await reportRef.get();
-
-  //   // Get data from docs and convert map to List
-  //   final allData = querySnapshot.docs.map((doc) => doc.data()).toList();
-  // }
-
   TimeOfDay? timeOn1 = TimeOfDay.now();
   TimeOfDay? timeOff1 = TimeOfDay.now();
   TimeOfDay? timeOn2 = TimeOfDay.now();
