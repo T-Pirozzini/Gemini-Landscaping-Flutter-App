@@ -347,7 +347,7 @@ class _ViewReportState extends State<ViewReport> {
                       Container(
                         alignment: Alignment.center,
                         child: Text(
-                          "${(((Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1])))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1])))).toString().padLeft(2, '0').substring(0, 4)}",
+                          "${(((Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1])))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1])))).toString().padLeft(2, '0').substring(0, 5)}",
                           style: GoogleFonts.montserrat(fontSize: 18),
                         ),
                       ),
@@ -494,19 +494,29 @@ class _ViewReportState extends State<ViewReport> {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Color.fromARGB(255, 20, 177, 54),
+                    color: FirebaseAuth.instance.currentUser?.uid ==
+                                "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                            FirebaseAuth.instance.currentUser?.uid ==
+                                "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
+                        ? Color.fromARGB(255, 20, 177, 54)
+                        : Colors.grey[400],
                   ),
                   child: MaterialButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SiteReport(
-                            docid: docid,
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: (FirebaseAuth.instance.currentUser?.uid ==
+                                "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                            FirebaseAuth.instance.currentUser?.uid ==
+                                "4Qpgb3aORKhUVXjgT2SNh6zgCWE3")
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => SiteReport(
+                                  docid: docid,
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
                     child: const Text(
                       "GENERATE PDF",
                       style: TextStyle(
@@ -520,10 +530,20 @@ class _ViewReportState extends State<ViewReport> {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Color.fromARGB(255, 20, 177, 54),
+                    color: FirebaseAuth.instance.currentUser?.uid ==
+                                "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                            FirebaseAuth.instance.currentUser?.uid ==
+                                "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
+                        ? Color.fromARGB(255, 20, 177, 54)
+                        : Colors.grey[400],
                   ),
                   child: MaterialButton(
-                    onPressed: _navigateToEditReport,
+                    onPressed: FirebaseAuth.instance.currentUser?.uid ==
+                                "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                            FirebaseAuth.instance.currentUser?.uid ==
+                                "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
+                        ? _navigateToEditReport
+                        : null,
                     child: const Text(
                       "EDIT REPORT",
                       style: TextStyle(
@@ -533,9 +553,16 @@ class _ViewReportState extends State<ViewReport> {
                     ),
                   ),
                 ),
-                SizedBox(width: 15),
+              ],
+            ),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
                 FirebaseAuth.instance.currentUser?.uid ==
-                        "5wwYztIxTifV0EQk3N7dfXsY0jm1"
+                            "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                        FirebaseAuth.instance.currentUser?.uid ==
+                            "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
                     ? Container(
                         decoration: BoxDecoration(
                           color: Colors.grey[600],
