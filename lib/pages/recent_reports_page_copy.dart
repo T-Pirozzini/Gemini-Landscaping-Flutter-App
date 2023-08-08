@@ -148,7 +148,7 @@ class _RecentReportsPageCopyState extends State<RecentReportsPageCopy>
                                 return Text(
                                   siteName,
                                   style: TextStyle(
-                                    fontSize: 24,
+                                    fontSize: 22,
                                   ),
                                 );
                               },

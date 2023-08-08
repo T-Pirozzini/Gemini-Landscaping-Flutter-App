@@ -523,16 +523,7 @@ class _ViewReportState extends State<ViewReport> {
                     color: Color.fromARGB(255, 20, 177, 54),
                   ),
                   child: MaterialButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => EditReport(
-                            docid: docid,
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: _navigateToEditReport,
                     child: const Text(
                       "EDIT REPORT",
                       style: TextStyle(
@@ -570,5 +561,27 @@ class _ViewReportState extends State<ViewReport> {
         ),
       ),
     );
+  }
+
+  Future<void> _navigateToEditReport() async {
+    Navigator.pop(context);
+    final updatedData = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditReport(
+          docid: docid,
+        ),
+      ),
+    );
+
+    if (updatedData != null) {
+      setState(() {
+        // Update UI with the received updated data
+        docid["info"]["siteName"] = updatedData["siteName"];
+        docid["info"]["address"] = updatedData["address"];
+        docid["info"]["date"] = updatedData["date"];
+        // ... update other fields
+      });
+    }
   }
 }

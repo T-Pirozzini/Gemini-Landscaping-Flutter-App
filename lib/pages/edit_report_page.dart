@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gemini_landscaping_app/pages/view_report_page.dart';
 
 class EditReport extends StatefulWidget {
   final DocumentSnapshot docid;
@@ -29,28 +30,28 @@ class _EditReportState extends State<EditReport> {
 
   // Implement the logic to update and save data to the database
   void updateReport() {
-  // Get edited values from controllers
-  String updatedName = _siteNameController.text;
-  String updatedAddress = _addressController.text;
-  String updatedDate = _dateController.text;
-  // ... get updated values for other fields
+    // Get edited values from controllers
+    String updatedName = _siteNameController.text;
+    String updatedAddress = _addressController.text;
+    String updatedDate = _dateController.text;
+    // ... get updated values for other fields
 
-  // Update Firestore document with new values
-  widget.docid.reference.update({
-    "info": {
-      'siteName': updatedName,
-      'date': updatedDate,
-      'address': updatedAddress,
-    },
-    // ... update other fields
-  }).then((_) {
-    // Data updated successfully, navigate back
-    Navigator.pop(context);
-  }).catchError((error) {
-    // Handle error if necessary
-    print("Error updating data: $error");
-  });
-}
+    // Update Firestore document with new values
+    widget.docid.reference.update({
+      "info": {
+        'siteName': updatedName,
+        'date': updatedDate,
+        'address': updatedAddress,
+      },
+      // ... update other fields
+    }).then((_) {
+      // Data updated successfully, navigate back
+      Navigator.pop(context);
+    }).catchError((error) {
+      // Handle error if necessary
+      print("Error updating data: $error");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
