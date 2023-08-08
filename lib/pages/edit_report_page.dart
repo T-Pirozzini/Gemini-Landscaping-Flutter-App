@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gemini_landscaping_app/pages/view_report_page.dart';
 import 'package:flutter/services.dart';
 
 class EditReport extends StatefulWidget {
@@ -184,13 +183,11 @@ class _EditReportState extends State<EditReport> {
                         child: TextFormField(
                           controller: _timeOn1Controller,
                           decoration: InputDecoration(labelText: 'Time On'),
-                          keyboardType: TextInputType.number,
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(
                                 r'[0-9:]')), // Allow only digits and colons
                             LengthLimitingTextInputFormatter(
                                 5), // Limit input length to 5 characters (e.g., 00:00)
-                            _TimeInputFormatter(), // Custom input formatter for time format
                           ],
                         ),
                       ),
@@ -198,13 +195,10 @@ class _EditReportState extends State<EditReport> {
                         child: TextFormField(
                           controller: _timeOff1Controller,
                           decoration: InputDecoration(labelText: 'Time Off'),
-                          keyboardType: TextInputType.number,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(
-                                r'[0-9:]')), 
-                            LengthLimitingTextInputFormatter(
-                                5), 
-                            _TimeInputFormatter(), 
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9:]')),
+                            LengthLimitingTextInputFormatter(5),
                           ],
                         ),
                       ),
@@ -222,13 +216,10 @@ class _EditReportState extends State<EditReport> {
                         child: TextFormField(
                           controller: _timeOn2Controller,
                           decoration: InputDecoration(labelText: 'Time On'),
-                          keyboardType: TextInputType.number,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(
-                                r'[0-9:]')), 
-                            LengthLimitingTextInputFormatter(
-                                5), 
-                            _TimeInputFormatter(), 
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9:]')),
+                            LengthLimitingTextInputFormatter(5),
                           ],
                         ),
                       ),
@@ -236,13 +227,10 @@ class _EditReportState extends State<EditReport> {
                         child: TextFormField(
                           controller: _timeOff2Controller,
                           decoration: InputDecoration(labelText: 'Time Off'),
-                          keyboardType: TextInputType.number,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(
-                                r'[0-9:]')), 
-                            LengthLimitingTextInputFormatter(
-                                5), 
-                            _TimeInputFormatter(), 
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9:]')),
+                            LengthLimitingTextInputFormatter(5),
                           ],
                         ),
                       ),
@@ -260,13 +248,10 @@ class _EditReportState extends State<EditReport> {
                         child: TextFormField(
                           controller: _timeOn3Controller,
                           decoration: InputDecoration(labelText: 'Time On'),
-                          keyboardType: TextInputType.number,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(
-                                r'[0-9:]')), 
-                            LengthLimitingTextInputFormatter(
-                                5), 
-                            _TimeInputFormatter(),
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9:]')),
+                            LengthLimitingTextInputFormatter(5),
                           ],
                         ),
                       ),
@@ -274,13 +259,10 @@ class _EditReportState extends State<EditReport> {
                         child: TextFormField(
                           controller: _timeOff3Controller,
                           decoration: InputDecoration(labelText: 'Time Off'),
-                          keyboardType: TextInputType.number,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(
-                                r'[0-9:]')), 
-                            LengthLimitingTextInputFormatter(
-                                5), 
-                            _TimeInputFormatter(), 
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9:]')),
+                            LengthLimitingTextInputFormatter(5),
                           ],
                         ),
                       ),
@@ -298,13 +280,10 @@ class _EditReportState extends State<EditReport> {
                         child: TextFormField(
                           controller: _timeOn4Controller,
                           decoration: InputDecoration(labelText: 'Time On'),
-                          keyboardType: TextInputType.number,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(
-                                r'[0-9:]')), 
-                            LengthLimitingTextInputFormatter(
-                                5), 
-                            _TimeInputFormatter(), 
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9:]')),
+                            LengthLimitingTextInputFormatter(5),
                           ],
                         ),
                       ),
@@ -312,13 +291,10 @@ class _EditReportState extends State<EditReport> {
                         child: TextFormField(
                           controller: _timeOff4Controller,
                           decoration: InputDecoration(labelText: 'Time Off'),
-                          keyboardType: TextInputType.number,
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(
-                                r'[0-9:]')), 
-                            LengthLimitingTextInputFormatter(
-                                5), 
-                            _TimeInputFormatter(), 
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9:]')),
+                            LengthLimitingTextInputFormatter(5),
                           ],
                         ),
                       ),
@@ -344,33 +320,6 @@ class _EditReportState extends State<EditReport> {
           );
         },
       ),
-    );
-  }
-}
-
-class _TimeInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    final text = newValue.text;
-
-    if (text.isEmpty) {
-      return newValue;
-    }
-
-    // Split the input text into hours and minutes
-    final parts = text.split(':');
-    if (parts.length > 2) {
-      return oldValue; // Reject input with more than one colon
-    }
-
-    final hours = int.tryParse(parts[0]) ?? 0;
-    final minutes = int.tryParse(parts.length > 1 ? parts[1] : '') ?? 0;
-
-    final formattedValue = '$hours:${minutes.toString().padLeft(2, '0')}';
-    return newValue.copyWith(
-      text: formattedValue,
-      selection: TextSelection.collapsed(offset: formattedValue.length),
     );
   }
 }

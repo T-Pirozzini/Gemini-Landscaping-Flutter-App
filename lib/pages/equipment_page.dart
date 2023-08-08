@@ -186,7 +186,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Container(
-                                  width: 200,
+                                  width: 150,
                                   child: TextField(
                                     controller: nameController,
                                     decoration: InputDecoration(
@@ -196,7 +196,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
                                 ),
                                 SizedBox(width: 10),
                                 Container(
-                                  width: 100,
+                                  width: 80,
                                   child: TextField(
                                     controller: yearController,
                                     decoration: InputDecoration(
@@ -211,7 +211,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 SizedBox(
-                                  width: 200,
+                                  width: 150,
                                   child: TextField(
                                     controller: serialNumberController,
                                     decoration: InputDecoration(
