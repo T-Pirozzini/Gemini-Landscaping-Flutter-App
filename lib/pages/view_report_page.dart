@@ -39,9 +39,10 @@ class _ViewReportState extends State<ViewReport> {
               onPressed: () {
                 widget.docid.reference.delete().whenComplete(
                   () {
-                    Navigator.pushReplacement(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (_) => Home()),
+                      (route) => false,
                     );
                   },
                 );
@@ -506,7 +507,7 @@ class _ViewReportState extends State<ViewReport> {
                                 "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
                             FirebaseAuth.instance.currentUser?.uid ==
                                 "4Qpgb3aORKhUVXjgT2SNh6zgCWE3")
-                        ? () {
+                        ? () async {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -515,15 +516,33 @@ class _ViewReportState extends State<ViewReport> {
                                 ),
                               ),
                             );
+                            // Update the field in Firestore
+                            try {
+                              await FirebaseFirestore.instance
+                                  .collection('SiteReports2023')
+                                  .doc(widget.docid.id)
+                                  .set(
+                                {'filed': true},
+                                SetOptions(merge: true),
+                              );
+                            } catch (error) {
+                              print('Error updating document: $error');
+                            }
                           }
                         : null,
-                    child: const Text(
+                    child: Text(
                       "GENERATE PDF",
                       style: TextStyle(
                         fontSize: 18,
-                        color: Color.fromARGB(255, 251, 251, 251),
+                        color: Colors.white,
                       ),
                     ),
+                    elevation: 0,
+                    color: ((widget.docid.data()
+                                as Map<String, dynamic>?)?['filed'] ==
+                            true)
+                        ? Colors.green.shade200
+                        : Color.fromARGB(255, 20, 177, 54),
                   ),
                 ),
                 SizedBox(width: 15),
