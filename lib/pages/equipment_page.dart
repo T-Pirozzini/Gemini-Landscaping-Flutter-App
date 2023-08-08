@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 // import '../models/repair_model.dart';
 
@@ -26,6 +27,17 @@ class _EquipmentPageState extends State<EquipmentPage> {
         FirebaseFirestore.instance.collection('equipment');
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Vehicles & Equipment",
+            style: GoogleFonts.montserrat(
+                fontSize: 18,
+                color: Colors.black,
+                fontWeight: FontWeight.w500)),
+        toolbarHeight: 25,
+        backgroundColor: Colors.green.shade100,
+        elevation: 0,
+        centerTitle: true,
+      ),
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.grey.shade200,
       body: StreamBuilder<QuerySnapshot>(
@@ -186,7 +198,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Container(
-                                  width: 200,
+                                  width: 150,
                                   child: TextField(
                                     controller: nameController,
                                     decoration: InputDecoration(
@@ -196,7 +208,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
                                 ),
                                 SizedBox(width: 10),
                                 Container(
-                                  width: 100,
+                                  width: 80,
                                   child: TextField(
                                     controller: yearController,
                                     decoration: InputDecoration(
@@ -211,7 +223,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 SizedBox(
-                                  width: 200,
+                                  width: 150,
                                   child: TextField(
                                     controller: serialNumberController,
                                     decoration: InputDecoration(
