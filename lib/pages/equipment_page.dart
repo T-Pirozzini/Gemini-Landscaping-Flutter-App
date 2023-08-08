@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
@@ -109,9 +110,35 @@ class _EquipmentPageState extends State<EquipmentPage> {
                           icon: Icon(Icons.delete),
                           color: Colors.grey, // Add repair report icon
                           onPressed: () {
-                            // Perform action when the icon is clicked
-                            _deleteEquipment(
-                                context, equipment.name, document.id);
+                            if (FirebaseAuth.instance.currentUser?.uid ==
+                                    "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                                FirebaseAuth.instance.currentUser?.uid ==
+                                    "4Qpgb3aORKhUVXjgT2SNh6zgCWE3") {
+                              _deleteEquipment(
+                                  context,
+                                  equipment.name,
+                                  document.id,
+                                  FirebaseAuth.instance.currentUser!.uid);
+                            } else {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Error'),
+                                    content: Text(
+                                        'You do not have permission to delete equipment'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
                           },
                         ),
                       ],
@@ -613,8 +640,8 @@ void _editEquipment(context, String equipmentName, int equipmentYear,
   );
 }
 
-void _deleteEquipment(
-    BuildContext context, String equipmentName, String documentId) {
+void _deleteEquipment(BuildContext context, String equipmentName,
+    String documentId, String userId) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -629,17 +656,19 @@ void _deleteEquipment(
             },
             child: Text('Cancel'),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              // Delete the equipment from Firestore
-              await FirebaseFirestore.instance
-                  .collection('equipment')
-                  .doc(documentId)
-                  .delete();
-              Navigator.of(context).pop();
-            },
-            child: Text('Delete'),
-          ),
+          if (userId == "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+              userId == "4Qpgb3aORKhUVXjgT2SNh6zgCWE3")
+            ElevatedButton(
+              onPressed: () async {
+                // Delete the equipment from Firestore
+                await FirebaseFirestore.instance
+                    .collection('equipment')
+                    .doc(documentId)
+                    .delete();
+                Navigator.of(context).pop();
+              },
+              child: Text('Delete'),
+            ),
         ],
       );
     },

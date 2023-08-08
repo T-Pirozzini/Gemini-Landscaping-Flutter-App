@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'edit_report_page.dart';
 import 'pdf_page.dart';
 
 // ignore: must_be_immutable
@@ -38,9 +39,10 @@ class _ViewReportState extends State<ViewReport> {
               onPressed: () {
                 widget.docid.reference.delete().whenComplete(
                   () {
-                    Navigator.pushReplacement(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (_) => Home()),
+                      (route) => false,
                     );
                   },
                 );
@@ -346,7 +348,7 @@ class _ViewReportState extends State<ViewReport> {
                       Container(
                         alignment: Alignment.center,
                         child: Text(
-                          "${(((Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1])))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1])))).toString().padLeft(2, '0').substring(0, 4)}",
+                          "${(((Duration(hours: int.parse(widget.docid["times"]["timeOff1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff1"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn1"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn1"].split(":")[1])))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff2"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn2"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn2"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff3"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn3"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn3"].split(":")[1]))) + (Duration(hours: int.parse(widget.docid["times"]["timeOff4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOff4"].split(":")[1])) - Duration(hours: int.parse(widget.docid["times"]["timeOn4"].split(":")[0]), minutes: int.parse(widget.docid["times"]["timeOn4"].split(":")[1])))).toString().padLeft(2, '0').substring(0, 5)}",
                           style: GoogleFonts.montserrat(fontSize: 18),
                         ),
                       ),
@@ -493,21 +495,76 @@ class _ViewReportState extends State<ViewReport> {
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: Color.fromARGB(255, 20, 177, 54),
+                    color: FirebaseAuth.instance.currentUser?.uid ==
+                                "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                            FirebaseAuth.instance.currentUser?.uid ==
+                                "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
+                        ? Color.fromARGB(255, 20, 177, 54)
+                        : Colors.grey[400],
                   ),
                   child: MaterialButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SiteReport(
-                            docid: docid,
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: (FirebaseAuth.instance.currentUser?.uid ==
+                                "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                            FirebaseAuth.instance.currentUser?.uid ==
+                                "4Qpgb3aORKhUVXjgT2SNh6zgCWE3")
+                        ? () async {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => SiteReport(
+                                  docid: docid,
+                                ),
+                              ),
+                            );
+                            // Update the field in Firestore
+                            try {
+                              await FirebaseFirestore.instance
+                                  .collection('SiteReports2023')
+                                  .doc(widget.docid.id)
+                                  .set(
+                                {'filed': true},
+                                SetOptions(merge: true),
+                              );
+                            } catch (error) {
+                              print('Error updating document: $error');
+                            }
+                          }
+                        : null,
+                    child: Text(
+                      "GENERATE PDF",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                    elevation: 0,
+                    color: ((widget.docid.data()
+                                as Map<String, dynamic>?)?['filed'] ==
+                            true)
+                        ? Colors.green.shade200
+                        : Color.fromARGB(255, 20, 177, 54),
+                  ),
+                ),
+                SizedBox(width: 15),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: FirebaseAuth.instance.currentUser?.uid ==
+                                "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                            FirebaseAuth.instance.currentUser?.uid ==
+                                "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
+                        ? Color.fromARGB(255, 20, 177, 54)
+                        : Colors.grey[400],
+                  ),
+                  child: MaterialButton(
+                    onPressed: FirebaseAuth.instance.currentUser?.uid ==
+                                "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                            FirebaseAuth.instance.currentUser?.uid ==
+                                "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
+                        ? _navigateToEditReport
+                        : null,
                     child: const Text(
-                      "PDF REPORT",
+                      "EDIT REPORT",
                       style: TextStyle(
                         fontSize: 18,
                         color: Color.fromARGB(255, 251, 251, 251),
@@ -515,9 +572,16 @@ class _ViewReportState extends State<ViewReport> {
                     ),
                   ),
                 ),
-                SizedBox(width: 15),
+              ],
+            ),
+            SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
                 FirebaseAuth.instance.currentUser?.uid ==
-                        "5wwYztIxTifV0EQk3N7dfXsY0jm1"
+                            "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                        FirebaseAuth.instance.currentUser?.uid ==
+                            "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
                     ? Container(
                         decoration: BoxDecoration(
                           color: Colors.grey[600],
@@ -543,5 +607,27 @@ class _ViewReportState extends State<ViewReport> {
         ),
       ),
     );
+  }
+
+  Future<void> _navigateToEditReport() async {
+    Navigator.pop(context);
+    final updatedData = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditReport(
+          docid: docid,
+        ),
+      ),
+    );
+
+    if (updatedData != null) {
+      setState(() {
+        // Update UI with the received updated data
+        docid["info"]["siteName"] = updatedData["siteName"];
+        docid["info"]["address"] = updatedData["address"];
+        docid["info"]["date"] = updatedData["date"];
+        // ... update other fields
+      });
+    }
   }
 }

@@ -85,6 +85,13 @@ class _SiteFoldersState extends State<SiteFolders> {
                                   fit: BoxFit.contain,
                                   height: 40,
                                   width: 40,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.grass_outlined,
+                                      color: Colors.green,
+                                      size: 40,
+                                    );
+                                  },
                                 ),
                               )
                             : Container(
