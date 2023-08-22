@@ -4,7 +4,6 @@ import 'package:gemini_landscaping_app/pages/announcement_page.dart';
 import 'package:gemini_landscaping_app/pages/folders_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
 import 'package:gemini_landscaping_app/pages/recent_reports_page_copy.dart';
-import 'package:gemini_landscaping_app/pages/recent_reports_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../auth.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';

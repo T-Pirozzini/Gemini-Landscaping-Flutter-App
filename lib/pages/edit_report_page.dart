@@ -309,8 +309,7 @@ class _EditReportState extends State<EditReport> {
                   ElevatedButton(
                     onPressed: updateReport,
                     style: ElevatedButton.styleFrom(
-                      primary: const Color.fromARGB(255, 31, 182, 77),
-                      onPrimary: Colors.white,
+                      foregroundColor: Colors.white, backgroundColor: const Color.fromARGB(255, 31, 182, 77),
                     ),
                     child: Text('Save'),
                   ),

@@ -254,8 +254,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
                             SizedBox(height: 20),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                  primary: Colors.black45,
-                                  onPrimary: Colors.white,
+                                  foregroundColor: Colors.white, backgroundColor: Colors.black45,
                                   textStyle: TextStyle(fontSize: 18)),
                               onPressed: () async {
                                 CollectionReference equipmentCollection =
@@ -401,8 +400,7 @@ void _showRepairEntriesDialog(
                                     });
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    primary: Colors.grey,
-                                    onPrimary: Colors.white,
+                                    foregroundColor: Colors.white, backgroundColor: Colors.grey,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
