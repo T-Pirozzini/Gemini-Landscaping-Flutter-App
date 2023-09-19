@@ -55,6 +55,8 @@ class _SiteReportState extends State<SiteReport> {
   var amount2;
   var amount3;
 
+  var user = '';
+
   //get current user
   final currentUser = FirebaseAuth.instance.currentUser!;
 
@@ -94,6 +96,13 @@ class _SiteReportState extends State<SiteReport> {
       amount1 = widget.docid['materials']['amount1'];
       amount2 = widget.docid['materials']['amount2'];
       amount3 = widget.docid['materials']['amount3'];
+
+    final docData = widget.docid.data() as Map<String, dynamic>;
+      final submittedByFieldExists = docData.containsKey('submittedBy') &&
+          docData['submittedBy'] != null &&
+          docData['submittedBy'].isNotEmpty;
+
+      user = submittedByFieldExists ? docData['submittedBy'] : 'unspecified';
     });
 
     super.initState();
@@ -751,7 +760,7 @@ class _SiteReportState extends State<SiteReport> {
                     ],
                   ),
                 ),
-                pw.Text('Submitted by: ${currentUser.email}'),
+                pw.Text('Submitted by: $user'),
               ],
             ),
           );

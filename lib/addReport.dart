@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -31,6 +32,7 @@ class _AddReportState extends State<AddReport> {
   String dropdownValue = '';
   String enteredSiteName = '';
   String imageURL = '';
+  final currentUser = FirebaseAuth.instance.currentUser!;
 
   @override
   void initState() {
@@ -269,6 +271,7 @@ class _AddReportState extends State<AddReport> {
         "vendor3": _vendorController3.text,
         "amount3": _amountController3.text,
       },
+      "submittedBy": currentUser.email,
     }).whenComplete(() {
       // reset all the form fields
       dateController.clear();
