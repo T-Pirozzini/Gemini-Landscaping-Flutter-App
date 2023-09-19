@@ -91,7 +91,7 @@ class _RecentReportsPageState extends State<RecentReportsPage>
               borderRadius: BorderRadius.circular(12),
             ),
             child: ListView.builder(
-              itemCount: documents.length,
+              itemCount: 50,
               itemBuilder: (_, index) {
                 return GestureDetector(
                   onTap: () {
@@ -105,84 +105,145 @@ class _RecentReportsPageState extends State<RecentReportsPage>
                   child: Column(
                     children: [
                       const SizedBox(
-                        height: 10,
+                        height: 5,
                       ),
                       Padding(
                         padding: const EdgeInsets.only(
                           left: 10,
                           right: 10,
                         ),
-                        child: ListTile(
-                          tileColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: const BorderSide(
-                              width: 2.0,
-                              color: Colors.green,
+                        child: Container(
+                          height: 65,
+                          child: ListTile(
+                            tileColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: const BorderSide(
+                                width: 2.0,
+                                color: Colors.green,
+                              ),
                             ),
-                          ),
-                          title: FutureBuilder<DocumentSnapshot>(
-                            future: FirebaseFirestore.instance
-                                .collection('SiteReports2023')
-                                .doc(documents[index].id)
-                                .get(),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<DocumentSnapshot> snapshot) {
-                              if (snapshot.hasError) {
-                                return Text('Error: ${snapshot.error}');
-                              }
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return Text('Loading...');
-                              }
-                              Map<String, dynamic>? data = snapshot.data!.data()
-                                  as Map<String, dynamic>?;
-                              if (data == null) {
-                                return Text('No data found');
-                              }
-                              String siteName = data['info']['siteName'] ?? '';
-                              return Text(
-                                siteName,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                ),
-                              );
-                            },
-                          ),
-                          subtitle: Text(
-                            'ID: ${documents[index].id.substring(documents[index].id.length - 5)}',
-                          ),
-                          trailing: FutureBuilder<DocumentSnapshot>(
-                            future: FirebaseFirestore.instance
-                                .collection('SiteReports2023')
-                                .doc(documents[index].id)
-                                .get(),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<DocumentSnapshot> snapshot) {
-                              if (snapshot.hasError) {
-                                return Text('Error: ${snapshot.error}');
-                              }
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return Text('Loading...');
-                              }
-                              Map<String, dynamic>? data = snapshot.data!.data()
-                                  as Map<String, dynamic>?;
-                              if (data == null) {
-                                return Text('No data found');
-                              }
-                              String siteDate = data['info']['date'] ?? '';
-                              return Text(
-                                siteDate,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                ),
-                              );
-                            },
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 0,
-                            horizontal: 10,
+                            title: FutureBuilder<DocumentSnapshot>(
+                              future: FirebaseFirestore.instance
+                                  .collection('SiteReports2023')
+                                  .doc(documents[index].id)
+                                  .get(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<DocumentSnapshot> snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                }
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Text('Loading...');
+                                }
+                                Map<String, dynamic>? data = snapshot.data!
+                                    .data() as Map<String, dynamic>?;
+                                if (data == null) {
+                                  return Text('No data found');
+                                }
+                                String siteName =
+                                    data['info']['siteName'] ?? '';
+                                return Text(
+                                  siteName,
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                  ),
+                                );
+                              },
+                            ),
+                            subtitle: FutureBuilder<DocumentSnapshot>(
+                              future: FirebaseFirestore.instance
+                                  .collection('SiteReports2023')
+                                  .doc(documents[index].id)
+                                  .get(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<DocumentSnapshot> snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                }
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Text('Loading...');
+                                }
+                                Map<String, dynamic>? data = snapshot.data!
+                                    .data() as Map<String, dynamic>?;
+                                if (data == null) {
+                                  return Text('No data found');
+                                }
+                                final filed = data['filed'] ?? false;
+                                return Row(
+                                  children: [
+                                    Text(
+                                      'ID: ${documents[index].id.substring(documents[index].id.length - 5)}',
+                                    ),
+                                    filed
+                                        ? Row(
+                                            children: [
+                                              Text(
+                                                ' - filed ',
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    color:
+                                                        Colors.green.shade200),
+                                              ),
+                                              Icon(
+                                                Icons.task_alt_outlined,
+                                                color: Colors.green.shade200,
+                                              )
+                                            ],
+                                          )
+                                        : Row(
+                                            children: [
+                                              Text(
+                                                ' - in progress ',
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors
+                                                        .blueGrey.shade200),
+                                              ),
+                                              Icon(
+                                                Icons.pending_outlined,
+                                                color: Colors.blueGrey.shade200,
+                                              )
+                                            ],
+                                          ),
+                                  ],
+                                );
+                              },
+                            ),
+                            trailing: FutureBuilder<DocumentSnapshot>(
+                              future: FirebaseFirestore.instance
+                                  .collection('SiteReports2023')
+                                  .doc(documents[index].id)
+                                  .get(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<DocumentSnapshot> snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text('Error: ${snapshot.error}');
+                                }
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Text('Loading...');
+                                }
+                                Map<String, dynamic>? data = snapshot.data!
+                                    .data() as Map<String, dynamic>?;
+                                if (data == null) {
+                                  return Text('No data found');
+                                }
+                                String siteDate = data['info']['date'] ?? '';
+                                return Text(
+                                  siteDate,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                );
+                              },
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 0,
+                              horizontal: 10,
+                            ),
                           ),
                         ),
                       ),
@@ -204,7 +265,7 @@ class _RecentReportsPageState extends State<RecentReportsPage>
             ? _animationController.reverse()
             : _animationController.forward(),
         iconData: Icons.add,
-        items: <Bubble>[          
+        items: <Bubble>[
           Bubble(
             title: "Site Report",
             iconColor: Colors.white,
