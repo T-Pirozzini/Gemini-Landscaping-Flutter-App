@@ -47,7 +47,7 @@ class _ExtraReportState extends State<ExtraReport> {
       );
     } else if (siteName == 'Bowen Estates' ||
         siteName == 'Riverbend Terrace' ||
-        siteName == 'Sandscapes' ||
+        siteName == 'Sandscapes Apartments' ||
         siteName == 'Valley View Terrace' ||
         siteName == 'Prideaux Manor' ||
         siteName == 'Alderwood' ||
@@ -97,9 +97,15 @@ class _ExtraReportState extends State<ExtraReport> {
         break;
       case "Prideaux Manor":
         address = "21 Prideaux Street";
-        break;
-      case "Sandscapes":
+        break;      
+      case "Sandscapes Apartments":
         address = "155 Moilliet";
+        break;
+      case "Sandscapes Townhomes":
+        address = "119 Moilliet";
+        break;
+      case "Creekside":
+        address = "500 Corfield Street South";
         break;
       case "Bowen Estates":
         address = "149-155 Wakesiah Avenue";

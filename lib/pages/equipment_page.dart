@@ -105,7 +105,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
 
                   return Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: borderColor),
+                      border: Border.all(color: borderColor, width: 2),
                       borderRadius: BorderRadius.circular(2),
                     ),
                     margin: EdgeInsets.all(5),
@@ -117,29 +117,61 @@ class _EquipmentPageState extends State<EquipmentPage> {
                       },
                       child: ListTile(
                         tileColor: Colors.white,
-                        title: Text(equipment.name),
+                        title: Text(
+                          equipment.name,
+                          style: TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Year: ${equipment.year}'),
-                            Text('ID: ${equipment.serialNumber}'),
+                            Text(
+                              'Year: ${equipment.year}',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            Text(
+                              'ID: ${equipment.serialNumber}',
+                              style: TextStyle(fontSize: 12),
+                            ),
                           ],
                         ),
                         leading: _getEquipmentIcon(equipment.equipment),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconButton(
-                              icon: Icon(Icons.add_box_outlined),
-                              color: Colors.green.shade400,
-                              onPressed: () {
-                                _addRepairReport(context, equipment.name,
-                                    document.id, priority);
-                              },
+                            Row(
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Report',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.green.shade200),
+                                    ),
+                                    Text('Damage:',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.green.shade200)),
+                                  ],
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.add_box_outlined),
+                                  color: Colors.green.shade200,
+                                  iconSize: 28,
+                                  onPressed: () {
+                                    _addRepairReport(context, equipment.name,
+                                        document.id, priority);
+                                  },
+                                ),
+                              ],
                             ),
                             IconButton(
                               icon: Icon(Icons.edit),
                               color: Colors.grey.shade600,
+                              iconSize: 18,
                               onPressed: () {
                                 _editEquipment(
                                   context,
@@ -154,6 +186,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
                             IconButton(
                               icon: Icon(Icons.delete),
                               color: Colors.grey,
+                              iconSize: 18,
                               onPressed: () {
                                 if (FirebaseAuth.instance.currentUser?.uid ==
                                         "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
