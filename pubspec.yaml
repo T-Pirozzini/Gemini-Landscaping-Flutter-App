@@ -47,7 +47,9 @@ dependencies:
   floating_action_bubble: ^1.1.4
   flutter_chat_bubble: ^2.0.2
   google_fonts: ^4.0.3
-  syncfusion_flutter_charts: ^21.1.41
+  syncfusion_flutter_charts: ^21.1.41  
+  firebase_storage: ^11.2.7
+  image_picker: ^1.0.4
 
 dev_dependencies:
   flutter_test:
