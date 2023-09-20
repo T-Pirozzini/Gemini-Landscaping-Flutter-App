@@ -295,8 +295,8 @@ class _RecentReportsPageState extends State<RecentReportsPage>
             icon: Icons.add_a_photo_outlined,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const UploadPhotos()));
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (_) => UploadPhotos()));
             },
           ),
         ],
