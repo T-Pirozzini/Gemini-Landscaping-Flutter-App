@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:lottie/lottie.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -39,8 +38,8 @@ class _UploadPhotosState extends State<UploadPhotos> {
         final Uint8List compressedImageData =
             await FlutterImageCompress.compressWithFile(
           imageFile.path,
-          quality: 70, // Adjust the quality as needed (0 - 100)
-        ) as Uint8List; // Explicitly cast it to Uint8List
+          quality: 70,
+        ) as Uint8List;
 
         final Reference storageReference = FirebaseStorage.instance
             .ref()
@@ -49,15 +48,19 @@ class _UploadPhotosState extends State<UploadPhotos> {
         final UploadTask uploadTask =
             storageReference.putData(compressedImageData);
 
-        await uploadTask.whenComplete(() {
-          storageReference.getDownloadURL().then((imageUrl) {
-            // Save the imageUrl to Firestore or use it as needed.
-            print('Image URL: $imageUrl');
+        await uploadTask.whenComplete(() async {
+          final imageUrl = await storageReference.getDownloadURL();
+          // Save the imageUrl to Firestore or use it as needed.
+          print('Image URL: $imageUrl');
+
+          // Update the imageUrls list with the new image URL
+          setState(() {
+            imageUrls.add(imageUrl);
           });
         });
 
         setState(() {
-          _image = imageFile; // Set the original image
+          _image = imageFile;
         });
       }
     } catch (e) {
@@ -70,17 +73,15 @@ class _UploadPhotosState extends State<UploadPhotos> {
       final ListResult result =
           await FirebaseStorage.instance.ref('images/').list();
 
-//
-
       for (final Reference ref in result.items) {
         final imageUrl = await ref.getDownloadURL();
-        print('Image URL: $imageUrl'); // Add this line to log the URL
+        print('Image URL: $imageUrl');
         setState(() {
           imageUrls.add(imageUrl);
         });
       }
     } catch (e) {
-      print('Error fetching images: $e'); // Print any errors
+      print('Error fetching images: $e');
     }
   }
 
@@ -90,7 +91,7 @@ class _UploadPhotosState extends State<UploadPhotos> {
       builder: (_) => Dialog(
         child: GestureDetector(
           onTap: () {
-            Navigator.pop(context); // Close the dialog on tap
+            Navigator.pop(context);
           },
           child: CachedNetworkImage(
             imageUrl: imageUrl,
@@ -164,48 +165,50 @@ class _UploadPhotosState extends State<UploadPhotos> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Center(
-                child: _image != null
-                    ? Image.file(_image!)
-                    : Text('No image selected'),
-              ),
               SizedBox(height: 10),
               ElevatedButton(
                 onPressed: _uploadImage,
                 child: Text('Upload Image'),
-              ),
-              Center(
-                child: Lottie.network(
-                  'https://assets8.lottiefiles.com/packages/lf20_0zv8teye.json',
-                  height: 200,
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                      const Color.fromARGB(255, 31, 182, 77)),
                 ),
               ),
               SizedBox(height: 10),
-              Text(
-                'Coming Soon...',
-                style: TextStyle(fontSize: 24),
-              ),
+              Text('Hint: long press to save image',
+                  style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
             ],
           ),
           Expanded(
             child: GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Number of columns in the grid
+                crossAxisCount: 3,
               ),
               itemCount: imageUrls.length,
               itemBuilder: (context, index) {
                 final imageUrl = imageUrls[index];
-                return GestureDetector(
-                  onTap: () {
-                    _showEnlargedImage(
-                        imageUrl); // Display enlarged image on tap
-                  },
-                  onLongPress: () {
-                    _saveImage(imageUrl); // Save/download image on long press
-                  },
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    placeholder: (context, url) => CircularProgressIndicator(),
+                return Container(
+                  padding: EdgeInsets.all(2.0),
+                  margin: EdgeInsets.all(5.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    border: Border.all(
+                      color: Colors.grey,
+                      width: 1.0,
+                    ),
+                  ),
+                  child: GestureDetector(
+                    onTap: () {
+                      _showEnlargedImage(imageUrl);
+                    },
+                    onLongPress: () {
+                      _saveImage(imageUrl);
+                    },
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      placeholder: (context, url) =>
+                          CircularProgressIndicator(),
+                    ),
                   ),
                 );
               },
