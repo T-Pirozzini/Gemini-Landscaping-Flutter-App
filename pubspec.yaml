@@ -37,7 +37,6 @@ dependencies:
   cupertino_icons: ^1.0.2
   pdf: ^3.8.4
   printing: ^5.11.0
-  firebase_core: ^2.5.0
   cloud_firestore: ^4.3.1
   intl: ^0.18.0
   firebase_auth: ^4.2.2
@@ -52,9 +51,10 @@ dependencies:
   image_picker: ^1.0.4
   image_gallery_saver: ^2.0.3
   cached_network_image: ^3.2.3
-  firebase_app_check: ^0.2.0  
+  # firebase_app_check: ^0.2.0  
   photo_view: ^0.14.0
   flutter_image_compress: ^2.0.4
+  firebase_core: ^2.16.0
 
 dev_dependencies:
   flutter_test:
