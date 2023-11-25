@@ -21,13 +21,19 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Gemini Landscaping",
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: const Color.fromARGB(255, 31, 182, 77),
+    return GestureDetector(
+      // This will dismiss the keyboard when the user taps outside of it
+      onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
+      },
+      child: MaterialApp(
+        title: "Gemini Landscaping",
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primaryColor: const Color.fromARGB(255, 31, 182, 77),
+        ),
+        home: const AuthPage(),
       ),
-      home: const AuthPage(),
     );
   }
 }

@@ -39,19 +39,25 @@ class _AddReportState extends State<AddReport> {
     super.initState();
     // add site names to siteList
     FirebaseFirestore.instance
-        .collection('SiteReports2023')
+        .collection('SiteList')
         .get()
         .then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
-        if (!siteList.contains(doc["info"]["siteName"])) {
+        if (!siteList.contains(doc["name"])) {
           setState(() {
-            siteList.add(doc["info"]["siteName"]);
+            siteList.add(doc["name"]);
           });
         }
       });
-      print(siteList.first);
-      dropdownValue = siteList.first;
+
+      // Check if siteList is not empty and then set dropdownValue
+      if (siteList.isNotEmpty) {
+        setState(() {
+          dropdownValue = siteList.first;
+        });
+      }
     });
+    print(siteList);
   }
 
   void _updateImageURL(String siteName) {
@@ -75,9 +81,7 @@ class _AddReportState extends State<AddReport> {
         siteName == 'Peartree Meadows' ||
         siteName == 'Pinewood Estates' ||
         siteName == 'Harwell Place' ||
-        siteName == 'Bowen Terrace' ||
-        siteName == 'Alderwood' ||
-        siteName == 'Woodgrove Pines') {
+        siteName == 'Bowen Terrace') {
       setState(
         () {
           imageURL =
@@ -402,71 +406,79 @@ class _AddReportState extends State<AddReport> {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
-              // date picker
-              SizedBox(
-                height: 55,
-                child: TextField(
-                  controller: dateController,
-                  style: GoogleFonts.montserrat(fontSize: 20),
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.calendar_month_rounded, size: 40),
-                    prefixIconColor: Colors.green,
-                    labelText: "Date:",
-                    labelStyle: GoogleFonts.montserrat(
-                        fontSize: 18, fontWeight: FontWeight.bold),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
-                    ),
-                    hintText: 'Select date',
-                  ),
-                  readOnly: true,
-                  onTap: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2101),
-                      builder: (context, child) {
-                        return Theme(
-                          data: Theme.of(context).copyWith(
-                            colorScheme: const ColorScheme.light(
-                              primary: Colors.green,
-                              onPrimary: Colors.white,
-                              onSurface: Colors.black,
-                            ),
-                          ),
-                          child: child!,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // date picker
+                  Expanded(
+                    flex: 1,
+                    child: TextField(
+                      controller: dateController,
+                      style: GoogleFonts.montserrat(fontSize: 12),
+                      decoration: InputDecoration(
+                        prefixIcon:
+                            Icon(Icons.calendar_month_rounded, size: 32),
+                        prefixIconColor: Colors.green,
+                        labelText: "Date:",
+                        border: OutlineInputBorder(),
+                        labelStyle: GoogleFonts.montserrat(fontSize: 14),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.green, width: 2.0),
+                        ),
+                      ),
+                      readOnly: true,
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2101),
+                          builder: (context, child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                colorScheme: const ColorScheme.light(
+                                  primary: Colors.green,
+                                  onPrimary: Colors.white,
+                                  onSurface: Colors.black,
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
                         );
+                        if (pickedDate != null) {
+                          String formattedDate =
+                              DateFormat("yyyy-MM-dd").format(pickedDate);
+                          setState(() {
+                            dateController.text = formattedDate.toString();
+                          });
+                        } else {
+                          print('No Date Selected');
+                        }
                       },
-                    );
-                    if (pickedDate != null) {
-                      String formattedDate =
-                          DateFormat("yyyy-MM-dd").format(pickedDate);
-                      setState(() {
-                        dateController.text = formattedDate.toString();
-                      });
-                    } else {
-                      print('No Date Selected');
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              // site list drop down
-              SizedBox(
-                height: 45,
-                child: Stack(
-                  children: [
-                    DropdownButtonFormField<String>(
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  // site list drop down
+                  Expanded(
+                    flex: 2,
+                    child: DropdownButtonFormField<String>(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Select a Site',
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.green, width: 2.0),
+                        ),
+                      ),
                       value: dropdownValue,
                       items: siteList.map((site) {
                         return DropdownMenuItem<String>(
                           value: site,
                           child: Text(
                             site,
-                            style: GoogleFonts.montserrat(fontSize: 18),
+                            style: GoogleFonts.montserrat(fontSize: 14),
                           ),
                         );
                       }).toList(),
@@ -480,12 +492,17 @@ class _AddReportState extends State<AddReport> {
                         );
                       },
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+              const SizedBox(
+                height: 10,
+              ),
+              // site list drop down
+
               TextFormField(
                 controller: _addressController,
-                style: GoogleFonts.montserrat(fontSize: 18),
+                style: GoogleFonts.montserrat(fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Enter address',
                 ),
@@ -499,10 +516,10 @@ class _AddReportState extends State<AddReport> {
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 50,
+                      height: 40,
                       child: TextField(
                         controller: name1,
-                        style: GoogleFonts.montserrat(fontSize: 16),
+                        style: GoogleFonts.montserrat(fontSize: 14),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -580,10 +597,10 @@ class _AddReportState extends State<AddReport> {
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 50,
+                      height: 40,
                       child: TextField(
                         controller: name2,
-                        style: GoogleFonts.montserrat(fontSize: 16),
+                        style: GoogleFonts.montserrat(fontSize: 14),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -659,10 +676,10 @@ class _AddReportState extends State<AddReport> {
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 50,
+                      height: 40,
                       child: TextField(
                         controller: name3,
-                        style: GoogleFonts.montserrat(fontSize: 16),
+                        style: GoogleFonts.montserrat(fontSize: 14),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -738,10 +755,10 @@ class _AddReportState extends State<AddReport> {
                   Expanded(
                     child: Container(
                       width: 100,
-                      height: 50,
+                      height: 40,
                       child: TextField(
                         controller: name4,
-                        style: GoogleFonts.montserrat(fontSize: 16),
+                        style: GoogleFonts.montserrat(fontSize: 14),
                         maxLines: null,
                         keyboardType: TextInputType.text,
                         decoration: const InputDecoration(
@@ -811,232 +828,300 @@ class _AddReportState extends State<AddReport> {
                   ),
                 ],
               ),
-              const SizedBox(height: 15),
-              Text(
-                'Pick Up Loose Garbage:',
-                style: GoogleFonts.montserrat(
-                    fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              ToggleButtons(
-                onPressed: (int index) {
-                  // All buttons are selectable.
-                  setState(() {
-                    if (_selectedGarbage.contains(garbage[index])) {
-                      _selectedGarbage.remove(garbage[index]);
-                    } else {
-                      _selectedGarbage.add(garbage[index]);
-                    }
-                  });
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: Colors.green[700],
-                selectedColor: Colors.white,
-                fillColor: Colors.green[200],
-                color: Colors.green[700],
-                constraints: const BoxConstraints(
-                  minHeight: 25.0,
-                  minWidth: 110.0,
-                ),
-                isSelected: garbage
-                    .map((value) => _selectedGarbage.contains(value))
-                    .toList(),
-                children: garbage
-                    .map((value) => Text(
-                          value,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                        ))
-                    .toList(),
-              ),
-              Text(
-                'Rake Yard Debris:',
-                style: GoogleFonts.montserrat(
-                    fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              ToggleButtons(
-                onPressed: (int index) {
-                  // All buttons are selectable.
-                  setState(() {
-                    if (_selectedDebris.contains(debris[index])) {
-                      _selectedDebris.remove(debris[index]);
-                    } else {
-                      _selectedDebris.add(debris[index]);
-                    }
-                  });
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: Colors.green[700],
-                selectedColor: Colors.white,
-                fillColor: Colors.green[200],
-                color: Colors.green[700],
-                constraints: const BoxConstraints(
-                  minHeight: 25.0,
-                  minWidth: 110.0,
-                ),
-                isSelected: debris
-                    .map((value) => _selectedDebris.contains(value))
-                    .toList(),
-                children: debris
-                    .map((value) => Text(
-                          value,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                        ))
-                    .toList(),
-              ),
-              Text(
-                'Lawn Care:',
-                style: GoogleFonts.montserrat(
-                    fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              ToggleButtons(
-                onPressed: (int index) {
-                  // All buttons are selectable.
-                  setState(() {
-                    if (_selectedLawn.contains(lawn[index])) {
-                      _selectedLawn.remove(lawn[index]);
-                    } else {
-                      _selectedLawn.add(lawn[index]);
-                    }
-                  });
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: Colors.green[700],
-                selectedColor: Colors.white,
-                fillColor: Colors.green[200],
-                color: Colors.green[700],
-                constraints: const BoxConstraints(
-                  minHeight: 25.0,
-                  minWidth: 55.0,
-                ),
-                isSelected:
-                    lawn.map((value) => _selectedLawn.contains(value)).toList(),
-                children: lawn
-                    .map((value) => Text(
-                          value,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                        ))
-                    .toList(),
-              ),
-              Text(
-                'Gardens:',
-                style: GoogleFonts.montserrat(
-                    fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              ToggleButtons(
-                onPressed: (int index) {
-                  // All buttons are selectable.
-                  setState(() {
-                    if (_selectedGarden.contains(garden[index])) {
-                      _selectedGarden.remove(garden[index]);
-                    } else {
-                      _selectedGarden.add(garden[index]);
-                    }
-                  });
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: Colors.green[700],
-                selectedColor: Colors.white,
-                fillColor: Colors.green[200],
-                color: Colors.green[700],
-                constraints: const BoxConstraints(
-                  minHeight: 25.0,
-                  minWidth: 85.0,
-                ),
-                isSelected: garden
-                    .map((value) => _selectedGarden.contains(value))
-                    .toList(),
-                children: garden
-                    .map((value) => Text(
-                          value,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                        ))
-                    .toList(),
-              ),
-              Text(
-                'Trees:',
-                style: GoogleFonts.montserrat(
-                    fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              ToggleButtons(
-                onPressed: (int index) {
-                  // All buttons are selectable.
-                  setState(() {
-                    if (_selectedTree.contains(tree[index])) {
-                      _selectedTree.remove(tree[index]);
-                    } else {
-                      _selectedTree.add(tree[index]);
-                    }
-                  });
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: Colors.green[700],
-                selectedColor: Colors.white,
-                fillColor: Colors.green[200],
-                color: Colors.green[700],
-                constraints: const BoxConstraints(
-                  minHeight: 25.0,
-                  minWidth: 110.0,
-                ),
-                isSelected:
-                    tree.map((value) => _selectedTree.contains(value)).toList(),
-                children: tree
-                    .map((value) => Text(
-                          value,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                        ))
-                    .toList(),
-              ),
-              Text(
-                'Blow Dust/Debris:',
-                style: GoogleFonts.montserrat(
-                    fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-              ToggleButtons(
-                onPressed: (int index) {
-                  // All buttons are selectable.
-                  setState(() {
-                    if (_selectedBlow.contains(blow[index])) {
-                      _selectedBlow.remove(blow[index]);
-                    } else {
-                      _selectedBlow.add(blow[index]);
-                    }
-                  });
-                },
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                selectedBorderColor: Colors.green[700],
-                selectedColor: Colors.white,
-                fillColor: Colors.green[200],
-                color: Colors.green[700],
-                constraints: const BoxConstraints(
-                  minHeight: 25.0,
-                  minWidth: 110.0,
-                ),
-                isSelected:
-                    blow.map((value) => _selectedBlow.contains(value)).toList(),
-                children: blow
-                    .map((value) => Text(
-                          value,
-                          style: GoogleFonts.montserrat(fontSize: 14),
-                        ))
-                    .toList(),
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                height: 150,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: TextField(
-                    controller: _descriptionController,
-                    maxLines: null,
-                    keyboardType: TextInputType.multiline,
-                    decoration: InputDecoration(
-                      hintText: 'Description',
-                      border: InputBorder.none,
+              const SizedBox(height: 5),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1,
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Pick Up Loose Garbage:',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          height: .5),
                     ),
                   ),
-                ),
+                  Wrap(
+                    children: [
+                      ToggleButtons(
+                        onPressed: (int index) {
+                          // All buttons are selectable.
+                          setState(() {
+                            if (_selectedGarbage.contains(garbage[index])) {
+                              _selectedGarbage.remove(garbage[index]);
+                            } else {
+                              _selectedGarbage.add(garbage[index]);
+                            }
+                          });
+                        },
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
+                        selectedBorderColor: Colors.green[700],
+                        selectedColor: Colors.white,
+                        fillColor: Colors.green[200],
+                        color: Colors.green[700],
+                        constraints: const BoxConstraints(
+                          minHeight: 25.0,
+                          minWidth: 110.0,
+                        ),
+                        isSelected: garbage
+                            .map((value) => _selectedGarbage.contains(value))
+                            .toList(),
+                        children: garbage
+                            .map((value) => Text(
+                                  value,
+                                  style: GoogleFonts.montserrat(fontSize: 12),
+                                ))
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 2),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1,
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Rake Yard Debris:',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          height: .5),
+                    ),
+                  ),
+                  ToggleButtons(
+                    onPressed: (int index) {
+                      // All buttons are selectable.
+                      setState(() {
+                        if (_selectedDebris.contains(debris[index])) {
+                          _selectedDebris.remove(debris[index]);
+                        } else {
+                          _selectedDebris.add(debris[index]);
+                        }
+                      });
+                    },
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    selectedBorderColor: Colors.green[700],
+                    selectedColor: Colors.white,
+                    fillColor: Colors.green[200],
+                    color: Colors.green[700],
+                    constraints: const BoxConstraints(
+                      minHeight: 25.0,
+                      minWidth: 110.0,
+                    ),
+                    isSelected: debris
+                        .map((value) => _selectedDebris.contains(value))
+                        .toList(),
+                    children: debris
+                        .map((value) => Text(
+                              value,
+                              style: GoogleFonts.montserrat(fontSize: 12),
+                            ))
+                        .toList(),
+                  ),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1,
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Lawn Care:',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          height: .5),
+                    ),
+                  ),
+                  ToggleButtons(
+                    onPressed: (int index) {
+                      // All buttons are selectable.
+                      setState(() {
+                        if (_selectedLawn.contains(lawn[index])) {
+                          _selectedLawn.remove(lawn[index]);
+                        } else {
+                          _selectedLawn.add(lawn[index]);
+                        }
+                      });
+                    },
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    selectedBorderColor: Colors.green[700],
+                    selectedColor: Colors.white,
+                    fillColor: Colors.green[200],
+                    color: Colors.green[700],
+                    constraints: const BoxConstraints(
+                      minHeight: 25.0,
+                      minWidth: 55.0,
+                    ),
+                    isSelected: lawn
+                        .map((value) => _selectedLawn.contains(value))
+                        .toList(),
+                    children: lawn
+                        .map((value) => Text(
+                              value,
+                              style: GoogleFonts.montserrat(fontSize: 12),
+                            ))
+                        .toList(),
+                  ),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1,
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Gardens:',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          height: .5),
+                    ),
+                  ),
+                  ToggleButtons(
+                    onPressed: (int index) {
+                      // All buttons are selectable.
+                      setState(() {
+                        if (_selectedGarden.contains(garden[index])) {
+                          _selectedGarden.remove(garden[index]);
+                        } else {
+                          _selectedGarden.add(garden[index]);
+                        }
+                      });
+                    },
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    selectedBorderColor: Colors.green[700],
+                    selectedColor: Colors.white,
+                    fillColor: Colors.green[200],
+                    color: Colors.green[700],
+                    constraints: const BoxConstraints(
+                      minHeight: 25.0,
+                      minWidth: 85.0,
+                    ),
+                    isSelected: garden
+                        .map((value) => _selectedGarden.contains(value))
+                        .toList(),
+                    children: garden
+                        .map((value) => Text(
+                              value,
+                              style: GoogleFonts.montserrat(fontSize: 12),
+                            ))
+                        .toList(),
+                  ),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1,
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Trees:',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          height: .5),
+                    ),
+                  ),
+                  ToggleButtons(
+                    onPressed: (int index) {
+                      // All buttons are selectable.
+                      setState(() {
+                        if (_selectedTree.contains(tree[index])) {
+                          _selectedTree.remove(tree[index]);
+                        } else {
+                          _selectedTree.add(tree[index]);
+                        }
+                      });
+                    },
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    selectedBorderColor: Colors.green[700],
+                    selectedColor: Colors.white,
+                    fillColor: Colors.green[200],
+                    color: Colors.green[700],
+                    constraints: const BoxConstraints(
+                      minHeight: 25.0,
+                      minWidth: 110.0,
+                    ),
+                    isSelected: tree
+                        .map((value) => _selectedTree.contains(value))
+                        .toList(),
+                    children: tree
+                        .map((value) => Text(
+                              value,
+                              style: GoogleFonts.montserrat(fontSize: 12),
+                            ))
+                        .toList(),
+                  ),
+                  Divider(
+                    color: Colors.grey,
+                    thickness: 1,
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Blow Dust/Debris:',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          height: .5),
+                    ),
+                  ),
+                  ToggleButtons(
+                    onPressed: (int index) {
+                      // All buttons are selectable.
+                      setState(() {
+                        if (_selectedBlow.contains(blow[index])) {
+                          _selectedBlow.remove(blow[index]);
+                        } else {
+                          _selectedBlow.add(blow[index]);
+                        }
+                      });
+                    },
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    selectedBorderColor: Colors.green[700],
+                    selectedColor: Colors.white,
+                    fillColor: Colors.green[200],
+                    color: Colors.green[700],
+                    constraints: const BoxConstraints(
+                      minHeight: 25.0,
+                      minWidth: 110.0,
+                    ),
+                    isSelected: blow
+                        .map((value) => _selectedBlow.contains(value))
+                        .toList(),
+                    children: blow
+                        .map((value) => Text(
+                              value,
+                              style: GoogleFonts.montserrat(fontSize: 12),
+                            ))
+                        .toList(),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    height: 150,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: TextField(
+                        controller: _descriptionController,
+                        maxLines: null,
+                        keyboardType: TextInputType.multiline,
+                        decoration: InputDecoration(
+                          hintText: 'Description',
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
