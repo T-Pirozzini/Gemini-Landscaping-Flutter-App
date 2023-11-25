@@ -2,14 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-class Chart extends StatefulWidget {
-  const Chart({Key? key});
+class ChartPage extends StatefulWidget {
+  const ChartPage({Key? key});
 
   @override
-  State<Chart> createState() => _ChartState();
+  State<ChartPage> createState() => _ChartPageState();
 }
 
-class _ChartState extends State<Chart> {
+class _ChartPageState extends State<ChartPage> {
   final Stream<QuerySnapshot> _siteStream =
       FirebaseFirestore.instance.collectionGroup('SiteReports2023').snapshots();
 
