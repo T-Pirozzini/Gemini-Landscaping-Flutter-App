@@ -1,21 +1,46 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/view_report_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SiteFiles extends StatefulWidget {
-  const SiteFiles({super.key, required this.siteName});
-
   final String siteName;
+  final String management;
+
+  const SiteFiles(
+      {super.key, required this.siteName, required this.management});
 
   @override
-  State<SiteFiles> createState() => _SiteFilesState(siteName: siteName);
+  State<SiteFiles> createState() =>
+      _SiteFilesState(siteName: siteName, management: management);
 }
 
 class _SiteFilesState extends State<SiteFiles> {
   late final String siteName;
+  late final String management;
 
-  _SiteFilesState({required this.siteName});
+  _SiteFilesState({required this.siteName, required this.management});
+
+  Future<String> getImageUrl(String management) async {
+    final List<String> imageExtensions = ['png', 'jpg', 'jpeg'];
+    String downloadUrl = '';
+
+    for (String extension in imageExtensions) {
+      try {
+        downloadUrl = await FirebaseStorage.instance
+            .ref('company_logos/$management.$extension')
+            .getDownloadURL();
+        // If the download URL is successfully retrieved, break the loop
+        break;
+      } catch (e) {
+        // If the image is not found, catch the error and continue to the next extension
+        continue;
+      }
+    }
+
+    return downloadUrl;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,9 +87,6 @@ class _SiteFilesState extends State<SiteFiles> {
           final reports = snapshot.data!.docs;
           reports
               .sort((a, b) => b['info']['date'].compareTo(a['info']['date']));
-          final report = reports.isNotEmpty ? reports.first : null;
-          final imageURL = (report?.data() as Map<String, dynamic>?)?['info']
-              ?['imageURL'] as String?;
 
           return GridView.builder(
             gridDelegate:
@@ -117,24 +139,33 @@ class _SiteFilesState extends State<SiteFiles> {
                       child: Stack(
                         children: [
                           Center(
-                            child: imageURL != null
-                                ? Container(
-                                    padding: EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    child: Image.network(
-                                      imageURL,
-                                      fit: BoxFit.contain,
-                                      height: 100,
-                                    ),
-                                  )
-                                : Icon(
-                                    Icons.grass_outlined,
-                                    color: Colors.green,
-                                    size: 100,
-                                  ),
+                            child: FutureBuilder<String>(
+                              future: getImageUrl(
+                                  management),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<String> snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return CircularProgressIndicator();
+                                }
+                                if (snapshot.hasError ||
+                                    !snapshot.hasData ||
+                                    snapshot.data!.isEmpty) {
+                                  return Icon(Icons.grass_outlined,
+                                      color: Colors.green, size: 40);
+                                }
+                                return Image.network(
+                                  snapshot.data!,
+                                  fit: BoxFit.contain,
+                                  height: 100,
+                                  width: 100,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(Icons.grass_outlined,
+                                        color: Colors.green, size: 40);
+                                  },
+                                );
+                              },
+                            ),
                           ),
                         ],
                       ),
