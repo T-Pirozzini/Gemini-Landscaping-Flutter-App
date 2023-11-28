@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/files_page.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class SiteFolders extends StatefulWidget {
   const SiteFolders({super.key});
@@ -12,7 +15,40 @@ class SiteFolders extends StatefulWidget {
 
 class _SiteFoldersState extends State<SiteFolders> {
   final Stream<QuerySnapshot> _siteStream =
-      FirebaseFirestore.instance.collectionGroup('SiteReports2023').snapshots();
+      FirebaseFirestore.instance.collectionGroup('SiteList').snapshots();
+
+  Future<int> getSiteCount(String siteName) async {
+    try {
+      final QuerySnapshot siteCount = await FirebaseFirestore.instance
+          .collectionGroup('SiteReports2023')
+          .where('info.siteName', isEqualTo: siteName)
+          .get();
+      return siteCount.docs.length;
+    } catch (e) {
+      print("Error getting site count: $e");
+      return 0;
+    }
+  }
+
+  Future<String> getImageUrl(String management) async {
+    final List<String> imageExtensions = ['png', 'jpg', 'jpeg'];
+    String downloadUrl = '';
+
+    for (String extension in imageExtensions) {
+      try {
+        downloadUrl = await FirebaseStorage.instance
+            .ref('company_logos/$management.$extension')
+            .getDownloadURL();
+        // If the download URL is successfully retrieved, break the loop
+        break;
+      } catch (e) {
+        // If the image is not found, catch the error and continue to the next extension
+        continue;
+      }
+    }
+
+    return downloadUrl;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,101 +77,92 @@ class _SiteFoldersState extends State<SiteFolders> {
             );
           }
           List<QueryDocumentSnapshot> siteList = snapshot.data!.docs;
-          siteList.sort(
-              (a, b) => a['info']['siteName'].compareTo(b['info']['siteName']));
+          siteList.sort((a, b) => a['name'].compareTo(b['name']));
+          // Check if current index matches the index of first occurrence of site name in the list
 
           return Container(
             child: ListView.builder(
               itemCount: siteList.length,
               itemBuilder: (BuildContext context, int index) {
-                final siteName = siteList[index]['info']['siteName'];
-                return StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('SiteReports2023')
-                      .where('info.siteName', isEqualTo: siteName)
-                      .snapshots(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.hasError) {
-                      return const Text('Something went wrong');
-                    }
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const SizedBox.shrink();
-                    }
-                    final reportsCount = snapshot.data!.size;
+                final siteName = siteList[index]['name'];
+                final management = siteList[index]['management'];
+                final firstIndex =
+                    siteList.indexWhere((doc) => doc['name'] == siteName);
 
-                    // Check if current index matches the index of first occurrence of site name in the list
-                    final firstIndex = siteList.indexWhere(
-                        (doc) => doc['info']['siteName'] == siteName);
-                    if (index != firstIndex) {
-                      return SizedBox.shrink();
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ListTile(
-                        leading: siteList[index]['info']['imageURL'] != null
-                            ? Container(
-                                padding: EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Image.network(
-                                  siteList[index]['info']['imageURL'],
-                                  fit: BoxFit.contain,
-                                  height: 40,
-                                  width: 40,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
-                                      Icons.grass_outlined,
-                                      color: Colors.green,
-                                      size: 40,
-                                    );
-                                  },
-                                ),
-                              )
-                            : Container(
-                                padding: EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Icon(
-                                  Icons.grass_outlined,
-                                  color: Colors.green,
-                                  size: 40,
-                                ),
-                              ),
-                        title: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: AlignmentDirectional.centerStart,
-                          child: Text(
-                            '$siteName',
-                            style: GoogleFonts.montserrat(
-                                fontSize: 20, letterSpacing: .5),
+                if (index != firstIndex) {
+                  return SizedBox.shrink();
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListTile(
+                    leading: FutureBuilder<String>(
+                      future: getImageUrl(
+                          management), // using the new function to get the image URL
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String> snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        }
+                        if (snapshot.hasError ||
+                            !snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return Icon(Icons.grass_outlined,
+                              color: Colors.green, size: 40);
+                        }
+                        return Image.network(
+                          snapshot.data!,
+                          fit: BoxFit.contain,
+                          height: 40,
+                          width: 40,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(Icons.grass_outlined,
+                                color: Colors.green, size: 40);
+                          },
+                        );
+                      },
+                    ),
+                    title: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        '$siteName',
+                        style: GoogleFonts.montserrat(
+                            fontSize: 20, letterSpacing: .5),
+                      ),
+                    ),
+                    trailing: FutureBuilder<int>(
+                      future: getSiteCount(siteName),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        }
+                        if (snapshot.hasError) {
+                          return Text('Error');
+                        }
+                        return Text('${snapshot.data} reports');
+                      },
+                    ),
+                    tileColor: Colors.grey[800],
+                    textColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SiteFiles(
+                            siteName: siteList[index]['name'],
                           ),
                         ),
-                        trailing: Text('$reportsCount reports'),
-                        tileColor: Colors.grey[800],
-                        textColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => SiteFiles(
-                                siteName: siteList[index]['info']['siteName'],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 );
               },
             ),
