@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gemini_landscaping_app/pages/addWinterReport.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'view_report_page.dart';
 import '../auth.dart';
@@ -269,7 +270,7 @@ class _RecentReportsPageState extends State<RecentReportsPage>
           Bubble(
             title: "Site Report",
             iconColor: Colors.white,
-            bubbleColor: Color.fromARGB(255, 31, 182, 77),
+            bubbleColor: const Color.fromARGB(255, 59, 82, 73),
             icon: Icons.note_add_outlined,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
@@ -280,7 +281,7 @@ class _RecentReportsPageState extends State<RecentReportsPage>
           Bubble(
             title: "Extras Report",
             iconColor: Colors.white,
-            bubbleColor: Color.fromARGB(255, 31, 182, 77),
+            bubbleColor: const Color.fromARGB(255, 59, 82, 73),
             icon: Icons.add_circle_outline,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
@@ -289,14 +290,14 @@ class _RecentReportsPageState extends State<RecentReportsPage>
             },
           ),
           Bubble(
-            title: "Pictures",
+            title: "Winter Report",
             iconColor: Colors.white,
-            bubbleColor: Color.fromARGB(255, 31, 182, 77),
-            icon: Icons.add_a_photo_outlined,
+            bubbleColor: const Color.fromARGB(255, 59, 82, 73),
+            icon: Icons.cloudy_snowing,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
               Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (_) => UploadPhotos()));
+                  context, MaterialPageRoute(builder: (_) => AddWinterReport()));
             },
           ),
         ],

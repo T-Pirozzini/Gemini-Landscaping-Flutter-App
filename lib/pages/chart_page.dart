@@ -15,70 +15,73 @@ class _ChartPageState extends State<ChartPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text(
-              'Coming Soon!',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            Icon(
-              Icons.warning,
-              color: Colors.red,
-            ),
-          ],
-        ),
-        Container(
-          margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-          color: Colors.grey.shade200,
-          child: StreamBuilder<QuerySnapshot>(
-            stream: _siteStream,
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasData) {
-                final data = getColumnData(snapshot.data!);
-                return SfCartesianChart(
-                  title: ChartTitle(
-                    text: "April 2023",
-                  ),
-                  primaryXAxis: CategoryAxis(
-                    title: AxisTitle(
-                      text: "Sites",
+    return Scaffold(
+      backgroundColor: Colors.grey.shade200,
+      body: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Text(
+                'Coming Soon!',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              Icon(
+                Icons.warning,
+                color: Colors.red,
+              ),
+            ],
+          ),
+          Container(
+            margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+            color: Colors.grey.shade200,
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _siteStream,
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasData) {
+                  final data = getColumnData(snapshot.data!);
+                  return SfCartesianChart(
+                    title: ChartTitle(
+                      text: "April 2023",
                     ),
-                    labelRotation: 90,
-                  ),
-                  primaryYAxis: NumericAxis(
-                    title: AxisTitle(
-                      text: "Time (hours)",
+                    primaryXAxis: CategoryAxis(
+                      title: AxisTitle(
+                        text: "Sites",
+                      ),
+                      labelRotation: 90,
                     ),
-                  ),
-                  legend: Legend(
-                    isVisible: true,
-                  ),
-                  series: <ChartSeries>[
-                    ColumnSeries<SiteData, String>(
-                      name: "Site Time",
-                      dataSource: data,
-                      xValueMapper: (SiteData data, _) => data.x,
-                      yValueMapper: (SiteData data, _) => data.y,
-                      dataLabelSettings: DataLabelSettings(
-                        // isVisible: true,
-                        labelPosition: ChartDataLabelPosition.outside,
+                    primaryYAxis: NumericAxis(
+                      title: AxisTitle(
+                        text: "Time (hours)",
                       ),
                     ),
-                  ],
-                );
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                return const CircularProgressIndicator();
-              }
-            },
+                    legend: Legend(
+                      isVisible: true,
+                    ),
+                    series: <ChartSeries>[
+                      ColumnSeries<SiteData, String>(
+                        name: "Site Time",
+                        dataSource: data,
+                        xValueMapper: (SiteData data, _) => data.x,
+                        yValueMapper: (SiteData data, _) => data.y,
+                        dataLabelSettings: DataLabelSettings(
+                          // isVisible: true,
+                          labelPosition: ChartDataLabelPosition.outside,
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  return const CircularProgressIndicator();
+                }
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
