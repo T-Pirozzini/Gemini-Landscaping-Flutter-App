@@ -27,10 +27,13 @@ class _AddWinterReportState extends State<AddWinterReport> {
   // site list
   List<String> winterSiteList = [];
   // drop down site menu
-  String dropdownValue = '';
+  String? dropdownValue;
   String enteredSiteName = '';
-  String imageURL = '';
   final currentUser = FirebaseAuth.instance.currentUser!;
+  double saltSliderValue = 0.0;
+  double meltSliderValue = 0.0;
+  double sandSliderValue = 0.0;
+  List<bool> isIceManagement = [true, false]; // Initial state for ToggleButtons
 
   @override
   void initState() {
@@ -53,9 +56,12 @@ class _AddWinterReportState extends State<AddWinterReport> {
         setState(() {
           dropdownValue = winterSiteList.first;
         });
+      } else {
+        setState(() {
+          dropdownValue = null; // or some default value that exists in the list
+        });
       }
     });
-    print(winterSiteList);
   }
 
   void _updateSiteAddress(String siteName) {
@@ -73,18 +79,9 @@ class _AddWinterReportState extends State<AddWinterReport> {
     });
   }
 
-  void _updateImageURL(String siteName) {
-    FirebaseFirestore.instance
-        .collection('WinterSiteList')
-        .get()
-        .then((QuerySnapshot querySnapshot) {
-      querySnapshot.docs.forEach((doc) {
-        if (siteName == doc["name"]) {
-          setState(() {
-            imageURL = doc["imageUrl"];
-          });
-        }
-      });
+  void addSiteToList(String newSiteName) {
+    setState(() {
+      winterSiteList.add(newSiteName);
     });
   }
 
@@ -106,7 +103,6 @@ class _AddWinterReportState extends State<AddWinterReport> {
         'date': dateController.text,
         'siteName': dropdownValue,
         'address': _addressController.text,
-        'imageURL': imageURL,
       },
       "names": {
         'name1': name1.text,
@@ -141,9 +137,16 @@ class _AddWinterReportState extends State<AddWinterReport> {
             timeOff4!.minute.toString().padLeft(2, '0'),
       },
       "service": {
+        'iceManagement': isIceManagement[0],
+        'snowRemoval': isIceManagement[1],
         'walkways': _selectedWalkways,
         'liability': _selectedLiability,
         'other': _selectedOther,
+      },
+      "material": {
+        'iceMelt': meltSliderValue,
+        'salt': saltSliderValue,
+        'sand': sandSliderValue,
       },
       "description": _descriptionController.text,
       "submittedBy": currentUser.email,
@@ -167,6 +170,9 @@ class _AddWinterReportState extends State<AddWinterReport> {
       _selectedWalkways = [];
       _selectedLiability = [];
       _selectedOther = [];
+      meltSliderValue = 0.0;
+      saltSliderValue = 0.0;
+      sandSliderValue = 0.0;
       _descriptionController.clear();
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Home()));
@@ -326,12 +332,11 @@ class _AddWinterReportState extends State<AddWinterReport> {
                           ),
                         );
                       }).toList(),
-                      onChanged: (String? value) async {
+                      onChanged: (String? newValue) async {
                         setState(
                           () {
-                            dropdownValue = value!;
-                            _updateImageURL(dropdownValue);
-                            _updateSiteAddress(dropdownValue);
+                            dropdownValue = newValue!;
+                            _updateSiteAddress(newValue);
                           },
                         );
                       },
@@ -676,6 +681,39 @@ class _AddWinterReportState extends State<AddWinterReport> {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Divider(),
+                  SizedBox(height: 5),
+                  ToggleButtons(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    selectedBorderColor: const Color.fromARGB(255, 59, 82, 73),
+                    selectedColor: Colors.white,
+                    fillColor: const Color.fromARGB(255, 59, 82, 73),
+                    color: Colors.black,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Ice Management'),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Snow Removal'),
+                      ),
+                    ],
+                    onPressed: (int index) {
+                      setState(() {
+                        for (int buttonIndex = 0;
+                            buttonIndex < isIceManagement.length;
+                            buttonIndex++) {
+                          if (buttonIndex == index) {
+                            isIceManagement[buttonIndex] = true;
+                          } else {
+                            isIceManagement[buttonIndex] = false;
+                          }
+                        }
+                      });
+                    },
+                    isSelected: isIceManagement,
+                  ),
                   Divider(
                     color: Colors.grey,
                     thickness: 1,
@@ -812,6 +850,49 @@ class _AddWinterReportState extends State<AddWinterReport> {
                             ))
                         .toList(),
                   ),
+                  Slider(
+                    value: meltSliderValue,
+                    min: 0.0,
+                    max: 10.0,
+                    divisions: 40,
+                    activeColor: Colors.blueAccent,
+                    label: meltSliderValue.toStringAsFixed(2),
+                    onChanged: (double value) {
+                      setState(() {
+                        meltSliderValue = value;
+                      });
+                    },
+                  ),
+                  Text(
+                      'Ice Melt Used: ${meltSliderValue.toStringAsFixed(2)} bags'),
+                  Slider(
+                    value: saltSliderValue,
+                    min: 0.0,
+                    max: 10.0,
+                    divisions: 40,
+                    label: saltSliderValue.toStringAsFixed(2),
+                    activeColor: Colors.blueAccent,
+                    onChanged: (double value) {
+                      setState(() {
+                        saltSliderValue = value;
+                      });
+                    },
+                  ),
+                  Text('Salt Used: ${saltSliderValue.toStringAsFixed(2)} bags'),
+                  Slider(
+                    value: sandSliderValue,
+                    min: 0.0,
+                    max: 10.0,
+                    divisions: 40,
+                    label: sandSliderValue.toStringAsFixed(2),
+                    activeColor: Colors.blueAccent,
+                    onChanged: (double value) {
+                      setState(() {
+                        sandSliderValue = value;
+                      });
+                    },
+                  ),
+                  Text('Sand Used: ${sandSliderValue.toStringAsFixed(2)} bags'),
                   Divider(
                     color: Colors.grey,
                     thickness: 1,
@@ -841,7 +922,125 @@ class _AddWinterReportState extends State<AddWinterReport> {
           ),
         ),
       ),
-      bottomSheet: Text('hi'),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text('Add a new site'),
+          Icon(Icons.arrow_right_outlined, size: 18),
+          FloatingActionButton(
+            backgroundColor: Colors.black45,
+            mini: true,
+            shape:
+                ShapeBorder.lerp(RoundedRectangleBorder(), CircleBorder(), 0.5),
+            onPressed: () {
+              TextEditingController nameController = TextEditingController();
+              TextEditingController addressController = TextEditingController();
+
+              showModalBottomSheet(
+                isScrollControlled: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
+                        child: Wrap(
+                          alignment: WrapAlignment.center,
+                          children: [
+                            Column(
+                              children: [
+                                Text(
+                                  'Add a new Winter Site:',
+                                  style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 10),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          .6,
+                                      child: TextField(
+                                        controller: nameController,
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          labelText: 'Site Name',
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.green,
+                                                width: 2.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          .8,
+                                      child: TextField(
+                                        controller: addressController,
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          labelText: 'Address',
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.green,
+                                                width: 2.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 5),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.black45,
+                                      textStyle: TextStyle(fontSize: 18)),
+                                  onPressed: () async {
+                                    CollectionReference equipmentCollection =
+                                        FirebaseFirestore.instance
+                                            .collection('WinterSiteList');
+
+                                    // Create a new document and set its data
+                                    await equipmentCollection.add({
+                                      'name': nameController.text,
+                                      'address': addressController.text,
+                                      'addedBy': currentUser.email,
+                                    });
+
+                                    // add site to drop down list
+                                    addSiteToList(nameController.text);
+
+                                    // Clear the text fields
+                                    nameController.clear();
+                                    addressController.clear();
+
+                                    // Close the bottom sheet after adding equipment
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('Add Site'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+            child: Icon(Icons.add),
+          ),
+        ],
+      ),
     );
   }
 }
