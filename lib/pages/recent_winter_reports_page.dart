@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:gemini_landscaping_app/pages/view_report_page.dart';
+import 'package:gemini_landscaping_app/pages/view_winter_report_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class RecentWinterReportsPage extends StatefulWidget {
@@ -61,7 +61,7 @@ class _RecentWinterReportsPageState extends State<RecentWinterReportsPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ViewReport(docid: documents[index]),
+                        builder: (_) => ViewWinterReportPage(docid: documents[index]),
                       ),
                     );
                   },
