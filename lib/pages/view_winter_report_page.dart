@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/edit_report_page.dart';
 import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'package:gemini_landscaping_app/pages/pdf_page.dart';
+import 'package:gemini_landscaping_app/pages/pdf_winter_report%20_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 // ignore: must_be_immutable
@@ -466,60 +467,60 @@ class _ViewWinterReportPageState extends State<ViewWinterReportPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Container(
-                //   decoration: BoxDecoration(
-                //     borderRadius: BorderRadius.circular(10),
-                //     color: FirebaseAuth.instance.currentUser?.uid ==
-                //                 "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
-                //             FirebaseAuth.instance.currentUser?.uid ==
-                //                 "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
-                //         ? Color.fromARGB(255, 20, 177, 54)
-                //         : Colors.grey[400],
-                //   ),
-                //   child: MaterialButton(
-                //     onPressed: (FirebaseAuth.instance.currentUser?.uid ==
-                //                 "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
-                //             FirebaseAuth.instance.currentUser?.uid ==
-                //                 "4Qpgb3aORKhUVXjgT2SNh6zgCWE3")
-                //         ? () async {
-                //             Navigator.push(
-                //               context,
-                //               MaterialPageRoute(
-                //                 builder: (_) => SiteReport(
-                //                   docid: docid,
-                //                 ),
-                //               ),
-                //             );
-                //             // Update the field in Firestore
-                //             try {
-                //               await FirebaseFirestore.instance
-                //                   .collection('WinterReports')
-                //                   .doc(widget.docid.id)
-                //                   .set(
-                //                 {'filed': true},
-                //                 SetOptions(merge: true),
-                //               );
-                //             } catch (error) {
-                //               print('Error updating document: $error');
-                //             }
-                //           }
-                //         : null,
-                //     child: Text(
-                //       "GENERATE PDF",
-                //       style: TextStyle(
-                //         fontSize: 18,
-                //         color: Colors.white,
-                //       ),
-                //     ),
-                //     elevation: 0,
-                //     color: ((widget.docid.data()
-                //                 as Map<String, dynamic>?)?['filed'] ==
-                //             true)
-                //         ? Colors.green.shade200
-                //         : Color.fromARGB(255, 20, 177, 54),
-                //   ),
-                // ),
-                // SizedBox(width: 15),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: FirebaseAuth.instance.currentUser?.uid ==
+                                "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                            FirebaseAuth.instance.currentUser?.uid ==
+                                "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
+                        ? Color.fromARGB(255, 20, 177, 54)
+                        : Colors.grey[400],
+                  ),
+                  child: MaterialButton(
+                    onPressed: (FirebaseAuth.instance.currentUser?.uid ==
+                                "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                            FirebaseAuth.instance.currentUser?.uid ==
+                                "4Qpgb3aORKhUVXjgT2SNh6zgCWE3")
+                        ? () async {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => WinterSiteReport(
+                                  docid: docid,
+                                ),
+                              ),
+                            );
+                            // Update the field in Firestore
+                            try {
+                              await FirebaseFirestore.instance
+                                  .collection('WinterReports')
+                                  .doc(widget.docid.id)
+                                  .set(
+                                {'filed': true},
+                                SetOptions(merge: true),
+                              );
+                            } catch (error) {
+                              print('Error updating document: $error');
+                            }
+                          }
+                        : null,
+                    child: Text(
+                      "GENERATE PDF",
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                      ),
+                    ),
+                    elevation: 0,
+                    color: ((widget.docid.data()
+                                as Map<String, dynamic>?)?['filed'] ==
+                            true)
+                        ? Colors.green.shade200
+                        : Color.fromARGB(255, 20, 177, 54),
+                  ),
+                ),
+                SizedBox(width: 15),
                 // Container(
                 //   decoration: BoxDecoration(
                 //     borderRadius: BorderRadius.circular(10),
