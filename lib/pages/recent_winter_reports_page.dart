@@ -1,66 +1,28 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gemini_landscaping_app/pages/addWinterReport.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:gemini_landscaping_app/pages/view_winter_report_page.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'view_report_page.dart';
-import '../auth.dart';
-import 'auth_page.dart';
-import 'package:floating_action_bubble/floating_action_bubble.dart';
-import '../uploadPhotos.dart';
-import '../addReport.dart';
-import 'package:gemini_landscaping_app/extraReport.dart';
 
-class RecentReportsPage extends StatefulWidget {
-  const RecentReportsPage({super.key});
+class RecentWinterReportsPage extends StatefulWidget {
+  const RecentWinterReportsPage({super.key});
 
   @override
-  State<RecentReportsPage> createState() => _RecentReportsPageState();
+  State<RecentWinterReportsPage> createState() =>
+      _RecentWinterReportsPageState();
 }
 
-class _RecentReportsPageState extends State<RecentReportsPage>
-    with SingleTickerProviderStateMixin {
-  // get current user
+class _RecentWinterReportsPageState extends State<RecentWinterReportsPage> {
   final currentUser = FirebaseAuth.instance.currentUser!;
-
-  final User? user = Auth().currentUser;
-
-  final Stream<QuerySnapshot> _reportStream2023 =
-      FirebaseFirestore.instance.collectionGroup('SiteReports2023').snapshots();
-
-  // sign current user out
-  Future<void> signOut() async {
-    await Auth().signOut();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => AuthPage()),
-    );
-  }
-
-  // floating action bubble
-  late Animation<double> _animation;
-  late AnimationController _animationController;
-
-  @override
-  void initState() {
-    _animationController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 260),
-    );
-
-    final curvedAnimation =
-        CurvedAnimation(curve: Curves.easeInOut, parent: _animationController);
-    _animation = Tween<double>(begin: 0, end: 1).animate(curvedAnimation);
-
-    super.initState();
-  }
+  final Stream<QuerySnapshot> _winterReportStream =
+      FirebaseFirestore.instance.collectionGroup('WinterReports').snapshots();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
-        title: Text("Most Recent Reports",
+        title: Text("Recent Winter Reports",
             style: GoogleFonts.montserrat(
                 fontSize: 18,
                 color: Colors.black,
@@ -71,7 +33,7 @@ class _RecentReportsPageState extends State<RecentReportsPage>
         centerTitle: true,
       ),
       body: StreamBuilder(
-        stream: _reportStream2023,
+        stream: _winterReportStream,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
             return const Text("something is wrong");
@@ -92,14 +54,14 @@ class _RecentReportsPageState extends State<RecentReportsPage>
               borderRadius: BorderRadius.circular(12),
             ),
             child: ListView.builder(
-              itemCount: 50,
+              itemCount: documents.length,
               itemBuilder: (_, index) {
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ViewReport(docid: documents[index]),
+                        builder: (_) => ViewWinterReportPage(docid: documents[index]),
                       ),
                     );
                   },
@@ -121,12 +83,12 @@ class _RecentReportsPageState extends State<RecentReportsPage>
                               borderRadius: BorderRadius.circular(10),
                               side: const BorderSide(
                                 width: 2.0,
-                                color: Colors.green,
+                                color: Colors.blueAccent,
                               ),
                             ),
                             title: FutureBuilder<DocumentSnapshot>(
                               future: FirebaseFirestore.instance
-                                  .collection('SiteReports2023')
+                                  .collection('WinterReports')
                                   .doc(documents[index].id)
                                   .get(),
                               builder: (BuildContext context,
@@ -155,7 +117,7 @@ class _RecentReportsPageState extends State<RecentReportsPage>
                             ),
                             subtitle: FutureBuilder<DocumentSnapshot>(
                               future: FirebaseFirestore.instance
-                                  .collection('SiteReports2023')
+                                  .collection('WinterReports')
                                   .doc(documents[index].id)
                                   .get(),
                               builder: (BuildContext context,
@@ -215,7 +177,7 @@ class _RecentReportsPageState extends State<RecentReportsPage>
                             ),
                             trailing: FutureBuilder<DocumentSnapshot>(
                               future: FirebaseFirestore.instance
-                                  .collection('SiteReports2023')
+                                  .collection('WinterReports')
                                   .doc(documents[index].id)
                                   .get(),
                               builder: (BuildContext context,
@@ -255,52 +217,6 @@ class _RecentReportsPageState extends State<RecentReportsPage>
             ),
           );
         },
-      ),
-      // Floating Action Button
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionBubble(
-        iconColor: Colors.white,
-        backGroundColor: const Color.fromARGB(255, 31, 182, 77),
-        animation: _animation,
-        onPress: () => _animationController.isCompleted
-            ? _animationController.reverse()
-            : _animationController.forward(),
-        iconData: Icons.add,
-        items: <Bubble>[
-          Bubble(
-            title: "Site Report",
-            iconColor: Colors.white,
-            bubbleColor: const Color.fromARGB(255, 59, 82, 73),
-            icon: Icons.note_add_outlined,
-            titleStyle: TextStyle(fontSize: 16, color: Colors.white),
-            onPress: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const AddReport()));
-            },
-          ),
-          Bubble(
-            title: "Extras Report",
-            iconColor: Colors.white,
-            bubbleColor: const Color.fromARGB(255, 59, 82, 73),
-            icon: Icons.add_circle_outline,
-            titleStyle: TextStyle(fontSize: 16, color: Colors.white),
-            onPress: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const ExtraReport()));
-            },
-          ),
-          Bubble(
-            title: "Winter Report",
-            iconColor: Colors.white,
-            bubbleColor: const Color.fromARGB(255, 59, 82, 73),
-            icon: Icons.cloudy_snowing,
-            titleStyle: TextStyle(fontSize: 16, color: Colors.white),
-            onPress: () {
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (_) => AddWinterReport()));
-            },
-          ),
-        ],
       ),
     );
   }

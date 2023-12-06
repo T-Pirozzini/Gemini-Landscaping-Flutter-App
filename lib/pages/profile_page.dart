@@ -28,6 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         title: Text("Profile",
             style: GoogleFonts.montserrat(
@@ -44,8 +45,8 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           Center(
             child: Lottie.network(
-                'https://assets1.lottiefiles.com/packages/lf20_aL00NpAjvC.json',
-                height: 200,
+              'https://assets1.lottiefiles.com/packages/lf20_aL00NpAjvC.json',
+              height: 200,
             ),
           ),
           SizedBox(height: 10),

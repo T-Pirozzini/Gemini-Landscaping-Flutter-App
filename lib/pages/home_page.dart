@@ -5,6 +5,7 @@ import 'package:gemini_landscaping_app/pages/folders_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
 import 'package:gemini_landscaping_app/pages/recent_reports_page.dart';
 import 'package:gemini_landscaping_app/pages/reports_controller.dart';
+import 'package:gemini_landscaping_app/uploadPhotos.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../auth.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
@@ -25,7 +26,8 @@ class _HomeState extends State<Home> {
   final pages = [
     TimeSheetController(),
     // RecentReportsPage(),
-    SiteFolders(),
+    // SiteFolders(),
+    UploadPhotos(),
     EquipmentPage(),
     // Chart(), Add when completed
     AnnouncementPage(),
@@ -68,7 +70,7 @@ class _HomeState extends State<Home> {
             size: 30,
           ),
           Icon(
-            Icons.folder_copy_outlined,
+            Icons.add_a_photo_outlined,
             color: Colors.white,
             size: 30,
           ),
