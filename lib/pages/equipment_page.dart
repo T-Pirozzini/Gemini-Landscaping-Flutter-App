@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class EquipmentPage extends StatefulWidget {
@@ -27,208 +28,247 @@ class _EquipmentPageState extends State<EquipmentPage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.grey.shade200,
-      body: StreamBuilder<QuerySnapshot>(
-        stream: equipmentCollection.snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          }
+      appBar: AppBar(
+        title: Text("Report Equipment Damage",
+            style: GoogleFonts.montserrat(
+                fontSize: 18,
+                color: Colors.black,
+                fontWeight: FontWeight.w500)),
+        toolbarHeight: 25,
+        backgroundColor: Colors.green.shade100,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: Column(
+        children: [
+          SizedBox(height: 10),
+          Text('How To: Tap green "+" to add a repair report.',
+              style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+          Text(' Set the priority level and submit.',
+              style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: equipmentCollection.snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
-          }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                }
 
-          List<Equipment> equipmentList = snapshot.data!.docs.map((document) {
-            Map<String, dynamic> data = document.data() as Map<String, dynamic>;
-            return Equipment(
-              name: data['name'] ?? '',
-              year: data['year'] ?? 0,
-              equipment: data['equipmentType'] ?? '',
-              serialNumber: data['serialNumber'] ?? '',
-            );
-          }).toList();
+                List<Equipment> equipmentList =
+                    snapshot.data!.docs.map((document) {
+                  Map<String, dynamic> data =
+                      document.data() as Map<String, dynamic>;
+                  return Equipment(
+                    name: data['name'] ?? '',
+                    year: data['year'] ?? 0,
+                    equipment: data['equipmentType'] ?? '',
+                    serialNumber: data['serialNumber'] ?? '',
+                  );
+                }).toList();
 
-          List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
+                List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
 
-          return ListView.builder(
-            itemCount: documents.length,
-            itemBuilder: (context, index) {
-              Equipment equipment = equipmentList[index];
-              QueryDocumentSnapshot document = documents[index];
+                return ListView.builder(
+                  itemCount: documents.length,
+                  itemBuilder: (context, index) {
+                    Equipment equipment = equipmentList[index];
+                    QueryDocumentSnapshot document = documents[index];
 
-              String mostExtremePriority = 'resolved';
+                    String mostExtremePriority = 'resolved';
 
-              return FutureBuilder<QuerySnapshot>(
-                future: document.reference.collection('repair_entries').get(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<QuerySnapshot> entrySnapshot) {
-                  if (entrySnapshot.hasData) {
-                    // Iterate through the repair entries to find the most extreme priority
-                    for (QueryDocumentSnapshot entry
-                        in entrySnapshot.data!.docs) {
-                      Map<String, dynamic> entryData =
-                          entry.data() as Map<String, dynamic>;
-                      String entryPriority =
-                          entryData['priority'] ?? 'resolved';
+                    return FutureBuilder<QuerySnapshot>(
+                      future:
+                          document.reference.collection('repair_entries').get(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<QuerySnapshot> entrySnapshot) {
+                        if (entrySnapshot.hasData) {
+                          // Iterate through the repair entries to find the most extreme priority
+                          for (QueryDocumentSnapshot entry
+                              in entrySnapshot.data!.docs) {
+                            Map<String, dynamic> entryData =
+                                entry.data() as Map<String, dynamic>;
+                            String entryPriority =
+                                entryData['priority'] ?? 'resolved';
 
-                      // Update the most extreme priority if the current entryPriority is higher
-                      if (entryPriority == 'high') {
-                        mostExtremePriority = 'high';
-                        break; // No need to check further
-                      } else if (entryPriority == 'medium' &&
-                          mostExtremePriority != 'high') {
-                        mostExtremePriority = 'medium';
-                      } else if (entryPriority == 'low' &&
-                          mostExtremePriority != 'high' &&
-                          mostExtremePriority != 'medium') {
-                        mostExtremePriority = 'low';
-                      }
-                    }
-                  }
+                            // Update the most extreme priority if the current entryPriority is higher
+                            if (entryPriority == 'high') {
+                              mostExtremePriority = 'high';
+                              break; // No need to check further
+                            } else if (entryPriority == 'medium' &&
+                                mostExtremePriority != 'high') {
+                              mostExtremePriority = 'medium';
+                            } else if (entryPriority == 'low' &&
+                                mostExtremePriority != 'high' &&
+                                mostExtremePriority != 'medium') {
+                              mostExtremePriority = 'low';
+                            }
+                          }
+                        }
 
-                  Color borderColor;
+                        Color borderColor;
 
-                  switch (mostExtremePriority) {
-                    case 'low':
-                      borderColor = Colors.yellow;
-                      break;
-                    case 'medium':
-                      borderColor = Colors.orange;
-                      break;
-                    case 'high':
-                      borderColor = Colors.red;
-                      break;
-                    default:
-                      borderColor = Colors.grey;
-                      break;
-                  }
+                        switch (mostExtremePriority) {
+                          case 'low':
+                            borderColor = Colors.yellow;
+                            break;
+                          case 'medium':
+                            borderColor = Colors.orange;
+                            break;
+                          case 'high':
+                            borderColor = Colors.red;
+                            break;
+                          default:
+                            borderColor = Colors.grey;
+                            break;
+                        }
 
-                  return Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: borderColor, width: 2),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                    margin: EdgeInsets.all(5),
-                    child: InkWell(
-                      onTap: () {
-                        // Open dialog with a list of dated repair entries log
-                        _showRepairEntriesDialog(
-                            context, equipment.name, document.id);
-                      },
-                      child: ListTile(
-                        tileColor: Colors.white,
-                        title: Text(
-                          equipment.name,
-                          style: TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Year: ${equipment.year}',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                            Text(
-                              'ID: ${equipment.serialNumber}',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        ),
-                        leading: _getEquipmentIcon(equipment.equipment),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Report',
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.green.shade200),
-                                    ),
-                                    Text('Damage:',
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.green.shade200)),
-                                  ],
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.add_box_outlined),
-                                  color: Colors.green.shade200,
-                                  iconSize: 28,
-                                  onPressed: () {
-                                    _addRepairReport(context, equipment.name,
-                                        document.id, priority);
-                                  },
-                                ),
-                              ],
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.edit),
-                              color: Colors.grey.shade600,
-                              iconSize: 18,
-                              onPressed: () {
-                                _editEquipment(
-                                  context,
-                                  equipment.name,
-                                  equipment.year,
-                                  equipment.serialNumber,
-                                  equipment.equipment,
-                                  document.id,
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete),
-                              color: Colors.grey,
-                              iconSize: 18,
-                              onPressed: () {
-                                if (FirebaseAuth.instance.currentUser?.uid ==
-                                        "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
-                                    FirebaseAuth.instance.currentUser?.uid ==
-                                        "4Qpgb3aORKhUVXjgT2SNh6zgCWE3") {
-                                  _deleteEquipment(
-                                      context,
-                                      equipment.name,
-                                      document.id,
-                                      FirebaseAuth.instance.currentUser!.uid);
-                                } else {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text('Error'),
-                                        content: Text(
-                                            'You do not have permission to delete equipment'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text('OK'),
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: borderColor, width: 2),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                          margin: EdgeInsets.all(5),
+                          child: InkWell(
+                            onTap: () {
+                              // Open dialog with a list of dated repair entries log
+                              _showRepairEntriesDialog(
+                                  context, equipment.name, document.id);
+                            },
+                            child: ListTile(
+                              tileColor: Colors.white,
+                              title: Text(
+                                equipment.name,
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Year: ${equipment.year}',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                  Text(
+                                    'ID: ${equipment.serialNumber}',
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              leading: _getEquipmentIcon(equipment.equipment),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Report',
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.green.shade200),
                                           ),
+                                          Text('Damage:',
+                                              style: TextStyle(
+                                                  fontSize: 12,
+                                                  color:
+                                                      Colors.green.shade200)),
                                         ],
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.add_box_outlined),
+                                        color: Colors.green.shade200,
+                                        iconSize: 28,
+                                        onPressed: () {
+                                          _addRepairReport(
+                                              context,
+                                              equipment.name,
+                                              document.id,
+                                              priority);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.edit),
+                                    color: Colors.grey.shade600,
+                                    iconSize: 18,
+                                    onPressed: () {
+                                      _editEquipment(
+                                        context,
+                                        equipment.name,
+                                        equipment.year,
+                                        equipment.serialNumber,
+                                        equipment.equipment,
+                                        document.id,
                                       );
                                     },
-                                  );
-                                }
-                              },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete),
+                                    color: Colors.grey,
+                                    iconSize: 18,
+                                    onPressed: () {
+                                      if (FirebaseAuth
+                                                  .instance.currentUser?.uid ==
+                                              "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                                          FirebaseAuth
+                                                  .instance.currentUser?.uid ==
+                                              "4Qpgb3aORKhUVXjgT2SNh6zgCWE3") {
+                                        _deleteEquipment(
+                                            context,
+                                            equipment.name,
+                                            document.id,
+                                            FirebaseAuth
+                                                .instance.currentUser!.uid);
+                                      } else {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text('Error'),
+                                              content: Text(
+                                                  'You do not have permission to delete equipment'),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child: Text('OK'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          );
-        },
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Text('Tap on the equipment to view the repair log.',
+                style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.black45,
