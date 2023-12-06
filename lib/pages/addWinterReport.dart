@@ -5,199 +5,84 @@ import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
-List<String> _selectedGarbage = [];
-List<String> debris = ['grassed areas', 'garden beds', 'tree wells'];
-List<String> _selectedDebris = [];
-List<String> lawn = ['mow', 'trim', 'edge', 'lime', 'aerate', 'fertilize'];
-List<String> _selectedLawn = [];
-List<String> garden = ['blow debris', 'weed', 'prune', 'fertilize'];
-List<String> _selectedGarden = [];
-List<String> tree = ['< 8ft', '> 8ft'];
-List<String> _selectedTree = [];
-List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
-List<String> _selectedBlow = [];
+List<String> walkways = ['Common Walkways', 'Building Entrances', 'Crosswalks'];
+List<String> _selectedWalkways = [];
+List<String> liability = [
+  'Access. Parking Stalls',
+  'Stairs',
+  'Curb Down-slopes'
+];
+List<String> _selectedLiability = [];
+List<String> other = ['Cart Returns', 'Other - specify'];
+List<String> _selectedOther = [];
 
-class AddReport extends StatefulWidget {
-  const AddReport({super.key});
+class AddWinterReport extends StatefulWidget {
+  const AddWinterReport({super.key});
 
   @override
-  State<AddReport> createState() => _AddReportState();
+  State<AddWinterReport> createState() => _AddWinterReportState();
 }
 
-class _AddReportState extends State<AddReport> {
+class _AddWinterReportState extends State<AddWinterReport> {
   // site list
-  List<String> siteList = [];
+  List<String> winterSiteList = [];
   // drop down site menu
-  String dropdownValue = '';
+  String? dropdownValue;
   String enteredSiteName = '';
-  String imageURL = '';
   final currentUser = FirebaseAuth.instance.currentUser!;
+  double saltSliderValue = 0.0;
+  double meltSliderValue = 0.0;
+  double sandSliderValue = 0.0;
+  List<bool> isIceManagement = [true, false]; // Initial state for ToggleButtons
 
   @override
   void initState() {
     super.initState();
     // add site names to siteList
     FirebaseFirestore.instance
-        .collection('SiteList')
+        .collection('WinterSiteList')
         .get()
         .then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
-        if (!siteList.contains(doc["name"])) {
+        if (!winterSiteList.contains(doc["name"])) {
           setState(() {
-            siteList.add(doc["name"]);
+            winterSiteList.add(doc["name"]);
           });
         }
       });
 
       // Check if siteList is not empty and then set dropdownValue
-      if (siteList.isNotEmpty) {
+      if (winterSiteList.isNotEmpty) {
         setState(() {
-          dropdownValue = siteList.first;
+          dropdownValue = winterSiteList.first;
+        });
+      } else {
+        setState(() {
+          dropdownValue = null; // or some default value that exists in the list
         });
       }
     });
-    print(siteList);
-  }
-
-  void _updateImageURL(String siteName) {
-    if (siteName == 'Merewood Apartments' ||
-        siteName == 'North Point Apartments' ||
-        siteName == 'Uplands Terrace') {
-      setState(
-        () {
-          imageURL =
-              'https://www.northpointnanaimo.ca/theme/orca/images/logos/Logo-Skyline-Living.png';
-        },
-      );
-    } else if (siteName == 'Country Grocer') {
-      setState(
-        () {
-          imageURL =
-              'https://www.lifetimenetworks.org/wp-content/uploads/2016/02/Country-Grocer-logo.png';
-        },
-      );
-    } else if (siteName == 'Lancelot Gardens' ||
-        siteName == 'Peartree Meadows' ||
-        siteName == 'Pinewood Estates' ||
-        siteName == 'Harwell Place' ||
-        siteName == 'Bowen Terrace') {
-      setState(
-        () {
-          imageURL =
-              'https://colyvanpacific.com/wp-content/uploads/2021/02/cropped-cp-web-logo-500px-200x200-1.png';
-        },
-      );
-    } else if (siteName == 'Bowen Estates' ||
-        siteName == 'Riverbend Terrace' ||
-        siteName == 'Sandscapes Apartments' ||
-        siteName == 'Valley View Terrace' ||
-        siteName == 'Prideaux Manor' ||
-        siteName == 'Alderwood' ||
-        siteName == 'Woodgrove Pines') {
-      setState(
-        () {
-          imageURL =
-              'https://storage.googleapis.com/rent-canada/logos/256/1619204444_devon-logo.png';
-        },
-      );
-    } else if (siteName == 'Nuko') {
-      setState(
-        () {
-          imageURL =
-              'https://images.squarespace-cdn.com/content/v1/55fbc84fe4b08176c3bcd7c3/1462002339453-UE4VWYNONOMBC9WBQQND/image-asset.png';
-        },
-      );
-    } else if (siteName == 'Nanaimo Liquor Plus') {
-      setState(
-        () {
-          imageURL =
-              'https://pbs.twimg.com/profile_images/1539393532779122688/vyn5Lr1x_400x400.jpg';
-        },
-      );
-    } else {
-      setState(() {
-        imageURL = '';
-      });
-    }
   }
 
   void _updateSiteAddress(String siteName) {
-    String address;
-    switch (siteName) {
-      case "Merewood Apartments":
-        address = "411 & 423 Despard Avenue";
-        break;
-      case "North Point Apartments":
-        address = "6971/6973/6975 Island Highway North";
-        break;
-      case "Uplands Terrace":
-        address = "6117 Uplands Drive";
-        break;
-      case "Alderwood":
-        address = "579 Rosehill Street";
-        break;
-      case "Prideaux Manor":
-        address = "21 Prideaux Street";
-        break;
-      case "Sandscapes Apartments":
-        address = "155 Moilliet";
-        break;
-      case "Sandscapes Townhomes":
-        address = "119 Moilliet";
-        break;
-      case "Creekside":
-        address = "500 Corfield Street South";
-        break;
-      case "Bowen Estates":
-        address = "149-155 Wakesiah Avenue";
-        break;
-      case "Riverbend Terrace":
-        address = "309 - 357 Millstone Avenue, 631 - 669 Rosehill Street";
-        break;
-      case "Valley View Terrace":
-        address = "847 Howard Avenue";
-        break;
-      case "Woodgrove Pines":
-        address = "6597 6599 & 6601 Applecross Rd & 6439 Portsmouth Rd";
-        break;
-      case "Pinewood Estates":
-        address = "3053 Pine Street";
-        break;
-      case "Lancelot Gardens":
-        address = "2544-2596 Highland Boulevard";
-        break;
-      case "Harwell Place":
-        address = "260 Harwell Place";
-        break;
-      case "Peartree Meadows":
-        address = "444 Bruce Avenue";
-        break;
-      case "Bowen Terrace":
-        address = "995, 997, 999, 1007 & 1097 Bowen Road";
-        break;
-      case "Country Grocer":
-        address = "1800 Dufferin Crescent";
-        break;
-      case "Nanaimo Liquor Plus":
-        address = "508 Eighth Street";
-        break;
-      case "Westhill Centre":
-        address = "1816, 1808, 1812 Bowen road";
-        break;
-      case "The Chemainus":
-        address = "9958 Daniel Street";
-        break;
-      case "Nuko":
-        address = "60 Needham Street";
-        break;
-      case "Guillevin":
-        address = "1965 Bollinger Road";
-        break;
-      default:
-        address = "";
-    }
-    _addressController.text = address;
+    FirebaseFirestore.instance
+        .collection('WinterSiteList')
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        if (siteName == doc["name"]) {
+          setState(() {
+            _addressController.text = doc["address"];
+          });
+        }
+      });
+    });
+  }
+
+  void addSiteToList(String newSiteName) {
+    setState(() {
+      winterSiteList.add(newSiteName);
+    });
   }
 
   TextEditingController dateController = TextEditingController();
@@ -208,18 +93,9 @@ class _AddReportState extends State<AddReport> {
   TextEditingController name3 = TextEditingController();
   TextEditingController name4 = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
-  TextEditingController _materialController1 = TextEditingController();
-  TextEditingController _vendorController1 = TextEditingController();
-  TextEditingController _amountController1 = TextEditingController();
-  TextEditingController _materialController2 = TextEditingController();
-  TextEditingController _vendorController2 = TextEditingController();
-  TextEditingController _amountController2 = TextEditingController();
-  TextEditingController _materialController3 = TextEditingController();
-  TextEditingController _vendorController3 = TextEditingController();
-  TextEditingController _amountController3 = TextEditingController();
 
   CollectionReference reportRef =
-      FirebaseFirestore.instance.collection('SiteReports2023');
+      FirebaseFirestore.instance.collection('WinterReports');
 
   void _submitForm() {
     reportRef.add({
@@ -227,7 +103,6 @@ class _AddReportState extends State<AddReport> {
         'date': dateController.text,
         'siteName': dropdownValue,
         'address': _addressController.text,
-        'imageURL': imageURL,
       },
       "names": {
         'name1': name1.text,
@@ -262,25 +137,18 @@ class _AddReportState extends State<AddReport> {
             timeOff4!.minute.toString().padLeft(2, '0'),
       },
       "service": {
-        'garbage': _selectedGarbage,
-        'debris': _selectedDebris,
-        'lawn': _selectedLawn,
-        'garden': _selectedGarden,
-        'tree': _selectedTree,
-        'blow': _selectedBlow,
+        'iceManagement': isIceManagement[0],
+        'snowRemoval': isIceManagement[1],
+        'walkways': _selectedWalkways,
+        'liability': _selectedLiability,
+        'other': _selectedOther,
+      },
+      "material": {
+        'iceMelt': meltSliderValue,
+        'salt': saltSliderValue,
+        'sand': sandSliderValue,
       },
       "description": _descriptionController.text,
-      "materials": {
-        "material1": _materialController1.text,
-        "vendor1": _vendorController1.text,
-        "amount1": _amountController1.text,
-        "material2": _materialController2.text,
-        "vendor2": _vendorController2.text,
-        "amount2": _amountController2.text,
-        "material3": _materialController3.text,
-        "vendor3": _vendorController3.text,
-        "amount3": _amountController3.text,
-      },
       "submittedBy": currentUser.email,
     }).whenComplete(() {
       // reset all the form fields
@@ -299,22 +167,13 @@ class _AddReportState extends State<AddReport> {
       timeOff3 = null;
       timeOn4 = null;
       timeOff4 = null;
-      _selectedGarbage = [];
-      _selectedDebris = [];
-      _selectedLawn = [];
-      _selectedGarden = [];
-      _selectedTree = [];
-      _selectedBlow = [];
+      _selectedWalkways = [];
+      _selectedLiability = [];
+      _selectedOther = [];
+      meltSliderValue = 0.0;
+      saltSliderValue = 0.0;
+      sandSliderValue = 0.0;
       _descriptionController.clear();
-      _materialController1.clear();
-      _vendorController1.clear();
-      _amountController1.clear();
-      _materialController2.clear();
-      _vendorController2.clear();
-      _amountController2.clear();
-      _materialController3.clear();
-      _vendorController3.clear();
-      _amountController3.clear();
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Home()));
     });
@@ -330,15 +189,6 @@ class _AddReportState extends State<AddReport> {
     name3.dispose();
     name4.dispose();
     _descriptionController.dispose();
-    _materialController1.dispose();
-    _vendorController1.dispose();
-    _amountController1.dispose();
-    _materialController2.dispose();
-    _vendorController2.dispose();
-    _amountController2.dispose();
-    _materialController3.dispose();
-    _vendorController3.dispose();
-    _amountController3.dispose();
     super.dispose();
   }
 
@@ -473,7 +323,7 @@ class _AddReportState extends State<AddReport> {
                         ),
                       ),
                       value: dropdownValue,
-                      items: siteList.map((site) {
+                      items: winterSiteList.map((site) {
                         return DropdownMenuItem<String>(
                           value: site,
                           child: Text(
@@ -482,12 +332,11 @@ class _AddReportState extends State<AddReport> {
                           ),
                         );
                       }).toList(),
-                      onChanged: (String? value) async {
+                      onChanged: (String? newValue) async {
                         setState(
                           () {
-                            dropdownValue = value!;
-                            _updateImageURL(dropdownValue);
-                            _updateSiteAddress(dropdownValue);
+                            dropdownValue = newValue!;
+                            _updateSiteAddress(newValue);
                           },
                         );
                       },
@@ -832,6 +681,39 @@ class _AddReportState extends State<AddReport> {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Divider(),
+                  SizedBox(height: 5),
+                  ToggleButtons(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    selectedBorderColor: const Color.fromARGB(255, 59, 82, 73),
+                    selectedColor: Colors.white,
+                    fillColor: const Color.fromARGB(255, 59, 82, 73),
+                    color: Colors.black,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Ice Management'),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('Snow Removal'),
+                      ),
+                    ],
+                    onPressed: (int index) {
+                      setState(() {
+                        for (int buttonIndex = 0;
+                            buttonIndex < isIceManagement.length;
+                            buttonIndex++) {
+                          if (buttonIndex == index) {
+                            isIceManagement[buttonIndex] = true;
+                          } else {
+                            isIceManagement[buttonIndex] = false;
+                          }
+                        }
+                      });
+                    },
+                    isSelected: isIceManagement,
+                  ),
                   Divider(
                     color: Colors.grey,
                     thickness: 1,
@@ -839,47 +721,43 @@ class _AddReportState extends State<AddReport> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Pick Up Loose Garbage:',
+                      'Primary Winter Services:',
                       style: GoogleFonts.montserrat(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           height: .5),
                     ),
                   ),
-                  Wrap(
-                    children: [
-                      ToggleButtons(
-                        onPressed: (int index) {
-                          // All buttons are selectable.
-                          setState(() {
-                            if (_selectedGarbage.contains(garbage[index])) {
-                              _selectedGarbage.remove(garbage[index]);
-                            } else {
-                              _selectedGarbage.add(garbage[index]);
-                            }
-                          });
-                        },
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
-                        selectedBorderColor: Colors.green[700],
-                        selectedColor: Colors.white,
-                        fillColor: Colors.green[200],
-                        color: Colors.green[700],
-                        constraints: const BoxConstraints(
-                          minHeight: 25.0,
-                          minWidth: 110.0,
-                        ),
-                        isSelected: garbage
-                            .map((value) => _selectedGarbage.contains(value))
-                            .toList(),
-                        children: garbage
-                            .map((value) => Text(
-                                  value,
-                                  style: GoogleFonts.montserrat(fontSize: 12),
-                                ))
-                            .toList(),
-                      ),
-                    ],
+                  ToggleButtons(
+                    onPressed: (int index) {
+                      // All buttons are selectable.
+                      setState(() {
+                        if (_selectedWalkways.contains(walkways[index])) {
+                          _selectedWalkways.remove(walkways[index]);
+                        } else {
+                          _selectedWalkways.add(walkways[index]);
+                        }
+                      });
+                    },
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    selectedBorderColor: Colors.green[700],
+                    selectedColor: Colors.white,
+                    fillColor: Colors.green[200],
+                    color: Colors.green[700],
+                    constraints: BoxConstraints(
+                      minWidth: (MediaQuery.of(context).size.width * .9) /
+                          walkways.length,
+                      minHeight: 30.0,
+                    ),
+                    isSelected: walkways
+                        .map((value) => _selectedWalkways.contains(value))
+                        .toList(),
+                    children: walkways
+                        .map((value) => Text(
+                              value,
+                              style: GoogleFonts.montserrat(fontSize: 12),
+                            ))
+                        .toList(),
                   ),
                   SizedBox(height: 2),
                   Divider(
@@ -889,7 +767,7 @@ class _AddReportState extends State<AddReport> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Rake Yard Debris:',
+                      'High Liability Winter Services:',
                       style: GoogleFonts.montserrat(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -900,10 +778,10 @@ class _AddReportState extends State<AddReport> {
                     onPressed: (int index) {
                       // All buttons are selectable.
                       setState(() {
-                        if (_selectedDebris.contains(debris[index])) {
-                          _selectedDebris.remove(debris[index]);
+                        if (_selectedLiability.contains(liability[index])) {
+                          _selectedLiability.remove(liability[index]);
                         } else {
-                          _selectedDebris.add(debris[index]);
+                          _selectedLiability.add(liability[index]);
                         }
                       });
                     },
@@ -912,14 +790,15 @@ class _AddReportState extends State<AddReport> {
                     selectedColor: Colors.white,
                     fillColor: Colors.green[200],
                     color: Colors.green[700],
-                    constraints: const BoxConstraints(
-                      minHeight: 25.0,
-                      minWidth: 110.0,
+                    constraints: BoxConstraints(
+                      minWidth: (MediaQuery.of(context).size.width * .9) /
+                          walkways.length,
+                      minHeight: 30.0,
                     ),
-                    isSelected: debris
-                        .map((value) => _selectedDebris.contains(value))
+                    isSelected: liability
+                        .map((value) => _selectedLiability.contains(value))
                         .toList(),
-                    children: debris
+                    children: liability
                         .map((value) => Text(
                               value,
                               style: GoogleFonts.montserrat(fontSize: 12),
@@ -933,7 +812,7 @@ class _AddReportState extends State<AddReport> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Lawn Care:',
+                      'Other Services:',
                       style: GoogleFonts.montserrat(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -944,10 +823,10 @@ class _AddReportState extends State<AddReport> {
                     onPressed: (int index) {
                       // All buttons are selectable.
                       setState(() {
-                        if (_selectedLawn.contains(lawn[index])) {
-                          _selectedLawn.remove(lawn[index]);
+                        if (_selectedOther.contains(other[index])) {
+                          _selectedOther.remove(other[index]);
                         } else {
-                          _selectedLawn.add(lawn[index]);
+                          _selectedOther.add(other[index]);
                         }
                       });
                     },
@@ -956,151 +835,67 @@ class _AddReportState extends State<AddReport> {
                     selectedColor: Colors.white,
                     fillColor: Colors.green[200],
                     color: Colors.green[700],
-                    constraints: const BoxConstraints(
-                      minHeight: 25.0,
-                      minWidth: 55.0,
+                    constraints: BoxConstraints(
+                      minWidth: (MediaQuery.of(context).size.width * .9) /
+                          walkways.length,
+                      minHeight: 30.0,
                     ),
-                    isSelected: lawn
-                        .map((value) => _selectedLawn.contains(value))
+                    isSelected: other
+                        .map((value) => _selectedOther.contains(value))
                         .toList(),
-                    children: lawn
+                    children: other
                         .map((value) => Text(
                               value,
                               style: GoogleFonts.montserrat(fontSize: 12),
                             ))
                         .toList(),
                   ),
+                  Slider(
+                    value: meltSliderValue,
+                    min: 0.0,
+                    max: 10.0,
+                    divisions: 40,
+                    activeColor: Colors.blueAccent,
+                    label: meltSliderValue.toStringAsFixed(2),
+                    onChanged: (double value) {
+                      setState(() {
+                        meltSliderValue = value;
+                      });
+                    },
+                  ),
+                  Text(
+                      'Ice Melt Used: ${meltSliderValue.toStringAsFixed(2)} bags'),
+                  Slider(
+                    value: saltSliderValue,
+                    min: 0.0,
+                    max: 10.0,
+                    divisions: 40,
+                    label: saltSliderValue.toStringAsFixed(2),
+                    activeColor: Colors.blueAccent,
+                    onChanged: (double value) {
+                      setState(() {
+                        saltSliderValue = value;
+                      });
+                    },
+                  ),
+                  Text('Salt Used: ${saltSliderValue.toStringAsFixed(2)} bags'),
+                  Slider(
+                    value: sandSliderValue,
+                    min: 0.0,
+                    max: 10.0,
+                    divisions: 40,
+                    label: sandSliderValue.toStringAsFixed(2),
+                    activeColor: Colors.blueAccent,
+                    onChanged: (double value) {
+                      setState(() {
+                        sandSliderValue = value;
+                      });
+                    },
+                  ),
+                  Text('Sand Used: ${sandSliderValue.toStringAsFixed(2)} bags'),
                   Divider(
                     color: Colors.grey,
                     thickness: 1,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Gardens:',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          height: .5),
-                    ),
-                  ),
-                  ToggleButtons(
-                    onPressed: (int index) {
-                      // All buttons are selectable.
-                      setState(() {
-                        if (_selectedGarden.contains(garden[index])) {
-                          _selectedGarden.remove(garden[index]);
-                        } else {
-                          _selectedGarden.add(garden[index]);
-                        }
-                      });
-                    },
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    selectedBorderColor: Colors.green[700],
-                    selectedColor: Colors.white,
-                    fillColor: Colors.green[200],
-                    color: Colors.green[700],
-                    constraints: const BoxConstraints(
-                      minHeight: 25.0,
-                      minWidth: 85.0,
-                    ),
-                    isSelected: garden
-                        .map((value) => _selectedGarden.contains(value))
-                        .toList(),
-                    children: garden
-                        .map((value) => Text(
-                              value,
-                              style: GoogleFonts.montserrat(fontSize: 12),
-                            ))
-                        .toList(),
-                  ),
-                  Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Trees:',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          height: .5),
-                    ),
-                  ),
-                  ToggleButtons(
-                    onPressed: (int index) {
-                      // All buttons are selectable.
-                      setState(() {
-                        if (_selectedTree.contains(tree[index])) {
-                          _selectedTree.remove(tree[index]);
-                        } else {
-                          _selectedTree.add(tree[index]);
-                        }
-                      });
-                    },
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    selectedBorderColor: Colors.green[700],
-                    selectedColor: Colors.white,
-                    fillColor: Colors.green[200],
-                    color: Colors.green[700],
-                    constraints: const BoxConstraints(
-                      minHeight: 25.0,
-                      minWidth: 110.0,
-                    ),
-                    isSelected: tree
-                        .map((value) => _selectedTree.contains(value))
-                        .toList(),
-                    children: tree
-                        .map((value) => Text(
-                              value,
-                              style: GoogleFonts.montserrat(fontSize: 12),
-                            ))
-                        .toList(),
-                  ),
-                  Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Blow Dust/Debris:',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          height: .5),
-                    ),
-                  ),
-                  ToggleButtons(
-                    onPressed: (int index) {
-                      // All buttons are selectable.
-                      setState(() {
-                        if (_selectedBlow.contains(blow[index])) {
-                          _selectedBlow.remove(blow[index]);
-                        } else {
-                          _selectedBlow.add(blow[index]);
-                        }
-                      });
-                    },
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    selectedBorderColor: Colors.green[700],
-                    selectedColor: Colors.white,
-                    fillColor: Colors.green[200],
-                    color: Colors.green[700],
-                    constraints: const BoxConstraints(
-                      minHeight: 25.0,
-                      minWidth: 110.0,
-                    ),
-                    isSelected: blow
-                        .map((value) => _selectedBlow.contains(value))
-                        .toList(),
-                    children: blow
-                        .map((value) => Text(
-                              value,
-                              style: GoogleFonts.montserrat(fontSize: 12),
-                            ))
-                        .toList(),
                   ),
                   Container(
                     decoration: BoxDecoration(
@@ -1126,6 +921,125 @@ class _AddReportState extends State<AddReport> {
             ],
           ),
         ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text('Add a new site'),
+          Icon(Icons.arrow_right_outlined, size: 18),
+          FloatingActionButton(
+            backgroundColor: Colors.black45,
+            mini: true,
+            shape:
+                ShapeBorder.lerp(RoundedRectangleBorder(), CircleBorder(), 0.5),
+            onPressed: () {
+              TextEditingController nameController = TextEditingController();
+              TextEditingController addressController = TextEditingController();
+
+              showModalBottomSheet(
+                isScrollControlled: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
+                        child: Wrap(
+                          alignment: WrapAlignment.center,
+                          children: [
+                            Column(
+                              children: [
+                                Text(
+                                  'Add a new Winter Site:',
+                                  style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 10),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          .6,
+                                      child: TextField(
+                                        controller: nameController,
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          labelText: 'Site Name',
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.green,
+                                                width: 2.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          .8,
+                                      child: TextField(
+                                        controller: addressController,
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          labelText: 'Address',
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.green,
+                                                width: 2.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 5),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.black45,
+                                      textStyle: TextStyle(fontSize: 18)),
+                                  onPressed: () async {
+                                    CollectionReference equipmentCollection =
+                                        FirebaseFirestore.instance
+                                            .collection('WinterSiteList');
+
+                                    // Create a new document and set its data
+                                    await equipmentCollection.add({
+                                      'name': nameController.text,
+                                      'address': addressController.text,
+                                      'addedBy': currentUser.email,
+                                    });
+
+                                    // add site to drop down list
+                                    addSiteToList(nameController.text);
+
+                                    // Clear the text fields
+                                    nameController.clear();
+                                    addressController.clear();
+
+                                    // Close the bottom sheet after adding equipment
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('Add Site'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+            child: Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }

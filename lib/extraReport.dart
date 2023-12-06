@@ -97,7 +97,7 @@ class _ExtraReportState extends State<ExtraReport> {
         break;
       case "Prideaux Manor":
         address = "21 Prideaux Street";
-        break;      
+        break;
       case "Sandscapes Apartments":
         address = "155 Moilliet";
         break;
