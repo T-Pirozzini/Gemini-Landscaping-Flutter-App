@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/chart_page.dart';
 import 'package:gemini_landscaping_app/pages/folders_page.dart';
 import 'package:gemini_landscaping_app/pages/recent_reports_page.dart';
+import 'package:gemini_landscaping_app/pages/recent_winter_reports_page.dart';
+import 'package:gemini_landscaping_app/pages/restricted_page.dart';
 
 class TimeSheetController extends StatefulWidget {
   const TimeSheetController({super.key});
@@ -20,29 +22,39 @@ class _TimeSheetControllerState extends State<TimeSheetController> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: const Color(0xFFDFD3C3),
-        appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 59, 82, 73),
-          toolbarHeight: 0,
-          bottom: TabBar(
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.grey.shade400,
-            indicatorColor: Colors.white,
-            tabs: [
-              Tab(text: 'Recent'),
-              Tab(text: 'All Reports'),
-              Tab(text: 'Analysis'),
-            ],
+          backgroundColor: const Color(0xFFDFD3C3),
+          appBar: AppBar(
+            backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+            toolbarHeight: 0,
+            bottom: TabBar(
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.grey.shade400,
+              indicatorColor: Colors.white,
+              tabs: [
+                Tab(text: 'Recent'),
+                Tab(text: 'All Reports'),
+                Tab(text: 'Winter Reports'),
+              ],
+            ),
           ),
-        ),
-        body: const TabBarView(
-          children: [
-            RecentReportsPage(),
-            SiteFolders(),
-            ChartPage(),
-          ],
-        ),
-      ),
+          body: FirebaseAuth.instance.currentUser?.uid ==
+                      "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
+                  FirebaseAuth.instance.currentUser?.uid ==
+                      "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
+              ? TabBarView(
+                  children: [
+                    RecentReportsPage(),
+                    SiteFolders(),
+                    RecentWinterReportsPage(),
+                  ],
+                )
+              : TabBarView(
+                  children: [
+                    RecentReportsPage(),
+                    RestrictedPage(),
+                    RestrictedPage(),
+                  ],
+                )),
     );
   }
 }
