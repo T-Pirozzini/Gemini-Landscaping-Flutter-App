@@ -60,6 +60,9 @@ class _SiteReportState extends State<SiteReport> {
   //get current user
   final currentUser = FirebaseAuth.instance.currentUser!;
 
+  // get current year
+  final String year = DateTime.now().year.toString();
+
   void initState() {
     setState(() {
       date = widget.docid['info']['date'];
@@ -97,7 +100,7 @@ class _SiteReportState extends State<SiteReport> {
       amount2 = widget.docid['materials']['amount2'];
       amount3 = widget.docid['materials']['amount3'];
 
-    final docData = widget.docid.data() as Map<String, dynamic>;
+      final docData = widget.docid.data() as Map<String, dynamic>;
       final submittedByFieldExists = docData.containsKey('submittedBy') &&
           docData['submittedBy'] != null &&
           docData['submittedBy'].isNotEmpty;
@@ -191,7 +194,7 @@ class _SiteReportState extends State<SiteReport> {
                 ),
                 pw.Center(
                   child: pw.Text(
-                    'SITE REPORT 2023',
+                    'SITE REPORT $year',
                     style: pw.TextStyle(
                       fontSize: 25,
                       fontWeight: pw.FontWeight.bold,
