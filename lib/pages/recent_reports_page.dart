@@ -7,7 +7,6 @@ import 'view_report_page.dart';
 import '../auth.dart';
 import 'auth_page.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
-import '../uploadPhotos.dart';
 import '../addReport.dart';
 import 'package:gemini_landscaping_app/extraReport.dart';
 
@@ -296,8 +295,8 @@ class _RecentReportsPageState extends State<RecentReportsPage>
             icon: Icons.cloudy_snowing,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (_) => AddWinterReport()));
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => AddWinterReport()));
             },
           ),
         ],
