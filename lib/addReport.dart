@@ -34,12 +34,19 @@ class _AddReportState extends State<AddReport> {
   String imageURL = '';
   final currentUser = FirebaseAuth.instance.currentUser!;
 
+  void addSiteToList(String newSiteName) {
+    setState(() {
+      siteList.add(newSiteName);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     // add site names to siteList
     FirebaseFirestore.instance
         .collection('SiteList')
+        .where('status', isEqualTo: true)
         .get()
         .then((QuerySnapshot querySnapshot) {
       querySnapshot.docs.forEach((doc) {
@@ -193,6 +200,9 @@ class _AddReportState extends State<AddReport> {
         break;
       case "Guillevin":
         address = "1965 Bollinger Road";
+        break;
+      case "Villa Rose":
+        address = "222 Second Avenue";
         break;
       default:
         address = "";
@@ -1126,6 +1136,132 @@ class _AddReportState extends State<AddReport> {
             ],
           ),
         ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text(
+            'Add a New Site',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          Icon(Icons.arrow_right_outlined, size: 24),
+          FloatingActionButton(
+            backgroundColor: Colors.black45,
+            mini: true,
+            shape:
+                ShapeBorder.lerp(RoundedRectangleBorder(), CircleBorder(), 0.5),
+            onPressed: () {
+              TextEditingController nameController = TextEditingController();
+              TextEditingController addressController = TextEditingController();
+
+              showModalBottomSheet(
+                isScrollControlled: true,
+                context: context,
+                builder: (BuildContext context) {
+                  return StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom,
+                        ),
+                        child: Wrap(
+                          alignment: WrapAlignment.center,
+                          children: [
+                            Column(
+                              children: [
+                                Text(
+                                  'Add a New Site:',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontFamily: 'Montserrat',
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 10),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          .6,
+                                      child: TextField(
+                                        controller: nameController,
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          labelText: 'Site Name',
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.green,
+                                                width: 2.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 5),
+                                    Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          .8,
+                                      child: TextField(
+                                        controller: addressController,
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(),
+                                          labelText: 'Address',
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                                color: Colors.green,
+                                                width: 2.0),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 5),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      foregroundColor: Colors.white,
+                                      backgroundColor: Colors.black45,
+                                      textStyle: TextStyle(fontSize: 18)),
+                                  onPressed: () async {
+                                    CollectionReference equipmentCollection =
+                                        FirebaseFirestore.instance
+                                            .collection('SiteList');
+
+                                    // Create a new document and set its data
+                                    await equipmentCollection.add({
+                                      'name': nameController.text,
+                                      'address': addressController.text,
+                                      'management': "",
+                                      'imageUrl': "",
+                                      'status:': true,
+                                      'addedBy': currentUser.email,
+                                    });
+
+                                    // add site to drop down list
+                                    addSiteToList(nameController.text);
+
+                                    // Clear the text fields
+                                    nameController.clear();
+                                    addressController.clear();
+
+                                    // Close the bottom sheet after adding equipment
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('Add Site'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+            child: Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }
