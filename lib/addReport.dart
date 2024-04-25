@@ -204,6 +204,9 @@ class _AddReportState extends State<AddReport> {
       case "Villa Rose":
         address = "222 Second Avenue";
         break;
+      case "Legacy Place":
+        address = "1931 Legacy Place";
+        break;
       default:
         address = "";
     }
@@ -231,8 +234,34 @@ class _AddReportState extends State<AddReport> {
   CollectionReference reportRef =
       FirebaseFirestore.instance.collection('SiteReports2023');
 
+  Timestamp convertTimeOfDayToTimestamp(TimeOfDay time) {
+    final DateTime now = DateTime.now();
+    final DateTime dateTime =
+        DateTime(now.year, now.month, now.day, time.hour, time.minute);
+    return Timestamp.fromDate(dateTime);
+  }
+
   void _submitForm() {
+    Map<String, dynamic> employeeTimes = {};
+
+    void addEmployeeTime(String name, TimeOfDay? timeOn, TimeOfDay? timeOff) {
+      if (name.isNotEmpty && timeOn != null && timeOff != null) {
+        employeeTimes[name] = {
+          'timeOn': convertTimeOfDayToTimestamp(timeOn),
+          'timeOff': convertTimeOfDayToTimestamp(timeOff),
+        };
+      }
+    }
+
+    // Add data for each employee if all required data is present
+    addEmployeeTime(name1.text, timeOn1, timeOff1);
+    addEmployeeTime(name2.text, timeOn2, timeOff2);
+    addEmployeeTime(name3.text, timeOn3, timeOff3);
+    addEmployeeTime(name4.text, timeOn4, timeOff4);
+
     reportRef.add({
+      "timestamp": DateTime.now(),
+      "employeeTimes": employeeTimes,      
       "info": {
         'date': dateController.text,
         'siteName': dropdownValue,

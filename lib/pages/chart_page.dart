@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class ChartPage extends StatefulWidget {
   const ChartPage({Key? key});
@@ -10,8 +10,36 @@ class ChartPage extends StatefulWidget {
 }
 
 class _ChartPageState extends State<ChartPage> {
-  final Stream<QuerySnapshot> _siteStream =
-      FirebaseFirestore.instance.collectionGroup('SiteReports2023').snapshots();
+  List<String> timesList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSiteReports();
+  }
+
+  Future<void> fetchSiteReports() async {
+    DateTime currentDate = DateTime.now();
+    DateTime startDate = DateTime(currentDate.year, currentDate.month, 1);
+    DateTime endDate = DateTime(currentDate.year, currentDate.month + 1, 1)
+        .subtract(Duration(days: 1));
+
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('SiteReports2023')
+        .where('timestamp', isGreaterThanOrEqualTo: startDate)
+        .where('timestamp', isLessThanOrEqualTo: endDate)
+        .get();
+
+    final List<DocumentSnapshot> documents = snapshot.docs;
+    print(documents.length);
+
+    for (var document in documents) {
+      Map<String, dynamic> times = document['times'];
+      times.forEach((key, value) {
+        timesList.add(value);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,84 +47,21 @@ class _ChartPageState extends State<ChartPage> {
       backgroundColor: Colors.grey.shade200,
       body: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Text(
-                'Coming Soon!',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              Icon(
-                Icons.warning,
-                color: Colors.red,
-              ),
-            ],
-          ),
           Container(
-            margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-            color: Colors.grey.shade200,
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _siteStream,
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (snapshot.hasData) {
-                  final data = getColumnData(snapshot.data!);
-                  return SfCartesianChart(
-                    title: ChartTitle(
-                      text: "April 2023",
-                    ),
-                    primaryXAxis: CategoryAxis(
-                      title: AxisTitle(
-                        text: "Sites",
-                      ),
-                      labelRotation: 90,
-                    ),
-                    primaryYAxis: NumericAxis(
-                      title: AxisTitle(
-                        text: "Time (hours)",
-                      ),
-                    ),
-                    legend: Legend(
-                      isVisible: true,
-                    ),
-                    series: <ChartSeries>[
-                      ColumnSeries<SiteData, String>(
-                        name: "Site Time",
-                        dataSource: data,
-                        xValueMapper: (SiteData data, _) => data.x,
-                        yValueMapper: (SiteData data, _) => data.y,
-                        dataLabelSettings: DataLabelSettings(
-                          // isVisible: true,
-                          labelPosition: ChartDataLabelPosition.outside,
-                        ),
-                      ),
-                    ],
+            height: 50,
+            child: Text('Placeholder'),
+          ),
+          Expanded(
+            child: ListView.builder(
+                itemCount: timesList.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(timesList[index]),
                   );
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  return const CircularProgressIndicator();
-                }
-              },
-            ),
+                }),
           ),
         ],
       ),
     );
   }
-}
-
-class SiteData {
-  String x;
-  double y;
-
-  SiteData(this.x, this.y);
-}
-
-List<SiteData> getColumnData(QuerySnapshot snapshot) {
-  final List<SiteData> ColumnData = <SiteData>[];
-  for (var doc in snapshot.docs) {
-    ColumnData.add(SiteData(doc['info']['siteName'], 20));
-  }
-  return ColumnData;
 }

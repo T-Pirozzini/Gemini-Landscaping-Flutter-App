@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
 import 'package:gemini_landscaping_app/pages/announcement_page.dart';
+// import 'package:gemini_landscaping_app/pages/chart_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
 import 'package:gemini_landscaping_app/pages/reports_controller.dart';
 import 'package:gemini_landscaping_app/uploadPhotos.dart';
@@ -22,10 +23,10 @@ class _HomeState extends State<Home> {
   // bottom navigation bar
   int currentIndex = 0;
   final pages = [
-    TimeSheetController(),    
+    TimeSheetController(),
     UploadPhotos(),
     EquipmentPage(),
-    // Chart(), Add when completed
+    // ChartPage(), // Add when completed
     AnnouncementPage(),
     ProfilePage(),
   ];
