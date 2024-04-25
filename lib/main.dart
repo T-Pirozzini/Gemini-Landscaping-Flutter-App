@@ -7,7 +7,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-  );  
+  );
   runApp(MyApp());
 }
 
@@ -31,6 +31,7 @@ class _MyAppState extends State<MyApp> {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           primaryColor: const Color.fromARGB(255, 31, 182, 77),
+          useMaterial3: false,
         ),
         home: const AuthPage(),
       ),

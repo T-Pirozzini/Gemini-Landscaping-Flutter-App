@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:gemini_landscaping_app/pages/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -19,7 +18,7 @@ class UploadPhotos extends StatefulWidget {
 
 class _UploadPhotosState extends State<UploadPhotos> {
   List<String> imageUrls = []; // List to store image URLs
-  File? _image;
+  File? image;
   final picker = ImagePicker();
 
   @override
@@ -61,7 +60,7 @@ class _UploadPhotosState extends State<UploadPhotos> {
         });
 
         setState(() {
-          _image = imageFile;
+          image = imageFile;
         });
       }
     } catch (e) {
