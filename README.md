@@ -10,9 +10,7 @@ No more messy paperwork. The client now receives real-time site time tracking in
 #### FLUTTER/FIREBASE
 ## :camera: Screenshots
 | Screen 1 | Screen 2 | Screen 3 |
-| -------- | -------- | -------- |
 | ![Screenshot 1](https://github.com/T-Pirozzini/Gemini-Landscaping-Flutter-App/blob/main/assets/Screenshot_1700869324.png?raw=true) | ![Screenshot 2](https://github.com/T-Pirozzini/Gemini-Landscaping-Flutter-App/blob/main/assets/Screenshot_1682121267.png?raw=true) | ![Screenshot 3](https://github.com/T-Pirozzini/Gemini-Landscaping-Flutter-App/blob/main/assets/Screenshot_1682121223.png?raw=true) |
 | Screen 4 | Screen 5 | Screen 6 |
-| -------- | -------- | -------- |
 | ![Screenshot 4](https://github.com/T-Pirozzini/Gemini-Landscaping-Flutter-App/blob/main/assets/Screenshot_1691106657.png?raw=true) | ![Screenshot 5](https://github.com/T-Pirozzini/Gemini-Landscaping-Flutter-App/blob/main/assets/Screenshot_1682121242.png?raw=true) | ![Screenshot 6](https://raw.githubusercontent.com/T-Pirozzini/gem-privacy/2fe768c8488cb96858c6ccd5ba3421b83e04c09e/Screenshot_1680139946.png) |
 
