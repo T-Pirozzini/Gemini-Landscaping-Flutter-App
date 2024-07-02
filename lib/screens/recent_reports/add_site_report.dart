@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gemini_landscaping_app/models/site_info.dart';
+import 'package:gemini_landscaping_app/providers/site_list_provider.dart';
 import 'package:gemini_landscaping_app/screens/home/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -18,18 +21,22 @@ List<String> _selectedTree = [];
 List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
 List<String> _selectedBlow = [];
 
-class AddSiteReport extends StatefulWidget {
+class AddSiteReport extends ConsumerStatefulWidget {
   const AddSiteReport({super.key});
 
   @override
-  State<AddSiteReport> createState() => _AddSiteReportState();
+  _AddSiteReportState createState() => _AddSiteReportState();
 }
 
-class _AddSiteReportState extends State<AddSiteReport> {
+class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   // site list
   List<String> siteList = [];
   // drop down site menu
-  String dropdownValue = '';
+  String? dropdownValue;
+  SiteInfo? selectedSite;
+  String address = '';
+  String currentDate = DateFormat('MMMM d, yyyy').format(DateTime.now());
+
   String enteredSiteName = '';
   String imageURL = '';
   final currentUser = FirebaseAuth.instance.currentUser!;
@@ -37,6 +44,9 @@ class _AddSiteReportState extends State<AddSiteReport> {
   @override
   void initState() {
     super.initState();
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('MMMM d, yyyy').format(now);
+    dateController = TextEditingController(text: formattedDate);
   }
 
   TextEditingController dateController = TextEditingController();
@@ -218,6 +228,7 @@ class _AddSiteReportState extends State<AddSiteReport> {
 
   @override
   Widget build(BuildContext context) {
+    final sitesAsyncValue = ref.watch(siteListProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
@@ -270,108 +281,102 @@ class _AddSiteReportState extends State<AddSiteReport> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // date picker
-                  Expanded(
-                    flex: 1,
-                    child: TextField(
-                      controller: dateController,
-                      style: GoogleFonts.montserrat(fontSize: 12),
-                      decoration: InputDecoration(
-                        prefixIcon:
-                            Icon(Icons.calendar_month_rounded, size: 32),
-                        prefixIconColor: Colors.green,
-                        labelText: "Date:",
-                        border: OutlineInputBorder(),
-                        labelStyle: GoogleFonts.montserrat(fontSize: 14),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.green, width: 2.0),
-                        ),
-                      ),
-                      readOnly: true,
-                      onTap: () async {
-                        DateTime? pickedDate = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2101),
-                          builder: (context, child) {
-                            return Theme(
-                              data: Theme.of(context).copyWith(
-                                colorScheme: const ColorScheme.light(
-                                  primary: Colors.green,
-                                  onPrimary: Colors.white,
-                                  onSurface: Colors.black,
-                                ),
+                  IconButton(
+                    onPressed: () async {
+                      DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2101),
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme: const ColorScheme.light(
+                                primary: Colors.green,
+                                onPrimary: Colors.white,
+                                onSurface: Colors.black,
                               ),
-                              child: child!,
-                            );
-                          },
-                        );
-                        if (pickedDate != null) {
-                          String formattedDate =
-                              DateFormat("yyyy-MM-dd").format(pickedDate);
-                          setState(() {
-                            dateController.text = formattedDate.toString();
-                          });
-                        } else {
-                          print('No Date Selected');
-                        }
-                      },
+                            ),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (pickedDate != null) {
+                        String formattedDate =
+                            DateFormat('MMMM d, yyyy').format(pickedDate);
+                        setState(() {
+                          dateController.text =
+                              formattedDate; // Update the date in the controller
+                        });
+                      }
+                    },
+                    icon: Icon(
+                      Icons.edit_calendar,
+                      color: Colors.green,
                     ),
                   ),
-                  SizedBox(width: 10),
-                  // site list drop down
-                  Expanded(
-                    flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Select a Site',
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.green, width: 2.0),
-                        ),
-                      ),
-                      value: dropdownValue,
-                      items: siteList.map((site) {
-                        return DropdownMenuItem<String>(
-                          value: site,
-                          child: Text(
-                            site,
-                            style: GoogleFonts.montserrat(fontSize: 14),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (String? value) async {
-                        setState(
-                          () {
-                            dropdownValue = value!;
-                          },
-                        );
-                      },
-                    ),
+                  Text(
+                    dateController.text,
+                    style: GoogleFonts.montserrat(fontSize: 14),
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 10,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 300,
+                    child: sitesAsyncValue.when(
+                      data: (siteList) {
+                        return DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.all(8),
+                            border: OutlineInputBorder(),
+                            labelText: 'Select a Site',
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.green, width: 2.0),
+                            ),
+                          ),
+                          value: dropdownValue,
+                          items: siteList.map((site) {
+                            return DropdownMenuItem<String>(
+                              value: site.name,
+                              child: Text(
+                                site.name,
+                                style: GoogleFonts.montserrat(fontSize: 14),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (String? value) {
+                            setState(() {
+                              dropdownValue = value!;
+                              selectedSite = siteList.firstWhere(
+                                  (site) => site.name == dropdownValue);
+                              address = selectedSite!.address;
+                            });
+                          },
+                        );
+                      },
+                      loading: () => Center(child: CircularProgressIndicator()),
+                      error: (error, stack) =>
+                          Center(child: Text('Error: $error')),
+                    ),
+                  ),
+                  if (selectedSite != null)
+                    Text(
+                      'Address: $address',
+                      style: GoogleFonts.montserrat(fontSize: 14),
+                    ),
+                ],
               ),
-              // site list drop down
-
-              TextFormField(
-                controller: _addressController,
-                style: GoogleFonts.montserrat(fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: 'Enter address',
-                ),
-              ),
-              const SizedBox(
-                height: 10,
+              Divider(
+                color: Colors.grey,
+                thickness: 1,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
