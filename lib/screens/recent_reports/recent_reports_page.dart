@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gemini_landscaping_app/pages/addWinterReport.dart';
+import 'package:gemini_landscaping_app/screens/recent_reports/add_site_report.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'view_report_page.dart';
-import '../auth.dart';
-import 'auth_page.dart';
+import '../../pages/view_report_page.dart';
+import '../../auth.dart';
+import '../auth/auth_page.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
-import '../addReport.dart';
+import 'addReport.dart';
 import 'package:gemini_landscaping_app/extraReport.dart';
 
 class RecentReportsPage extends StatefulWidget {
@@ -274,7 +275,7 @@ class _RecentReportsPageState extends State<RecentReportsPage>
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
               Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const AddReport()));
+                  MaterialPageRoute(builder: (_) => const AddSiteReport()));
             },
           ),
           Bubble(

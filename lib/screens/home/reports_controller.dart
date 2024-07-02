@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/folders_page.dart';
-import 'package:gemini_landscaping_app/pages/recent_reports_page.dart';
+import 'package:gemini_landscaping_app/screens/recent_reports/recent_reports_page.dart';
 import 'package:gemini_landscaping_app/pages/recent_winter_reports_page.dart';
 import 'package:gemini_landscaping_app/pages/restricted_page.dart';
 
