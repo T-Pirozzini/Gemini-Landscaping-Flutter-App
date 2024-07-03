@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_landscaping_app/models/site_info.dart';
 import 'package:gemini_landscaping_app/providers/site_list_provider.dart';
+import 'package:gemini_landscaping_app/screens/add_report/date_picker.dart';
+import 'package:gemini_landscaping_app/screens/add_report/site_picker.dart';
 import 'package:gemini_landscaping_app/screens/home/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -29,12 +31,14 @@ class AddSiteReport extends ConsumerStatefulWidget {
 }
 
 class _AddSiteReportState extends ConsumerState<AddSiteReport> {
-  // site list
-  List<String> siteList = [];
-  // drop down site menu
+  // site picker component
   String? dropdownValue;
   SiteInfo? selectedSite;
   String address = '';
+
+  // date picker component
+  TextEditingController dateController = TextEditingController();
+
   String currentDate = DateFormat('MMMM d, yyyy').format(DateTime.now());
 
   String enteredSiteName = '';
@@ -49,7 +53,14 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     dateController = TextEditingController(text: formattedDate);
   }
 
-  TextEditingController dateController = TextEditingController();
+  void onSiteChanged(SiteInfo? site) {
+    setState(() {
+      selectedSite = site;
+      dropdownValue = site?.name;
+      address = site?.address ?? '';
+    });
+  }
+
   TextEditingController siteNameController = TextEditingController();
   TextEditingController _addressController = TextEditingController();
   TextEditingController name1 = TextEditingController();
@@ -283,96 +294,11 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () async {
-                      DateTime? pickedDate = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2101),
-                        builder: (context, child) {
-                          return Theme(
-                            data: Theme.of(context).copyWith(
-                              colorScheme: const ColorScheme.light(
-                                primary: Colors.green,
-                                onPrimary: Colors.white,
-                                onSurface: Colors.black,
-                              ),
-                            ),
-                            child: child!,
-                          );
-                        },
-                      );
-                      if (pickedDate != null) {
-                        String formattedDate =
-                            DateFormat('MMMM d, yyyy').format(pickedDate);
-                        setState(() {
-                          dateController.text =
-                              formattedDate; // Update the date in the controller
-                        });
-                      }
-                    },
-                    icon: Icon(
-                      Icons.edit_calendar,
-                      color: Colors.green,
-                    ),
-                  ),
-                  Text(
-                    dateController.text,
-                    style: GoogleFonts.montserrat(fontSize: 14),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 300,
-                    child: sitesAsyncValue.when(
-                      data: (siteList) {
-                        return DropdownButtonFormField<String>(
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.all(8),
-                            border: OutlineInputBorder(),
-                            labelText: 'Select a Site',
-                            focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.green, width: 2.0),
-                            ),
-                          ),
-                          value: dropdownValue,
-                          items: siteList.map((site) {
-                            return DropdownMenuItem<String>(
-                              value: site.name,
-                              child: Text(
-                                site.name,
-                                style: GoogleFonts.montserrat(fontSize: 14),
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (String? value) {
-                            setState(() {
-                              dropdownValue = value!;
-                              selectedSite = siteList.firstWhere(
-                                  (site) => site.name == dropdownValue);
-                              address = selectedSite!.address;
-                            });
-                          },
-                        );
-                      },
-                      loading: () => Center(child: CircularProgressIndicator()),
-                      error: (error, stack) =>
-                          Center(child: Text('Error: $error')),
-                    ),
-                  ),
-                  if (selectedSite != null)
-                    Text(
-                      'Address: $address',
-                      style: GoogleFonts.montserrat(fontSize: 14),
-                    ),
-                ],
+              DatePickerComponent(dateController: dateController),
+              SitePickerComponent(
+                dropdownValue: dropdownValue,
+                selectedSite: selectedSite,
+                onSiteChanged: onSiteChanged,
               ),
               Divider(
                 color: Colors.grey,
