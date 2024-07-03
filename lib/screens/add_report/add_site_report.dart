@@ -5,23 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_landscaping_app/models/site_info.dart';
 import 'package:gemini_landscaping_app/providers/site_list_provider.dart';
 import 'package:gemini_landscaping_app/screens/add_report/date_picker.dart';
+import 'package:gemini_landscaping_app/screens/add_report/employee_times.dart';
+import 'package:gemini_landscaping_app/screens/add_report/material.dart';
+import 'package:gemini_landscaping_app/screens/add_report/service_list.dart';
 import 'package:gemini_landscaping_app/screens/add_report/site_picker.dart';
 import 'package:gemini_landscaping_app/screens/home/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-
-List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
-List<String> _selectedGarbage = [];
-List<String> debris = ['grassed areas', 'garden beds', 'tree wells'];
-List<String> _selectedDebris = [];
-List<String> lawn = ['mow', 'trim', 'edge', 'lime', 'aerate', 'fertilize'];
-List<String> _selectedLawn = [];
-List<String> garden = ['blow debris', 'weed', 'prune', 'fertilize'];
-List<String> _selectedGarden = [];
-List<String> tree = ['< 8ft', '> 8ft'];
-List<String> _selectedTree = [];
-List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
-List<String> _selectedBlow = [];
 
 class AddSiteReport extends ConsumerStatefulWidget {
   const AddSiteReport({super.key});
@@ -31,16 +21,36 @@ class AddSiteReport extends ConsumerStatefulWidget {
 }
 
 class _AddSiteReportState extends ConsumerState<AddSiteReport> {
+  // date picker component
+  TextEditingController dateController = TextEditingController();
+
   // site picker component
   String? dropdownValue;
   SiteInfo? selectedSite;
   String address = '';
 
-  // date picker component
-  TextEditingController dateController = TextEditingController();
+  // employee times component
+  List<Map<String, dynamic>> employeeTimes = [];
 
+  // service list component
+  List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
+  List<String> _selectedGarbage = [];
+  List<String> debris = ['grassed areas', 'garden beds', 'tree wells'];
+  List<String> _selectedDebris = [];
+  List<String> lawn = ['mow', 'trim', 'edge', 'lime', 'aerate', 'fertilize'];
+  List<String> _selectedLawn = [];
+  List<String> garden = ['blow debris', 'weed', 'prune', 'fertilize'];
+  List<String> _selectedGarden = [];
+  List<String> tree = ['< 8ft', '> 8ft'];
+  List<String> _selectedTree = [];
+  List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
+  List<String> _selectedBlow = [];
+
+  // material component
+  List<Map<String, dynamic>> materials = [];
+
+  // possibly unused?
   String currentDate = DateFormat('MMMM d, yyyy').format(DateTime.now());
-
   String enteredSiteName = '';
   String imageURL = '';
   final currentUser = FirebaseAuth.instance.currentUser!;
@@ -51,13 +61,87 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('MMMM d, yyyy').format(now);
     dateController = TextEditingController(text: formattedDate);
+
+    addEmployeeTime();
   }
 
+  // Site Picker Component
   void onSiteChanged(SiteInfo? site) {
     setState(() {
       selectedSite = site;
       dropdownValue = site?.name;
       address = site?.address ?? '';
+    });
+  }
+
+  // Employee Times Component
+  void addEmployeeTime() {
+    setState(() {
+      employeeTimes.add({
+        'nameController': TextEditingController(),
+        'timeOn': TimeOfDay.now(),
+        'timeOff': TimeOfDay.now(),
+      });
+    });
+  }
+
+  void updateTimeOn(int index, TimeOfDay time) {
+    setState(() {
+      employeeTimes[index]['timeOn'] = time;
+    });
+  }
+
+  void updateTimeOff(int index, TimeOfDay time) {
+    setState(() {
+      employeeTimes[index]['timeOff'] = time;
+    });
+  }
+
+  // Service List Component
+  void onGarbageSelectionChanged(List<String> selectedGarbage) {
+    setState(() {
+      _selectedGarbage = selectedGarbage;
+    });
+  }
+
+  void onDebrisSelectionChanged(List<String> selectedDebris) {
+    setState(() {
+      _selectedDebris = selectedDebris;
+    });
+  }
+
+  void onLawnSelectionChanged(List<String> selectedLawn) {
+    setState(() {
+      _selectedLawn = selectedLawn;
+    });
+  }
+
+  void onGardenSelectionChanged(List<String> selectedGarden) {
+    setState(() {
+      _selectedGarden = selectedGarden;
+    });
+  }
+
+  void onTreeSelectionChanged(List<String> selectedTree) {
+    setState(() {
+      _selectedTree = selectedTree;
+    });
+  }
+
+  void onBlowSelectionChanged(List<String> selectedBlow) {
+    setState(() {
+      _selectedBlow = selectedBlow;
+    });
+  }
+
+  // Material Component
+  void addMaterial() {
+    setState(() {
+      materials.add({
+        'vendorController': TextEditingController(),
+        'materialController': TextEditingController(),
+        'costController': TextEditingController(),
+      });
     });
   }
 
@@ -304,618 +388,140 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                 color: Colors.grey,
                 thickness: 1,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Container(
-                      width: 100,
-                      height: 40,
-                      child: TextField(
-                        controller: name1,
-                        style: GoogleFonts.montserrat(fontSize: 14),
-                        maxLines: null,
-                        keyboardType: TextInputType.text,
-                        decoration: const InputDecoration(
-                          hintText: 'Driver',
-                        ),
-                      ),
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      const Text("ON",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Container(
-                        width: 100,
-                        height: 30,
-                        child: FloatingActionButton.extended(
-                          heroTag: "btn1On",
-                          icon: const Icon(Icons.access_time_outlined),
-                          label: Text(
-                              '${timeOn1!.hour.toString()}:${timeOn1!.minute.toString().padLeft(2, '0')}'),
-                          backgroundColor:
-                              const Color.fromARGB(255, 31, 182, 77),
-                          onPressed: () async {
-                            TimeOfDay? newTimeOn1 = await showTimePicker(
-                              context: context,
-                              initialTime: timeOn1!,
-                            );
-                            if (newTimeOn1 != null) {
-                              setState(() {
-                                timeOn1 = newTimeOn1;
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Column(
-                    children: [
-                      const Text("OFF",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Container(
-                        width: 100,
-                        height: 30,
-                        child: FloatingActionButton.extended(
-                          heroTag: "btn1Off",
-                          icon: const Icon(Icons.access_time_outlined),
-                          label: Text(
-                              '${timeOff1!.hour.toString()}:${timeOff1!.minute.toString().padLeft(2, '0')}'),
-                          backgroundColor:
-                              const Color.fromARGB(255, 31, 182, 77),
-                          onPressed: () async {
-                            TimeOfDay? newTimeOff1 = await showTimePicker(
-                              context: context,
-                              initialTime: timeOff1!,
-                            );
-                            if (newTimeOff1 != null) {
-                              setState(() {
-                                timeOff1 = newTimeOff1;
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              Container(
+                padding: EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.green[100],
+                ),
+                child: Text('Add Employees & Times:',
+                    style: GoogleFonts.montserrat(fontSize: 14)),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Container(
-                      width: 100,
-                      height: 40,
-                      child: TextField(
-                        controller: name2,
-                        style: GoogleFonts.montserrat(fontSize: 14),
-                        maxLines: null,
-                        keyboardType: TextInputType.text,
-                        decoration: const InputDecoration(
-                          hintText: 'Name',
-                        ),
-                      ),
-                    ),
+              ...employeeTimes.asMap().entries.map((entry) {
+                int index = entry.key;
+                Map<String, dynamic> staffMember = entry.value;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: EmployeeTimesComponent(
+                    nameController: staffMember['nameController'],
+                    initialTimeOn: staffMember['timeOn'],
+                    initialTimeOff: staffMember['timeOff'],
+                    onTimeOnChanged: (time) => updateTimeOn(index, time),
+                    onTimeOffChanged: (time) => updateTimeOff(index, time),
                   ),
-                  Column(
-                    children: [
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 100,
-                        height: 30,
-                        child: FloatingActionButton.extended(
-                          heroTag: "btn2On",
-                          icon: const Icon(Icons.access_time_outlined),
-                          label: Text(
-                              '${timeOn2!.hour.toString()}:${timeOn2!.minute.toString().padLeft(2, '0')}'),
-                          backgroundColor:
-                              const Color.fromARGB(255, 31, 182, 77),
-                          onPressed: () async {
-                            TimeOfDay? newTimeOn2 = await showTimePicker(
-                              context: context,
-                              initialTime: timeOn2!,
-                            );
-                            if (newTimeOn2 != null) {
-                              setState(() {
-                                timeOn2 = newTimeOn2;
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Column(
-                    children: [
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 100,
-                        height: 30,
-                        child: FloatingActionButton.extended(
-                          heroTag: "btn2Off",
-                          icon: const Icon(Icons.access_time_outlined),
-                          label: Text(
-                              '${timeOff2!.hour.toString()}:${timeOff2!.minute.toString().padLeft(2, '0')}'),
-                          backgroundColor:
-                              const Color.fromARGB(255, 31, 182, 77),
-                          onPressed: () async {
-                            TimeOfDay? newTimeOff2 = await showTimePicker(
-                              context: context,
-                              initialTime: timeOff2!,
-                            );
-                            if (newTimeOff2 != null) {
-                              setState(() {
-                                timeOff2 = newTimeOff2;
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                );
+              }).toList(),
+              ElevatedButton(
+                onPressed: addEmployeeTime,
+                child: const Text('Add Another Employee Time'),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Container(
-                      width: 100,
-                      height: 40,
-                      child: TextField(
-                        controller: name3,
-                        style: GoogleFonts.montserrat(fontSize: 14),
-                        maxLines: null,
-                        keyboardType: TextInputType.text,
-                        decoration: const InputDecoration(
-                          hintText: 'Name',
-                        ),
-                      ),
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 100,
-                        height: 30,
-                        child: FloatingActionButton.extended(
-                          heroTag: "btn3On",
-                          icon: const Icon(Icons.access_time_outlined),
-                          label: Text(
-                              '${timeOn3!.hour.toString()}:${timeOn3!.minute.toString().padLeft(2, '0')}'),
-                          backgroundColor:
-                              const Color.fromARGB(255, 31, 182, 77),
-                          onPressed: () async {
-                            TimeOfDay? newTimeOn3 = await showTimePicker(
-                              context: context,
-                              initialTime: timeOn3!,
-                            );
-                            if (newTimeOn3 != null) {
-                              setState(() {
-                                timeOn3 = newTimeOn3;
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Column(
-                    children: [
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 100,
-                        height: 30,
-                        child: FloatingActionButton.extended(
-                          heroTag: "btn3Off",
-                          icon: const Icon(Icons.access_time_outlined),
-                          label: Text(
-                              '${timeOff3!.hour.toString()}:${timeOff3!.minute.toString().padLeft(2, '0')}'),
-                          backgroundColor:
-                              const Color.fromARGB(255, 31, 182, 77),
-                          onPressed: () async {
-                            TimeOfDay? newTimeOff3 = await showTimePicker(
-                              context: context,
-                              initialTime: timeOff3!,
-                            );
-                            if (newTimeOff3 != null) {
-                              setState(() {
-                                timeOff3 = newTimeOff3;
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              Divider(
+                color: Colors.grey,
+                thickness: 1,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Container(
-                      width: 100,
-                      height: 40,
-                      child: TextField(
-                        controller: name4,
-                        style: GoogleFonts.montserrat(fontSize: 14),
-                        maxLines: null,
-                        keyboardType: TextInputType.text,
-                        decoration: const InputDecoration(
-                          hintText: 'Name',
-                        ),
-                      ),
-                    ),
+              Container(
+                padding: EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.green[100],
+                ),
+                child: Text('Select Services Provided:',
+                    style: GoogleFonts.montserrat(fontSize: 14)),
+              ),
+              ServiceToggleComponent(
+                title: 'Pick Up Loose Garbage:',
+                services: garbage,
+                selectedServices: _selectedGarbage,
+                onSelectionChanged: onGarbageSelectionChanged,
+              ),
+              ServiceToggleComponent(
+                title: 'Rake Yard Debris:',
+                services: debris,
+                selectedServices: _selectedDebris,
+                onSelectionChanged: onDebrisSelectionChanged,
+              ),
+              ServiceToggleComponent(
+                title: 'Lawn Care:',
+                services: lawn,
+                selectedServices: _selectedLawn,
+                onSelectionChanged: onLawnSelectionChanged,
+              ),
+              ServiceToggleComponent(
+                title: 'Gardens:',
+                services: garden,
+                selectedServices: _selectedGarden,
+                onSelectionChanged: onGardenSelectionChanged,
+              ),
+              ServiceToggleComponent(
+                title: 'Trees (Pruning/Hedging):',
+                services: tree,
+                selectedServices: _selectedTree,
+                onSelectionChanged: onTreeSelectionChanged,
+              ),
+              ServiceToggleComponent(
+                title: 'Blow Dust/Debris:',
+                services: blow,
+                selectedServices: _selectedBlow,
+                onSelectionChanged: onBlowSelectionChanged,
+              ),
+              Divider(
+                color: Colors.grey,
+                thickness: 1,
+              ),
+              Container(
+                padding: EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.green[100],
+                ),
+                child: Text('Add Materials Used:',
+                    style: GoogleFonts.montserrat(fontSize: 14)),
+              ),
+              SizedBox(height: 5),
+              ...materials.asMap().entries.map((entry) {
+                int index = entry.key;
+                Map<String, dynamic> material = entry.value;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: MaterialComponent(
+                    vendorController: material['vendorController'],
+                    materialController: material['materialController'],
+                    costController: material['costController'],
                   ),
-                  Column(
-                    children: [
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 100,
-                        height: 30,
-                        child: FloatingActionButton.extended(
-                          heroTag: "btn4On",
-                          icon: const Icon(Icons.access_time_outlined),
-                          label: Text(
-                              '${timeOn4!.hour.toString()}:${timeOn4!.minute.toString().padLeft(2, '0')}'),
-                          backgroundColor:
-                              const Color.fromARGB(255, 31, 182, 77),
-                          onPressed: () async {
-                            TimeOfDay? newTimeOn4 = await showTimePicker(
-                              context: context,
-                              initialTime: timeOn4!,
-                            );
-                            if (newTimeOn4 != null) {
-                              setState(() {
-                                timeOn4 = newTimeOn4;
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Column(
-                    children: [
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 100,
-                        height: 30,
-                        child: FloatingActionButton.extended(
-                          heroTag: "btn4Off",
-                          icon: const Icon(Icons.access_time_outlined),
-                          label: Text(
-                              '${timeOff4!.hour.toString()}:${timeOff4!.minute.toString().padLeft(2, '0')}'),
-                          backgroundColor:
-                              const Color.fromARGB(255, 31, 182, 77),
-                          onPressed: () async {
-                            TimeOfDay? newTimeOff4 = await showTimePicker(
-                              context: context,
-                              initialTime: timeOff4!,
-                            );
-                            if (newTimeOff4 != null) {
-                              setState(() {
-                                timeOff4 = newTimeOff4;
-                              });
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                );
+              }).toList(),
+              ElevatedButton(
+                onPressed: addMaterial,
+                child: const Text('Add Material'),
+              ),
+              Divider(
+                color: Colors.grey,
+                thickness: 1,
+              ),
+              Container(
+                padding: EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.green[100],
+                ),
+                child: Text('Service Details:',
+                    style: GoogleFonts.montserrat(fontSize: 14)),
               ),
               const SizedBox(height: 5),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Pick Up Loose Garbage:',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          height: .5),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                height: 150,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: TextField(
+                    controller: _descriptionController,
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
+                    decoration: InputDecoration(
+                      hintText: 'Add a description of services provided',
+                      border: InputBorder.none,
                     ),
                   ),
-                  Wrap(
-                    children: [
-                      ToggleButtons(
-                        onPressed: (int index) {
-                          // All buttons are selectable.
-                          setState(() {
-                            if (_selectedGarbage.contains(garbage[index])) {
-                              _selectedGarbage.remove(garbage[index]);
-                            } else {
-                              _selectedGarbage.add(garbage[index]);
-                            }
-                          });
-                        },
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
-                        selectedBorderColor: Colors.green[700],
-                        selectedColor: Colors.white,
-                        fillColor: Colors.green[200],
-                        color: Colors.green[700],
-                        constraints: const BoxConstraints(
-                          minHeight: 25.0,
-                          minWidth: 110.0,
-                        ),
-                        isSelected: garbage
-                            .map((value) => _selectedGarbage.contains(value))
-                            .toList(),
-                        children: garbage
-                            .map((value) => Text(
-                                  value,
-                                  style: GoogleFonts.montserrat(fontSize: 12),
-                                ))
-                            .toList(),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 2),
-                  Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Rake Yard Debris:',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          height: .5),
-                    ),
-                  ),
-                  ToggleButtons(
-                    onPressed: (int index) {
-                      // All buttons are selectable.
-                      setState(() {
-                        if (_selectedDebris.contains(debris[index])) {
-                          _selectedDebris.remove(debris[index]);
-                        } else {
-                          _selectedDebris.add(debris[index]);
-                        }
-                      });
-                    },
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    selectedBorderColor: Colors.green[700],
-                    selectedColor: Colors.white,
-                    fillColor: Colors.green[200],
-                    color: Colors.green[700],
-                    constraints: const BoxConstraints(
-                      minHeight: 25.0,
-                      minWidth: 110.0,
-                    ),
-                    isSelected: debris
-                        .map((value) => _selectedDebris.contains(value))
-                        .toList(),
-                    children: debris
-                        .map((value) => Text(
-                              value,
-                              style: GoogleFonts.montserrat(fontSize: 12),
-                            ))
-                        .toList(),
-                  ),
-                  Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Lawn Care:',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          height: .5),
-                    ),
-                  ),
-                  ToggleButtons(
-                    onPressed: (int index) {
-                      // All buttons are selectable.
-                      setState(() {
-                        if (_selectedLawn.contains(lawn[index])) {
-                          _selectedLawn.remove(lawn[index]);
-                        } else {
-                          _selectedLawn.add(lawn[index]);
-                        }
-                      });
-                    },
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    selectedBorderColor: Colors.green[700],
-                    selectedColor: Colors.white,
-                    fillColor: Colors.green[200],
-                    color: Colors.green[700],
-                    constraints: const BoxConstraints(
-                      minHeight: 25.0,
-                      minWidth: 55.0,
-                    ),
-                    isSelected: lawn
-                        .map((value) => _selectedLawn.contains(value))
-                        .toList(),
-                    children: lawn
-                        .map((value) => Text(
-                              value,
-                              style: GoogleFonts.montserrat(fontSize: 12),
-                            ))
-                        .toList(),
-                  ),
-                  Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Gardens:',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          height: .5),
-                    ),
-                  ),
-                  ToggleButtons(
-                    onPressed: (int index) {
-                      // All buttons are selectable.
-                      setState(() {
-                        if (_selectedGarden.contains(garden[index])) {
-                          _selectedGarden.remove(garden[index]);
-                        } else {
-                          _selectedGarden.add(garden[index]);
-                        }
-                      });
-                    },
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    selectedBorderColor: Colors.green[700],
-                    selectedColor: Colors.white,
-                    fillColor: Colors.green[200],
-                    color: Colors.green[700],
-                    constraints: const BoxConstraints(
-                      minHeight: 25.0,
-                      minWidth: 85.0,
-                    ),
-                    isSelected: garden
-                        .map((value) => _selectedGarden.contains(value))
-                        .toList(),
-                    children: garden
-                        .map((value) => Text(
-                              value,
-                              style: GoogleFonts.montserrat(fontSize: 12),
-                            ))
-                        .toList(),
-                  ),
-                  Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Trees:',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          height: .5),
-                    ),
-                  ),
-                  ToggleButtons(
-                    onPressed: (int index) {
-                      // All buttons are selectable.
-                      setState(() {
-                        if (_selectedTree.contains(tree[index])) {
-                          _selectedTree.remove(tree[index]);
-                        } else {
-                          _selectedTree.add(tree[index]);
-                        }
-                      });
-                    },
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    selectedBorderColor: Colors.green[700],
-                    selectedColor: Colors.white,
-                    fillColor: Colors.green[200],
-                    color: Colors.green[700],
-                    constraints: const BoxConstraints(
-                      minHeight: 25.0,
-                      minWidth: 110.0,
-                    ),
-                    isSelected: tree
-                        .map((value) => _selectedTree.contains(value))
-                        .toList(),
-                    children: tree
-                        .map((value) => Text(
-                              value,
-                              style: GoogleFonts.montserrat(fontSize: 12),
-                            ))
-                        .toList(),
-                  ),
-                  Divider(
-                    color: Colors.grey,
-                    thickness: 1,
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Blow Dust/Debris:',
-                      style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          height: .5),
-                    ),
-                  ),
-                  ToggleButtons(
-                    onPressed: (int index) {
-                      // All buttons are selectable.
-                      setState(() {
-                        if (_selectedBlow.contains(blow[index])) {
-                          _selectedBlow.remove(blow[index]);
-                        } else {
-                          _selectedBlow.add(blow[index]);
-                        }
-                      });
-                    },
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    selectedBorderColor: Colors.green[700],
-                    selectedColor: Colors.white,
-                    fillColor: Colors.green[200],
-                    color: Colors.green[700],
-                    constraints: const BoxConstraints(
-                      minHeight: 25.0,
-                      minWidth: 110.0,
-                    ),
-                    isSelected: blow
-                        .map((value) => _selectedBlow.contains(value))
-                        .toList(),
-                    children: blow
-                        .map((value) => Text(
-                              value,
-                              style: GoogleFonts.montserrat(fontSize: 12),
-                            ))
-                        .toList(),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    height: 150,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: TextField(
-                        controller: _descriptionController,
-                        maxLines: null,
-                        keyboardType: TextInputType.multiline,
-                        decoration: InputDecoration(
-                          hintText: 'Description',
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
