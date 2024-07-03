@@ -37,6 +37,9 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   // employee times component
   List<Map<String, dynamic>> employeeTimes = [];
 
+  // description component
+  TextEditingController _descriptionController = TextEditingController();
+
   // service list component
   List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
   List<String> _selectedGarbage = [];
@@ -54,10 +57,6 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   // material component
   List<Map<String, dynamic>> materials = [];
 
-  // possibly unused?
-  String currentDate = DateFormat('MMMM d, yyyy').format(DateTime.now());
-  String enteredSiteName = '';
-  String imageURL = '';
   final currentUser = FirebaseAuth.instance.currentUser!;
 
   @override
@@ -156,26 +155,6 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     });
   }
 
-  TextEditingController siteNameController = TextEditingController();
-  TextEditingController _addressController = TextEditingController();
-  TextEditingController name1 = TextEditingController();
-  TextEditingController name2 = TextEditingController();
-  TextEditingController name3 = TextEditingController();
-  TextEditingController name4 = TextEditingController();
-  TextEditingController _descriptionController = TextEditingController();
-  TextEditingController _materialController1 = TextEditingController();
-  TextEditingController _vendorController1 = TextEditingController();
-  TextEditingController _amountController1 = TextEditingController();
-  TextEditingController _materialController2 = TextEditingController();
-  TextEditingController _vendorController2 = TextEditingController();
-  TextEditingController _amountController2 = TextEditingController();
-  TextEditingController _materialController3 = TextEditingController();
-  TextEditingController _vendorController3 = TextEditingController();
-  TextEditingController _amountController3 = TextEditingController();
-
-  CollectionReference reportRef =
-      FirebaseFirestore.instance.collection('SiteReports2023');
-
   Timestamp convertTimeOfDayToTimestamp(TimeOfDay time) {
     final DateTime now = DateTime.now();
     final DateTime dateTime =
@@ -183,66 +162,50 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     return Timestamp.fromDate(dateTime);
   }
 
-  void _submitForm() {
-    Map<String, dynamic> employeeTimes = {};
+  Duration calculateDuration(TimeOfDay startTime, TimeOfDay endTime) {
+    final DateTime now = DateTime.now();
+    final DateTime startDateTime = DateTime(
+        now.year, now.month, now.day, startTime.hour, startTime.minute);
+    final DateTime endDateTime =
+        DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
 
-    void addEmployeeTime(String name, TimeOfDay? timeOn, TimeOfDay? timeOff) {
+    return endDateTime.difference(startDateTime);
+  }
+
+  final reportRef = FirebaseFirestore.instance.collection('SiteReports');
+
+  void _submitForm() {
+    Map<String, dynamic> employeeTimesMap = {};
+    Duration totalCombinedDuration = Duration();
+
+    for (var employee in employeeTimes) {
+      String name = employee['nameController'].text;
+      TimeOfDay? timeOn = employee['timeOn'];
+      TimeOfDay? timeOff = employee['timeOff'];
+
       if (name.isNotEmpty && timeOn != null && timeOff != null) {
-        employeeTimes[name] = {
+        Duration duration = calculateDuration(timeOn, timeOff);
+        totalCombinedDuration += duration;
+
+        employeeTimesMap[name] = {
           'timeOn': convertTimeOfDayToTimestamp(timeOn),
           'timeOff': convertTimeOfDayToTimestamp(timeOff),
+          'duration': duration.inMinutes,
         };
       }
     }
 
-    // Add data for each employee if all required data is present
-    addEmployeeTime(name1.text, timeOn1, timeOff1);
-    addEmployeeTime(name2.text, timeOn2, timeOff2);
-    addEmployeeTime(name3.text, timeOn3, timeOff3);
-    addEmployeeTime(name4.text, timeOn4, timeOff4);
-
     reportRef.add({
       "timestamp": DateTime.now(),
-      "employeeTimes": employeeTimes,
-      "info": {
+      "isRegularMaintenance": isRegularMaintenance,
+      "employeeTimes": employeeTimesMap,
+      "totalCombinedDuration": totalCombinedDuration.inMinutes,
+      "siteInfo": {
         'date': dateController.text,
         'siteName': dropdownValue,
-        'address': _addressController.text,
-        'imageURL': imageURL,
+        'address': address,
       },
-      "names": {
-        'name1': name1.text,
-        'name2': name2.text,
-        'name3': name3.text,
-        'name4': name4.text,
-      },
-      "times": {
-        'timeOn1': timeOn1!.hour.toString() +
-            ':' +
-            timeOn1!.minute.toString().padLeft(2, '0'),
-        'timeOff1': timeOff1!.hour.toString() +
-            ':' +
-            timeOff1!.minute.toString().padLeft(2, '0'),
-        'timeOn2': timeOn2!.hour.toString() +
-            ':' +
-            timeOn2!.minute.toString().padLeft(2, '0'),
-        'timeOff2': timeOff2!.hour.toString() +
-            ':' +
-            timeOff2!.minute.toString().padLeft(2, '0'),
-        'timeOn3': timeOn3!.hour.toString() +
-            ':' +
-            timeOn3!.minute.toString().padLeft(2, '0'),
-        'timeOff3': timeOff3!.hour.toString() +
-            ':' +
-            timeOff3!.minute.toString().padLeft(2, '0'),
-        'timeOn4': timeOn4!.hour.toString() +
-            ':' +
-            timeOn4!.minute.toString().padLeft(2, '0'),
-        'timeOff4': timeOff4!.hour.toString() +
-            ':' +
-            timeOff4!.minute.toString().padLeft(2, '0'),
-      },
-      "service": {
+      "services": {
         'garbage': _selectedGarbage,
         'debris': _selectedDebris,
         'lawn': _selectedLawn,
@@ -250,52 +213,33 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         'tree': _selectedTree,
         'blow': _selectedBlow,
       },
+      "materials": materials.map((material) {
+        return {
+          "vendor": material['vendorController'].text,
+          "description": material['materialController'].text,
+          "cost": material['costController'].text,
+        };
+      }).toList(),
       "description": _descriptionController.text,
-      "materials": {
-        "material1": _materialController1.text,
-        "vendor1": _vendorController1.text,
-        "amount1": _amountController1.text,
-        "material2": _materialController2.text,
-        "vendor2": _vendorController2.text,
-        "amount2": _amountController2.text,
-        "material3": _materialController3.text,
-        "vendor3": _vendorController3.text,
-        "amount3": _amountController3.text,
-      },
       "submittedBy": currentUser.email,
+      "filed": false,
     }).whenComplete(() {
       // reset all the form fields
       dateController.clear();
-      dropdownValue = 'Select a site';
-      _addressController.clear();
-      name1.clear();
-      name2.clear();
-      name3.clear();
-      name4.clear();
-      timeOn1 = null;
-      timeOff1 = null;
-      timeOn2 = null;
-      timeOff2 = null;
-      timeOn3 = null;
-      timeOff3 = null;
-      timeOn4 = null;
-      timeOff4 = null;
+      dropdownValue = null;
+      selectedSite = null;
+      address = '';
+      employeeTimes.clear();
       _selectedGarbage = [];
       _selectedDebris = [];
       _selectedLawn = [];
       _selectedGarden = [];
       _selectedTree = [];
       _selectedBlow = [];
+      materials.clear();
       _descriptionController.clear();
-      _materialController1.clear();
-      _vendorController1.clear();
-      _amountController1.clear();
-      _materialController2.clear();
-      _vendorController2.clear();
-      _amountController2.clear();
-      _materialController3.clear();
-      _vendorController3.clear();
-      _amountController3.clear();
+
+      // Navigate back to Home
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Home()));
     });
@@ -304,33 +248,16 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   @override
   void dispose() {
     dateController.dispose();
-    siteNameController.dispose();
-    _addressController.dispose();
-    name1.dispose();
-    name2.dispose();
-    name3.dispose();
-    name4.dispose();
-    _descriptionController.dispose();
-    _materialController1.dispose();
-    _vendorController1.dispose();
-    _amountController1.dispose();
-    _materialController2.dispose();
-    _vendorController2.dispose();
-    _amountController2.dispose();
-    _materialController3.dispose();
-    _vendorController3.dispose();
-    _amountController3.dispose();
+    employeeTimes.forEach((employee) {
+      employee['nameController'].dispose();
+    });
+    materials.forEach((material) {
+      material['vendorController'].dispose();
+      material['materialController'].dispose();
+      material['costController'].dispose();
+    });
     super.dispose();
   }
-
-  TimeOfDay? timeOn1 = TimeOfDay.now();
-  TimeOfDay? timeOff1 = TimeOfDay.now();
-  TimeOfDay? timeOn2 = TimeOfDay.now();
-  TimeOfDay? timeOff2 = TimeOfDay.now();
-  TimeOfDay? timeOn3 = TimeOfDay.now();
-  TimeOfDay? timeOff3 = TimeOfDay.now();
-  TimeOfDay? timeOn4 = TimeOfDay.now();
-  TimeOfDay? timeOff4 = TimeOfDay.now();
 
   @override
   Widget build(BuildContext context) {

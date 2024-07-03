@@ -24,7 +24,8 @@ class FirestoreService extends ChangeNotifier {
   }
 
   Future<List<SiteInfo>> fetchAllSites() async {
-    final QuerySnapshot snapshot = await _db.collection('SiteList').get();
+    final QuerySnapshot snapshot =
+        await _db.collection('SiteList').where("status", isEqualTo: true).get();
     final List<DocumentSnapshot> documents = snapshot.docs;
 
     return documents.map((doc) {

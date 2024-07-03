@@ -32,38 +32,22 @@ class _SitePickerComponentState extends ConsumerState<SitePickerComponent> {
           children: [
             Container(
               width: 300,
-              child: DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.all(8),
-                  border: OutlineInputBorder(),
-                  labelText: 'Select a Site',
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.green, width: 2.0),
+              child: GestureDetector(
+                onTap: () => _showCustomDropdown(context, siteList),
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.all(8),
+                    border: OutlineInputBorder(),
+                    labelText: 'Select a Site',
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.green, width: 2.0),
+                    ),
+                  ),
+                  child: Text(
+                    widget.dropdownValue ?? '',
+                    style: GoogleFonts.montserrat(fontSize: 14),
                   ),
                 ),
-                value: widget.dropdownValue,
-                items: siteList.map((site) {
-                  return DropdownMenuItem<String>(
-                    value: site.name,
-                    child: Text(
-                      site.name,
-                      style: GoogleFonts.montserrat(fontSize: 14),
-                    ),
-                  );
-                }).toList(),
-                onChanged: (String? value) {
-                  final selectedSite = siteList.firstWhere(
-                    (site) => site.name == value,
-                    orElse: () => SiteInfo(
-                      address: '',
-                      imageUrl: '',
-                      management: '',
-                      name: '',
-                      status: false,
-                    ),
-                  );
-                  widget.onSiteChanged(selectedSite);
-                },
               ),
             ),
             SizedBox(height: 8),
@@ -77,6 +61,42 @@ class _SitePickerComponentState extends ConsumerState<SitePickerComponent> {
       },
       loading: () => Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(child: Text('Error: $error')),
+    );
+  }
+
+  void _showCustomDropdown(BuildContext context, List<SiteInfo> siteList) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Select a Site',
+              style: GoogleFonts.montserrat(fontSize: 14)),
+          content: Container(
+            width: double.maxFinite,
+            child: RawScrollbar(
+              thumbColor: const Color.fromARGB(255, 59, 82, 73),
+              radius: Radius.circular(10),
+              thickness: 8,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: siteList.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(
+                      siteList[index].name,
+                      style: GoogleFonts.montserrat(fontSize: 14),
+                    ),
+                    onTap: () {
+                      widget.onSiteChanged(siteList[index]);
+                      Navigator.of(context).pop();
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
