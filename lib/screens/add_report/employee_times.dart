@@ -7,13 +7,17 @@ class EmployeeTimesComponent extends StatefulWidget {
   final TimeOfDay initialTimeOff;
   final ValueChanged<TimeOfDay> onTimeOnChanged;
   final ValueChanged<TimeOfDay> onTimeOffChanged;
-  const EmployeeTimesComponent(
-      {super.key,
-      required this.nameController,
-      required this.initialTimeOn,
-      required this.initialTimeOff,
-      required this.onTimeOnChanged,
-      required this.onTimeOffChanged});
+  final VoidCallback onDelete;
+
+  const EmployeeTimesComponent({
+    super.key,
+    required this.nameController,
+    required this.initialTimeOn,
+    required this.initialTimeOff,
+    required this.onTimeOnChanged,
+    required this.onTimeOffChanged,
+    required this.onDelete,
+  });
 
   @override
   State<EmployeeTimesComponent> createState() => _EmployeeTimesComponentState();
@@ -34,33 +38,43 @@ class _EmployeeTimesComponentState extends State<EmployeeTimesComponent> {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
-          child: Container(
-            width: 100,
-            height: 40,
-            child: TextField(
-              controller: widget.nameController,
-              style: GoogleFonts.montserrat(fontSize: 14),
-              maxLines: null,
-              keyboardType: TextInputType.text,
-              decoration: const InputDecoration(
-                hintText: 'Name',
-              ),
+          child: TextField(
+            controller: widget.nameController,
+            style: GoogleFonts.montserrat(fontSize: 14),
+            maxLines: null,
+            keyboardType: TextInputType.text,
+            decoration: const InputDecoration(
+              hintText: 'Name',
+              border: OutlineInputBorder(),
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
             ),
           ),
         ),
+        const SizedBox(width: 10),
         Column(
           children: [
             const Text("ON", style: TextStyle(fontWeight: FontWeight.bold)),
-            Container(
+            SizedBox(
               width: 100,
               height: 30,
-              child: FloatingActionButton.extended(
-                heroTag: null,
-                icon: const Icon(Icons.access_time_outlined),
-                label: Text('${timeOn.hour}:${timeOn.minute.toString().padLeft(2, '0')}'),
-                backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.access_time_outlined, size: 16),
+                label: Text(
+                  '${timeOn.hour}:${timeOn.minute.toString().padLeft(2, '0')}',
+                  style: GoogleFonts.montserrat(fontSize: 14),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  textStyle: GoogleFonts.montserrat(fontSize: 14),
+                ),
                 onPressed: () async {
                   TimeOfDay? newTimeOn = await showTimePicker(
                     context: context,
@@ -81,14 +95,23 @@ class _EmployeeTimesComponentState extends State<EmployeeTimesComponent> {
         Column(
           children: [
             const Text("OFF", style: TextStyle(fontWeight: FontWeight.bold)),
-            Container(
+            SizedBox(
               width: 100,
               height: 30,
-              child: FloatingActionButton.extended(
-                heroTag: null,
-                icon: const Icon(Icons.access_time_outlined),
-                label: Text('${timeOff.hour}:${timeOff.minute.toString().padLeft(2, '0')}'),
-                backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.access_time_outlined, size: 16),
+                label: Text(
+                  '${timeOff.hour}:${timeOff.minute.toString().padLeft(2, '0')}',
+                  style: GoogleFonts.montserrat(fontSize: 14),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  textStyle: GoogleFonts.montserrat(fontSize: 14),
+                ),
                 onPressed: () async {
                   TimeOfDay? newTimeOff = await showTimePicker(
                     context: context,
@@ -104,6 +127,18 @@ class _EmployeeTimesComponentState extends State<EmployeeTimesComponent> {
               ),
             ),
           ],
+        ),
+        SizedBox(
+          width: 20,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.grey,
+              size: 24,
+            ),
+            onPressed: widget.onDelete,
+          ),
         ),
       ],
     );

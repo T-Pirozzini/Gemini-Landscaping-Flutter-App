@@ -40,7 +40,7 @@ class _MaterialComponentState extends State<MaterialComponent> {
                 controller: widget.materialController,
                 style: GoogleFonts.montserrat(fontSize: 14),
                 decoration: const InputDecoration(
-                  labelText: 'Material',
+                  labelText: 'Material/Quantity',
                   border: OutlineInputBorder(),
                 ),
               ),

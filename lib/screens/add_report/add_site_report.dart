@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_landscaping_app/models/site_info.dart';
 import 'package:gemini_landscaping_app/providers/site_list_provider.dart';
+import 'package:gemini_landscaping_app/screens/add_report/add_new_site.dart';
 import 'package:gemini_landscaping_app/screens/add_report/date_picker.dart';
 import 'package:gemini_landscaping_app/screens/add_report/employee_times.dart';
 import 'package:gemini_landscaping_app/screens/add_report/material.dart';
 import 'package:gemini_landscaping_app/screens/add_report/service_list.dart';
+import 'package:gemini_landscaping_app/screens/add_report/service_type.dart';
 import 'package:gemini_landscaping_app/screens/add_report/site_picker.dart';
 import 'package:gemini_landscaping_app/screens/home/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,6 +23,9 @@ class AddSiteReport extends ConsumerStatefulWidget {
 }
 
 class _AddSiteReportState extends ConsumerState<AddSiteReport> {
+  // regular maintenance or additional service
+  bool isRegularMaintenance = true;
+
   // date picker component
   TextEditingController dateController = TextEditingController();
 
@@ -94,6 +99,12 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   void updateTimeOff(int index, TimeOfDay time) {
     setState(() {
       employeeTimes[index]['timeOff'] = time;
+    });
+  }
+
+  void deleteEmployeeTime(int index) {
+    setState(() {
+      employeeTimes.removeAt(index);
     });
   }
 
@@ -378,7 +389,20 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              DatePickerComponent(dateController: dateController),
+              ServiceTypeComponent(
+                  isInitialRegularMaintenance: isRegularMaintenance),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  DatePickerComponent(dateController: dateController),
+                  AddNewSiteComponent(
+                    currentUser: currentUser,
+                    onSiteAdded: () {
+                      ref.refresh(siteListProvider);
+                    },
+                  ),
+                ],
+              ),
               SitePickerComponent(
                 dropdownValue: dropdownValue,
                 selectedSite: selectedSite,
@@ -396,6 +420,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                 child: Text('Add Employees & Times:',
                     style: GoogleFonts.montserrat(fontSize: 14)),
               ),
+              SizedBox(height: 5),
               ...employeeTimes.asMap().entries.map((entry) {
                 int index = entry.key;
                 Map<String, dynamic> staffMember = entry.value;
@@ -407,10 +432,19 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                     initialTimeOff: staffMember['timeOff'],
                     onTimeOnChanged: (time) => updateTimeOn(index, time),
                     onTimeOffChanged: (time) => updateTimeOff(index, time),
+                    onDelete: () => deleteEmployeeTime(index),
                   ),
                 );
               }).toList(),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  textStyle: GoogleFonts.montserrat(fontSize: 14),
+                ),
                 onPressed: addEmployeeTime,
                 child: const Text('Add Another Employee Time'),
               ),
@@ -488,6 +522,14 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                 );
               }).toList(),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  textStyle: GoogleFonts.montserrat(fontSize: 14),
+                ),
                 onPressed: addMaterial,
                 child: const Text('Add Material'),
               ),
@@ -517,7 +559,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                     maxLines: null,
                     keyboardType: TextInputType.multiline,
                     decoration: InputDecoration(
-                      hintText: 'Add a description of services provided',
+                      hintText: 'Add a description of services provided . . .',
                       border: InputBorder.none,
                     ),
                   ),
@@ -526,129 +568,6 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
             ],
           ),
         ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Text(
-            'Add a New Site',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          Icon(Icons.arrow_right_outlined, size: 24),
-          FloatingActionButton(
-            backgroundColor: Colors.black45,
-            mini: true,
-            shape:
-                ShapeBorder.lerp(RoundedRectangleBorder(), CircleBorder(), 0.5),
-            onPressed: () {
-              TextEditingController nameController = TextEditingController();
-              TextEditingController addressController = TextEditingController();
-
-              showModalBottomSheet(
-                isScrollControlled: true,
-                context: context,
-                builder: (BuildContext context) {
-                  return StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          bottom: MediaQuery.of(context).viewInsets.bottom,
-                        ),
-                        child: Wrap(
-                          alignment: WrapAlignment.center,
-                          children: [
-                            Column(
-                              children: [
-                                Text(
-                                  'Add a New Site:',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontFamily: 'Montserrat',
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(height: 10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          .6,
-                                      child: TextField(
-                                        controller: nameController,
-                                        decoration: InputDecoration(
-                                          border: OutlineInputBorder(),
-                                          labelText: 'Site Name',
-                                          focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.green,
-                                                width: 2.0),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: 5),
-                                    Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          .8,
-                                      child: TextField(
-                                        controller: addressController,
-                                        decoration: InputDecoration(
-                                          border: OutlineInputBorder(),
-                                          labelText: 'Address',
-                                          focusedBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(
-                                                color: Colors.green,
-                                                width: 2.0),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 5),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      foregroundColor: Colors.white,
-                                      backgroundColor: Colors.black45,
-                                      textStyle: TextStyle(fontSize: 18)),
-                                  onPressed: () async {
-                                    CollectionReference equipmentCollection =
-                                        FirebaseFirestore.instance
-                                            .collection('SiteList');
-
-                                    // Create a new document and set its data
-                                    await equipmentCollection.add({
-                                      'name': nameController.text,
-                                      'address': addressController.text,
-                                      'management': "",
-                                      'imageUrl': "",
-                                      'status:': true,
-                                      'addedBy': currentUser.email,
-                                    });
-
-                                    // Clear the text fields
-                                    nameController.clear();
-                                    addressController.clear();
-
-                                    // Close the bottom sheet after adding equipment
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text('Add Site'),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
-            child: Icon(Icons.add),
-          ),
-        ],
       ),
     );
   }

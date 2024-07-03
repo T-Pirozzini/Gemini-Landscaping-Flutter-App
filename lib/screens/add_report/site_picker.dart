@@ -66,6 +66,7 @@ class _SitePickerComponentState extends ConsumerState<SitePickerComponent> {
                 },
               ),
             ),
+            SizedBox(height: 8),
             if (widget.selectedSite != null)
               Text(
                 'Address: ${widget.selectedSite!.address}',
