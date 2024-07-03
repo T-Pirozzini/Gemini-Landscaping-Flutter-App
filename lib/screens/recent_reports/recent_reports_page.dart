@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gemini_landscaping_app/pages/addWinterReport.dart';
-import 'package:gemini_landscaping_app/screens/recent_reports/add_site_report.dart';
+import 'package:gemini_landscaping_app/screens/add_report/add_site_report.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../pages/view_report_page.dart';
 import '../../auth.dart';
