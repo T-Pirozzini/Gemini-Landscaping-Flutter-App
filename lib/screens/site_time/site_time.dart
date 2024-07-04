@@ -1,8 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_landscaping_app/providers/report_provider.dart';
 import 'package:gemini_landscaping_app/providers/site_list_provider.dart';
+import 'package:gemini_landscaping_app/screens/site_time/number_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:numberpicker/numberpicker.dart';
+
+final selectedMonthProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
 class SiteTime extends ConsumerStatefulWidget {
   const SiteTime({super.key});
@@ -13,27 +20,121 @@ class SiteTime extends ConsumerStatefulWidget {
 
 class _SiteTimeState extends ConsumerState<SiteTime> {
   List<Color> colors = [
-    Colors.red,
-    Colors.green,
-    Colors.blue,
-    Colors.orange,
-    Colors.purple,
-    Colors.yellow,
-    Colors.brown,
-    Colors.pink,
-    Colors.cyan,
-    Colors.lime,
+    Colors.redAccent,
+    Colors.greenAccent,
+    Colors.blueAccent,
+    Colors.orangeAccent,
+    Colors.purpleAccent,
+    Colors.yellowAccent,
+    Colors.lightBlueAccent,
+    Colors.pinkAccent,
+    Colors.cyanAccent,
+    Colors.limeAccent,
+    Colors.indigoAccent,
+    Colors.tealAccent,
+    Colors.amberAccent,
   ];
+
+  DateTime _selectedMonth = DateTime.now();
+
+  void _incrementMonth() {
+    ref.read(selectedMonthProvider.notifier).state = DateTime(
+      ref.read(selectedMonthProvider).year,
+      ref.read(selectedMonthProvider).month + 1,
+      1,
+    );
+  }
+
+  void _decrementMonth() {
+    ref.read(selectedMonthProvider.notifier).state = DateTime(
+      ref.read(selectedMonthProvider).year,
+      ref.read(selectedMonthProvider).month - 1,
+      1,
+    );
+  }
+
+  void _adjustSiteTarget(BuildContext context, WidgetRef ref, String siteId,
+      String name, double target) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AdjustSiteTargetDialog(
+          siteId: siteId,
+          currentName: name,
+          currentTarget: target,
+          onConfirm: () {
+            // Invalidate the provider to refresh the data
+            ref.invalidate(siteListProvider);
+            ref.invalidate(specificMonthSitereportProvider(
+                ref.read(selectedMonthProvider)));
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _setSiteToInactive(BuildContext context, String siteId) async {
+    final shouldSetInactive = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm'),
+          content: Text('Are you sure you want to set this site to inactive?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text('Confirm'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldSetInactive == true) {
+      await FirebaseFirestore.instance
+          .collection('SiteList')
+          .doc(siteId)
+          .update({'status': false});
+      // Invalidate the provider to refresh the data
+      ref.invalidate(siteListProvider);
+      ref.invalidate(
+        specificMonthSitereportProvider(
+          ref.read(selectedMonthProvider),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final selectedMonth = ref.watch(selectedMonthProvider);
     final sitesAsyncValue = ref.watch(siteListProvider);
-    final reportsAsyncValue = ref.watch(currentMonthsitereportProvider);
+    final reportsAsyncValue =
+        ref.watch(specificMonthSitereportProvider(selectedMonth));
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Site Times'),
+        title: Text(DateFormat("MMMM yyyy").format(_selectedMonth)),
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: _decrementMonth,
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.arrow_forward_ios),
+            onPressed: _incrementMonth,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -43,7 +144,7 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
               data: (reportList) {
                 return GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
+                    crossAxisCount: 2,
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 10,
                     childAspectRatio: 1,
@@ -115,11 +216,13 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
                           fit: BoxFit.scaleDown,
                           child: Text(
                             site.name,
-                            style: const TextStyle(
-                              fontSize: 14,
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
+                        SizedBox(height: 4),
                         Expanded(
                           child: Stack(
                             alignment: Alignment.center,
@@ -140,11 +243,19 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
                                 children: [
                                   Text(
                                     '${(totalDuration / 60).toStringAsFixed(1)} / ${(site.target / 60).toStringAsFixed(1)} hrs',
+                                    style: GoogleFonts.openSans(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 5),
                                   Text(
                                     '${(progress * 100).toStringAsFixed(1)}%',
+                                    style: GoogleFonts.openSans(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                     textAlign: TextAlign.center,
                                   ),
                                 ],
@@ -160,7 +271,7 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
                                             (context, error, stackTrace) {
                                           return const Icon(
                                             Icons.grass_rounded,
-                                            size: 100,
+                                            size: 80,
                                             color: Colors.green,
                                           );
                                         },
@@ -170,7 +281,7 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
                                       opacity: 0.3,
                                       child: const Icon(
                                         Icons.grass_rounded,
-                                        size: 100,
+                                        size: 80,
                                         color: Colors.green,
                                       ),
                                     ),
@@ -181,6 +292,31 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
                           'Reports: $reportCount',
                           style: const TextStyle(
                             fontSize: 12,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.track_changes),
+                                onPressed: () => _adjustSiteTarget(context, ref,
+                                    site.id, site.name, site.target),
+                                iconSize: 18,
+                                color: Colors.blueGrey,
+                                tooltip: "Adjust the target",
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.toggle_off),
+                                onPressed: () =>
+                                    _setSiteToInactive(context, site.id),
+                                iconSize: 18,
+                                color: Colors.blueGrey,
+                                tooltip: "Set site to inactive",
+                              ),
+                            ],
                           ),
                         ),
                         Divider(thickness: 2, color: Colors.black),

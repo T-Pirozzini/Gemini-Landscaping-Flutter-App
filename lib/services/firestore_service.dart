@@ -45,6 +45,28 @@ class FirestoreService extends ChangeNotifier {
     }).toList();
   }
 
+  // fetch specific month report data
+  Future<List<SiteReport>> fetchSpecificMonthSiteReports(DateTime date) async {
+    final DateTime startOfMonth = DateTime(date.year, date.month, 1);
+    final DateTime endOfMonth = DateTime(date.year, date.month + 1, 0);
+
+    final QuerySnapshot snapshot = await _db
+        .collection('SiteReports')
+        .where('timestamp', isGreaterThan: startOfMonth)
+        .where('timestamp', isLessThanOrEqualTo: endOfMonth)
+        .get();
+    final List<DocumentSnapshot> documents = snapshot.docs;
+
+    return documents.map((doc) {
+      return SiteReport(
+        id: doc.id,
+        siteName: doc['siteInfo']['siteName'],
+        totalCombinedDuration: doc['totalCombinedDuration'],
+        date: doc['siteInfo']['date'],
+      );
+    }).toList();
+  }
+
   Future<List<SiteInfo>> fetchAllSites() async {
     final QuerySnapshot snapshot =
         await _db.collection('SiteList').where("status", isEqualTo: true).get();
@@ -58,6 +80,7 @@ class FirestoreService extends ChangeNotifier {
         name: doc['name'],
         status: doc['status'],
         target: doc['target'].toDouble(),
+        id: doc.id,
       );
     }).toList();
   }

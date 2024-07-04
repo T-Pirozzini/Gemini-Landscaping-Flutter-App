@@ -7,6 +7,7 @@ class SiteInfo {
   final String name;
   final bool status;
   final double target;
+  final String id;
 
   const SiteInfo({
     required this.address,
@@ -15,5 +16,6 @@ class SiteInfo {
     required this.name,
     required this.status,
     required this.target,
+    required this.id,
   });
 }
