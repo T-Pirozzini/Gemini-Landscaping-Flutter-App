@@ -15,16 +15,39 @@ class FirestoreService extends ChangeNotifier {
     return documents.map((doc) {
       return SiteReport(
         id: doc.id,
-        title: doc['title'],
-        description: doc['description'],
-        date: doc['date'],
-        imageUrl: doc['imageUrl'],
+        siteName: doc['siteName'],
+        totalCombinedDuration: doc['totalCombinedDuration'],
+        date: doc['siteInfo']['date'],
+      );
+    }).toList();
+  }
+
+  // fetch current month report data
+  Future<List<SiteReport>> fetchCurrentMonthSiteReports() async {
+    final DateTime now = DateTime.now();
+    final DateTime startOfCurrentMonth = DateTime(now.year, now.month, 1);
+    final DateTime endOfCurrentMonth = DateTime(now.year, now.month + 1, 0);
+
+    final QuerySnapshot snapshot = await _db
+        .collection('SiteReports')
+        .where('timestamp', isGreaterThan: startOfCurrentMonth)
+        .where('timestamp', isLessThanOrEqualTo: endOfCurrentMonth)
+        .get();
+    final List<DocumentSnapshot> documents = snapshot.docs;
+
+    return documents.map((doc) {
+      return SiteReport(
+        id: doc.id,
+        siteName: doc['siteInfo']['siteName'],
+        totalCombinedDuration: doc['totalCombinedDuration'],
+        date: doc['siteInfo']['date'],
       );
     }).toList();
   }
 
   Future<List<SiteInfo>> fetchAllSites() async {
-    final QuerySnapshot snapshot = await _db.collection('SiteList').get();
+    final QuerySnapshot snapshot =
+        await _db.collection('SiteList').where("status", isEqualTo: true).get();
     final List<DocumentSnapshot> documents = snapshot.docs;
 
     return documents.map((doc) {
@@ -34,6 +57,7 @@ class FirestoreService extends ChangeNotifier {
         management: doc['management'],
         name: doc['name'],
         status: doc['status'],
+        target: doc['target'].toDouble(),
       );
     }).toList();
   }
