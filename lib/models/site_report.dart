@@ -1,18 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class SiteReport {
-  const SiteReport({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.date,
-    required this.imageUrl,    
-  });
-
   final String id;
-  final String title;
-  final String description;
-  final String date;
-  final String imageUrl;
-  
+  final String siteName;
+  final int totalCombinedDuration;
+  final DateTime date;
+
+  SiteReport({
+    required this.id,
+    required this.siteName,
+    required this.totalCombinedDuration,
+    required this.date,
+  });
 }

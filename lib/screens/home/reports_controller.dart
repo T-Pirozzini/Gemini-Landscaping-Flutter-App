@@ -4,6 +4,7 @@ import 'package:gemini_landscaping_app/pages/folders_page.dart';
 import 'package:gemini_landscaping_app/screens/recent_reports/recent_reports_page.dart';
 import 'package:gemini_landscaping_app/pages/recent_winter_reports_page.dart';
 import 'package:gemini_landscaping_app/pages/restricted_page.dart';
+import 'package:gemini_landscaping_app/screens/site_time/site_time.dart';
 
 class TimeSheetController extends StatefulWidget {
   const TimeSheetController({super.key});
@@ -19,7 +20,7 @@ class _TimeSheetControllerState extends State<TimeSheetController> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         backgroundColor: const Color(0xFFDFD3C3),
         appBar: AppBar(
@@ -32,6 +33,7 @@ class _TimeSheetControllerState extends State<TimeSheetController> {
             tabs: [
               Tab(text: 'Recent'),
               Tab(text: 'All Reports'),
+              Tab(text: 'Site Time'),
               Tab(text: 'Winter Reports'),
             ],
           ),
@@ -44,12 +46,14 @@ class _TimeSheetControllerState extends State<TimeSheetController> {
                 children: [
                   RecentReportsPage(),
                   SiteFolders(),
+                  SiteTime(),
                   RecentWinterReportsPage(),
                 ],
               )
             : TabBarView(
                 children: [
                   RecentReportsPage(),
+                  RestrictedPage(),
                   RestrictedPage(),
                   RecentWinterReportsPage(),
                 ],
