@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_landscaping_app/providers/report_provider.dart';
@@ -11,6 +12,19 @@ class SiteTime extends ConsumerStatefulWidget {
 }
 
 class _SiteTimeState extends ConsumerState<SiteTime> {
+  List<Color> colors = [
+    Colors.red,
+    Colors.green,
+    Colors.blue,
+    Colors.orange,
+    Colors.purple,
+    Colors.yellow,
+    Colors.brown,
+    Colors.pink,
+    Colors.cyan,
+    Colors.lime,
+  ];
+
   @override
   Widget build(BuildContext context) {
     final sitesAsyncValue = ref.watch(siteListProvider);
@@ -41,8 +55,59 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
                         .where((report) => report.siteName == site.name)
                         .toList();
                     final totalDuration = siteReports.fold<double>(
-                        0, (sum, report) => sum + report.totalCombinedDuration);
+                        0,
+                        (sum, report) =>
+                            sum + report.totalCombinedDuration.toDouble());
                     final progress = totalDuration / site.target;
+                    final reportCount = siteReports.length;
+
+                    // Aggregate durations by date
+                    Map<String, double> dateDurations = {};
+                    for (var report in siteReports) {
+                      dateDurations.update(
+                        report.date,
+                        (existing) =>
+                            existing + report.totalCombinedDuration.toDouble(),
+                        ifAbsent: () => report.totalCombinedDuration.toDouble(),
+                      );
+                    }
+
+                    Map<String, Color> dateColorMap = {};
+                    List<PieChartSectionData> sections = [];
+                    double totalPercent = 0;
+                    int colorIndex = 0;
+
+                    dateDurations.forEach((date, duration) {
+                      final percentage = (duration / site.target) * 100;
+                      totalPercent += percentage;
+                      if (!dateColorMap.containsKey(date)) {
+                        dateColorMap[date] = colors[colorIndex % colors.length];
+                        colorIndex++;
+                      }
+                      final color = dateColorMap[date]!;
+                      sections.add(
+                        PieChartSectionData(
+                          value: percentage,
+                          color: color,
+                          title: '${(duration / 60).toStringAsFixed(1)}h',
+                          radius: 50,
+                          showTitle: false,
+                        ),
+                      );
+                    });
+
+                    // Add remaining part of the chart to show uncompleted portion
+                    if (totalPercent < 100) {
+                      sections.add(
+                        PieChartSectionData(
+                          value: 100 - totalPercent,
+                          color: Colors.grey[300],
+                          title: '',
+                          radius: 50,
+                          showTitle: false,
+                        ),
+                      );
+                    }
 
                     return Column(
                       children: [
@@ -55,44 +120,19 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 10),
                         Expanded(
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              site.imageUrl.isNotEmpty
-                                  ? Opacity(
-                                      opacity: 0.5,
-                                      child: Image.network(
-                                        site.imageUrl,
-                                        height: 80,
-                                        width: 80,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return const Icon(
-                                            Icons.grass_rounded,
-                                            size: 100,
-                                            color: Colors.green,
-                                          );
-                                        },
-                                      ),
-                                    )
-                                  : Opacity(
-                                      opacity: 0.5,
-                                      child: const Icon(
-                                        Icons.grass_rounded,
-                                        size: 100,
-                                        color: Colors.green,
-                                      ),
-                                    ),
                               SizedBox(
-                                height: 100, // Adjust size
-                                width: 100, // Adjust size
-                                child: CircularProgressIndicator(
-                                  value: progress,
-                                  backgroundColor: Colors.grey[300],
-                                  color: Colors.blue,
-                                  strokeWidth: 10,
+                                height: 250,
+                                width: 250,
+                                child: PieChart(
+                                  PieChartData(
+                                    sections: sections,
+                                    centerSpaceRadius: double.infinity,
+                                    borderData: FlBorderData(show: false),
+                                  ),
                                 ),
                               ),
                               Column(
@@ -109,7 +149,38 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
                                   ),
                                 ],
                               ),
+                              site.imageUrl.isNotEmpty
+                                  ? Opacity(
+                                      opacity: 0.3,
+                                      child: Image.network(
+                                        site.imageUrl,
+                                        height: 80,
+                                        width: 80,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return const Icon(
+                                            Icons.grass_rounded,
+                                            size: 100,
+                                            color: Colors.green,
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : Opacity(
+                                      opacity: 0.3,
+                                      child: const Icon(
+                                        Icons.grass_rounded,
+                                        size: 100,
+                                        color: Colors.green,
+                                      ),
+                                    ),
                             ],
+                          ),
+                        ),
+                        Text(
+                          'Reports: $reportCount',
+                          style: const TextStyle(
+                            fontSize: 12,
                           ),
                         ),
                         Divider(thickness: 2, color: Colors.black),

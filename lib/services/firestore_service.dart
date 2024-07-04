@@ -17,7 +17,7 @@ class FirestoreService extends ChangeNotifier {
         id: doc.id,
         siteName: doc['siteName'],
         totalCombinedDuration: doc['totalCombinedDuration'],
-        date: (doc['timestamp'] as Timestamp).toDate(),
+        date: doc['siteInfo']['date'],
       );
     }).toList();
   }
@@ -40,7 +40,7 @@ class FirestoreService extends ChangeNotifier {
         id: doc.id,
         siteName: doc['siteInfo']['siteName'],
         totalCombinedDuration: doc['totalCombinedDuration'],
-        date: (doc['timestamp'] as Timestamp).toDate(),
+        date: doc['siteInfo']['date'],
       );
     }).toList();
   }
