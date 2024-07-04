@@ -174,7 +174,48 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
 
   final reportRef = FirebaseFirestore.instance.collection('SiteReports');
 
+  // form validation
+  bool _validateForm() {
+    if (dropdownValue == null || dropdownValue!.isEmpty) {
+      _showErrorDialog('Please select a site.');
+      return false;
+    }
+
+    for (var employee in employeeTimes) {
+      if (employee['nameController'].text.isEmpty) {
+        _showErrorDialog('Please enter an employee name.');
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Validation Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _submitForm() {
+    if (!_validateForm()) {
+      return; // Exit if the form is not valid
+    }
+
     Map<String, dynamic> employeeTimesMap = {};
     Duration totalCombinedDuration = Duration();
 
