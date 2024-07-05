@@ -23,7 +23,7 @@ class AddSiteReport extends ConsumerStatefulWidget {
 }
 
 class _AddSiteReportState extends ConsumerState<AddSiteReport> {
-  // regular maintenance or additional service
+  // service type component
   bool isRegularMaintenance = true;
 
   // date picker component
@@ -67,6 +67,13 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     dateController = TextEditingController(text: formattedDate);
 
     addEmployeeTime();
+  }
+
+  // Service Type Component
+  void handleServiceTypeChange(bool isRegular) {
+    setState(() {
+      isRegularMaintenance = isRegular;
+    });
   }
 
   // Site Picker Component
@@ -211,7 +218,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     );
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (!_validateForm()) {
       return; // Exit if the form is not valid
     }
@@ -236,54 +243,67 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
       }
     }
 
-    reportRef.add({
-      "timestamp": DateTime.now(),
-      "isRegularMaintenance": isRegularMaintenance,
-      "employeeTimes": employeeTimesMap,
-      "totalCombinedDuration": totalCombinedDuration.inMinutes,
-      "siteInfo": {
-        'date': dateController.text,
-        'siteName': dropdownValue,
-        'address': address,
-      },
-      "services": {
-        'garbage': _selectedGarbage,
-        'debris': _selectedDebris,
-        'lawn': _selectedLawn,
-        'garden': _selectedGarden,
-        'tree': _selectedTree,
-        'blow': _selectedBlow,
-      },
-      "materials": materials.map((material) {
-        return {
-          "vendor": material['vendorController'].text,
-          "description": material['materialController'].text,
-          "cost": material['costController'].text,
-        };
-      }).toList(),
-      "description": _descriptionController.text,
-      "submittedBy": currentUser.email,
-      "filed": false,
-    }).whenComplete(() {
-      // reset all the form fields
-      dateController.clear();
-      dropdownValue = null;
-      selectedSite = null;
-      address = '';
-      employeeTimes.clear();
-      _selectedGarbage = [];
-      _selectedDebris = [];
-      _selectedLawn = [];
-      _selectedGarden = [];
-      _selectedTree = [];
-      _selectedBlow = [];
-      materials.clear();
-      _descriptionController.clear();
+    try {
+      await reportRef.add({
+        "timestamp": DateTime.now(),
+        "isRegularMaintenance": isRegularMaintenance,
+        "employeeTimes": employeeTimesMap,
+        "totalCombinedDuration": totalCombinedDuration.inMinutes,
+        "siteInfo": {
+          'date': dateController.text,
+          'siteName': dropdownValue,
+          'address': address,
+        },
+        "services": {
+          'garbage': _selectedGarbage,
+          'debris': _selectedDebris,
+          'lawn': _selectedLawn,
+          'garden': _selectedGarden,
+          'tree': _selectedTree,
+          'blow': _selectedBlow,
+        },
+        "materials": materials.map((material) {
+          return {
+            "vendor": material['vendorController'].text,
+            "description": material['materialController'].text,
+            "cost": material['costController'].text,
+          };
+        }).toList(),
+        "description": _descriptionController.text,
+        "submittedBy": currentUser.email,
+        "filed": false,
+      });
 
-      // Navigate back to Home
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => Home()));
-    });
+      print('Report added successfully');
+
+      if (mounted) {
+        print('Widget is still mounted, proceeding with reset and navigation');
+
+        // Reset all the form fields
+        dateController.clear();
+        dropdownValue = null;
+        selectedSite = null;
+        address = '';
+        employeeTimes.clear();
+        _selectedGarbage = [];
+        _selectedDebris = [];
+        _selectedLawn = [];
+        _selectedGarden = [];
+        _selectedTree = [];
+        _selectedBlow = [];
+        materials.clear();
+        _descriptionController.clear();
+
+        // Navigate back to Home
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => Home()));
+      } else {
+        print('Widget is no longer mounted, skipping reset and navigation');
+      }
+    } catch (e) {
+      print('Error adding report: $e');
+      _showErrorDialog('Failed to add report, please try again.');
+    }
   }
 
   @override
@@ -358,7 +378,9 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ServiceTypeComponent(
-                  isInitialRegularMaintenance: isRegularMaintenance),
+                isInitialRegularMaintenance: isRegularMaintenance,
+                onServiceTypeChanged: handleServiceTypeChange,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -473,7 +495,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                 decoration: BoxDecoration(
                   color: Colors.green[100],
                 ),
-                child: Text('Add Materials Used:',
+                child: Text('Add Materials or Disposal:',
                     style: GoogleFonts.montserrat(fontSize: 14)),
               ),
               SizedBox(height: 5),
@@ -499,7 +521,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                   textStyle: GoogleFonts.montserrat(fontSize: 14),
                 ),
                 onPressed: addMaterial,
-                child: const Text('Add Material'),
+                child: const Text('Add Material or Disposal'),
               ),
               Divider(
                 color: Colors.grey,

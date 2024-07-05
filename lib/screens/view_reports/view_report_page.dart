@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/screens/home/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'edit_report_page.dart';
-import 'pdf_page.dart';
+import '../print_save_report/pdf_page.dart';
 
 // ignore: must_be_immutable
 class ViewReport extends StatefulWidget {
@@ -457,9 +457,9 @@ class _ViewReportState extends State<ViewReport> {
                                 fontSize: 16, fontWeight: FontWeight.w600),
                           ),
                           Wrap(
-                            spacing: 8.0, 
-                            runSpacing: 4.0, 
-                            children: items.map((item) {                              
+                            spacing: 8.0,
+                            runSpacing: 4.0,
+                            children: items.map((item) {
                               bool isMaterialOrDescription =
                                   label == 'Materials:' ||
                                       label == 'Description:';
@@ -508,7 +508,7 @@ class _ViewReportState extends State<ViewReport> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => SiteReport(
+                                builder: (_) => PrintReport(
                                   docid: docid,
                                 ),
                               ),
@@ -611,7 +611,7 @@ class _ViewReportState extends State<ViewReport> {
     final updatedData = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => EditReport(
+        builder: (_) => EditReportPage(
           docid: docid,
         ),
       ),
