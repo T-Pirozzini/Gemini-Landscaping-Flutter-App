@@ -1,27 +1,27 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gemini_landscaping_app/pages/equipment_page.dart';
 import 'package:gemini_landscaping_app/pages/folders_page.dart';
-import 'package:gemini_landscaping_app/screens/recent_reports/recent_reports.dart';
 import 'package:gemini_landscaping_app/screens/recent_reports/recent_reports_page.dart';
-import 'package:gemini_landscaping_app/pages/recent_winter_reports_page.dart';
 import 'package:gemini_landscaping_app/pages/restricted_page.dart';
 import 'package:gemini_landscaping_app/screens/site_time/site_time.dart';
+import 'package:gemini_landscaping_app/uploadPhotos.dart';
 
-class TimeSheetController extends StatefulWidget {
-  const TimeSheetController({super.key});
+class UtilityController extends StatefulWidget {
+  const UtilityController({super.key});
 
   @override
-  State<TimeSheetController> createState() => _TimeSheetControllerState();
+  State<UtilityController> createState() => UtilityControllerState();
 }
 
-class _TimeSheetControllerState extends State<TimeSheetController> {
+class UtilityControllerState extends State<UtilityController> {
   String userRole = '';
   final currentUser = FirebaseAuth.instance.currentUser!;
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         backgroundColor: const Color(0xFFDFD3C3),
         appBar: AppBar(
@@ -32,9 +32,8 @@ class _TimeSheetControllerState extends State<TimeSheetController> {
             unselectedLabelColor: Colors.grey.shade400,
             indicatorColor: Colors.white,
             tabs: [
-              Tab(text: 'Recent'),
-              Tab(text: 'All Reports'),
-              Tab(text: 'Winter Reports'),
+              Tab(text: 'Upload Photos'),
+              Tab(text: 'Report Repairs'),
             ],
           ),
         ),
@@ -44,16 +43,14 @@ class _TimeSheetControllerState extends State<TimeSheetController> {
                     "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
             ? TabBarView(
                 children: [
-                  RecentReports(),
-                  SiteFolders(),
-                  RecentWinterReportsPage(),
+                  UploadPhotos(),
+                  EquipmentPage(),
                 ],
               )
             : TabBarView(
                 children: [
-                  RecentReports(),
-                  RestrictedPage(),
-                  RecentWinterReportsPage(),
+                  UploadPhotos(),
+                  EquipmentPage(),
                 ],
               ),
       ),

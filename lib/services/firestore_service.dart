@@ -9,15 +9,22 @@ class FirestoreService extends ChangeNotifier {
 
   // fetch all report data
   Future<List<SiteReport>> fetchAllReports() async {
-    final QuerySnapshot snapshot = await _db.collection('SiteReports').get();
+    final QuerySnapshot snapshot = await _db
+        .collection('SiteReports')        
+        .get();
     final List<DocumentSnapshot> documents = snapshot.docs;
 
     return documents.map((doc) {
+      final employeeTimes = doc['employeeTimes'] as Map<String, dynamic>;
+      final employees = employeeTimes.keys.toList();
+
       return SiteReport(
         id: doc.id,
-        siteName: doc['siteName'],
+        siteName: doc['siteInfo']['siteName'],
         totalCombinedDuration: doc['totalCombinedDuration'],
         date: doc['siteInfo']['date'],
+        employees: employees,
+        filed: doc['filed'] ?? false,
       );
     }).toList();
   }
@@ -36,11 +43,16 @@ class FirestoreService extends ChangeNotifier {
     final List<DocumentSnapshot> documents = snapshot.docs;
 
     return documents.map((doc) {
+      final employeeTimes = doc['employeeTimes'] as Map<String, dynamic>;
+      final employees = employeeTimes.keys.toList();
+
       return SiteReport(
         id: doc.id,
         siteName: doc['siteInfo']['siteName'],
         totalCombinedDuration: doc['totalCombinedDuration'],
         date: doc['siteInfo']['date'],
+        employees: employees,
+        filed: doc['filed'] ?? false,
       );
     }).toList();
   }
@@ -58,11 +70,16 @@ class FirestoreService extends ChangeNotifier {
     final List<DocumentSnapshot> documents = snapshot.docs;
 
     return documents.map((doc) {
+      final employeeTimes = doc['employeeTimes'] as Map<String, dynamic>;
+      final employees = employeeTimes.keys.toList();
+
       return SiteReport(
         id: doc.id,
         siteName: doc['siteInfo']['siteName'],
         totalCombinedDuration: doc['totalCombinedDuration'],
         date: doc['siteInfo']['date'],
+        employees: employees,
+        filed: doc['filed'] ?? false,
       );
     }).toList();
   }

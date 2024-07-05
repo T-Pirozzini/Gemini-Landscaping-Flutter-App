@@ -13,3 +13,8 @@ final specificMonthSitereportProvider = FutureProvider.family<List<SiteReport>, 
   final firestoreService = FirestoreService();
   return firestoreService.fetchSpecificMonthSiteReports(date);
 });
+
+final allSiteReportsProvider = FutureProvider<List<SiteReport>>((ref) async {
+  final firestoreService = FirestoreService();
+  return firestoreService.fetchAllReports();
+});

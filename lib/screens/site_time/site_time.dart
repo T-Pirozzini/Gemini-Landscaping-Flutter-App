@@ -7,7 +7,6 @@ import 'package:gemini_landscaping_app/providers/site_list_provider.dart';
 import 'package:gemini_landscaping_app/screens/site_time/number_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:numberpicker/numberpicker.dart';
 
 final selectedMonthProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
