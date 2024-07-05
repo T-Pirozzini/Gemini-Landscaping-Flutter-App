@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gemini_landscaping_app/pages/addWinterReport.dart';
+import 'package:gemini_landscaping_app/providers/report_provider.dart';
 import 'package:gemini_landscaping_app/screens/add_report/add_site_report.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../view_reports/view_report_page.dart';
@@ -273,8 +274,8 @@ class _RecentReportsPageState extends State<RecentReportsPage>
             icon: Icons.note_add_outlined,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const AddSiteReport()));
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (_) => AddSiteReport()));
             },
           ),
           Bubble(

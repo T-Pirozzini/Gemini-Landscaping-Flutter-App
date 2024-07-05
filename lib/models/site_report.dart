@@ -11,6 +11,7 @@ class SiteReport {
   final String description;
   final String submittedBy;
   final DateTime timestamp;
+  final bool isRegularMaintenance;
 
   SiteReport({
     required this.id,
@@ -25,6 +26,7 @@ class SiteReport {
     required this.description,
     required this.submittedBy,
     required this.timestamp,
+    required this.isRegularMaintenance,
   });
 }
 

@@ -41,7 +41,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
 
   @override
   Widget build(BuildContext context) {
-    final reportsAsyncValue = ref.watch(allSiteReportsProvider);
+    final reportsAsyncValue = ref.watch(allSiteReportsStreamProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -69,7 +69,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
           return ListView.builder(
             itemCount: limitedReports.length,
             itemBuilder: (context, index) {
-              final report = reports[index];
+              final report = limitedReports[index];
               // Convert duration from minutes to hours
               final durationInHours = report.totalCombinedDuration / 60;
               final formattedDuration = durationInHours.toStringAsFixed(1);
@@ -138,7 +138,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
                         ],
                       ),
                       trailing: Text(
-                        'Date: ${report.date}\nDuration: $formattedDuration hrs\nEmployees: ${report.employees.length}',
+                        '${report.date}\nDuration: $formattedDuration hrs\nEmployees: ${report.employees.length}',
                         style: TextStyle(
                           fontSize: 14,
                         ),
@@ -170,8 +170,8 @@ class _RecentReportsState extends ConsumerState<RecentReports>
             icon: Icons.note_add_outlined,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const AddSiteReport()));
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (_) => AddSiteReport()));
             },
           ),
           Bubble(

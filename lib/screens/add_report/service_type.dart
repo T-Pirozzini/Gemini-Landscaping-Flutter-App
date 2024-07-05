@@ -3,17 +3,19 @@ import 'package:google_fonts/google_fonts.dart';
 
 class ServiceTypeComponent extends StatefulWidget {
   final bool isInitialRegularMaintenance;
+  final ValueChanged<bool> onServiceTypeChanged;
 
   const ServiceTypeComponent({
     super.key,
     required this.isInitialRegularMaintenance,
+    required this.onServiceTypeChanged,
   });
 
   @override
-  State<ServiceTypeComponent> createState() => _ServiceToggleComponentState();
+  State<ServiceTypeComponent> createState() => _ServiceTypeComponentState();
 }
 
-class _ServiceToggleComponentState extends State<ServiceTypeComponent> {
+class _ServiceTypeComponentState extends State<ServiceTypeComponent> {
   late bool isRegularMaintenance;
 
   @override
@@ -24,8 +26,7 @@ class _ServiceToggleComponentState extends State<ServiceTypeComponent> {
 
   @override
   Widget build(BuildContext context) {
-    return // Toggle buttons for Regular Maintenance Program and Additional Service
-        Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ChoiceChip(
@@ -37,9 +38,12 @@ class _ServiceToggleComponentState extends State<ServiceTypeComponent> {
           ),
           selected: isRegularMaintenance,
           onSelected: (selected) {
-            setState(() {
-              isRegularMaintenance = true;
-            });
+            if (!isRegularMaintenance) {
+              setState(() {
+                isRegularMaintenance = true;
+              });
+              widget.onServiceTypeChanged(true);
+            }
           },
         ),
         const SizedBox(width: 8),
@@ -52,9 +56,12 @@ class _ServiceToggleComponentState extends State<ServiceTypeComponent> {
           ),
           selected: !isRegularMaintenance,
           onSelected: (selected) {
-            setState(() {
-              isRegularMaintenance = false;
-            });
+            if (isRegularMaintenance) {
+              setState(() {
+                isRegularMaintenance = false;
+              });
+              widget.onServiceTypeChanged(false);
+            }
           },
         ),
       ],

@@ -18,3 +18,8 @@ final allSiteReportsProvider = FutureProvider<List<SiteReport>>((ref) async {
   final firestoreService = FirestoreService();
   return firestoreService.fetchAllReports();
 });
+
+final allSiteReportsStreamProvider = StreamProvider<List<SiteReport>>((ref) {
+  final firestoreService = FirestoreService();
+  return firestoreService.fetchAllReportsStream();
+});
