@@ -50,7 +50,7 @@ class FirestoreService extends ChangeNotifier {
         description: doc['description'],
         submittedBy: doc['submittedBy'],
         timestamp: (doc['timestamp'] as Timestamp).toDate(),
-        isRegularMaintenance: doc['isRegularMaintenance'],
+        isRegularMaintenance: doc['isRegularMaintenance'],        
       );
     }).toList();
   }

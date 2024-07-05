@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_landscaping_app/screens/all_reports/files_page.dart';
+import 'package:gemini_landscaping_app/screens/all_reports/report_files.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gemini_landscaping_app/providers/site_list_provider.dart';
 import 'package:gemini_landscaping_app/providers/report_provider.dart';
 
 class ReportFolders extends ConsumerWidget {
   const ReportFolders({super.key});
-  
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -38,13 +38,12 @@ class ReportFolders extends ConsumerWidget {
                   final site = siteList[index];
                   final siteReports = reports
                       .where((report) => report.siteName == site.name)
-                      .toList();
-                  final management = site.management;
+                      .toList();                  
                   final imageUrl = site.imageUrl;
 
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: ListTile(                      
+                    child: ListTile(
                       leading: Image.network(
                         imageUrl,
                         fit: BoxFit.contain,
@@ -76,9 +75,9 @@ class ReportFolders extends ConsumerWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => SiteFiles(
+                            builder: (_) => ReportFiles(
                               siteName: site.name,
-                              management: management,
+                              imageUrl: imageUrl,
                             ),
                           ),
                         );

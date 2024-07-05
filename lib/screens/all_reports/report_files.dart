@@ -1,49 +1,23 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:gemini_landscaping_app/screens/view_reports/view_report_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gemini_landscaping_app/screens/view_reports/report_preview.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gemini_landscaping_app/providers/report_provider.dart';
 
-class ReportFiles extends StatefulWidget {
+class ReportFiles extends ConsumerWidget {
   final String siteName;
-  final String management;
+  final String imageUrl;
 
-  const ReportFiles(
-      {super.key, required this.siteName, required this.management});
-
-  @override
-  State<ReportFiles> createState() =>
-      _ReportFilesState(siteName: siteName, management: management);
-}
-
-class _ReportFilesState extends State<ReportFiles> {
-  late final String siteName;
-  late final String management;
-
-  _SiteFilesState({required this.siteName, required this.management});
-
-  Future<String> getImageUrl(String management) async {
-    final List<String> imageExtensions = ['png', 'jpg', 'jpeg'];
-    String downloadUrl = '';
-
-    for (String extension in imageExtensions) {
-      try {
-        downloadUrl = await FirebaseStorage.instance
-            .ref('company_logos/$management.$extension')
-            .getDownloadURL();
-        // If the download URL is successfully retrieved, break the loop
-        break;
-      } catch (e) {
-        // If the image is not found, catch the error and continue to the next extension
-        continue;
-      }
-    }
-
-    return downloadUrl;
-  }
+  const ReportFiles({
+    super.key,
+    required this.siteName,
+    required this.imageUrl,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final reportsAsyncValue = ref.watch(allSiteReportsStreamProvider);
+
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
@@ -71,29 +45,19 @@ class _ReportFilesState extends State<ReportFiles> {
             color: Colors.white, fit: BoxFit.contain, height: 50),
         centerTitle: true,
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('SiteReports2023')
-            .where('info.siteName', isEqualTo: siteName)
-            .snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError) {
-            return const Text("Something went wrong");
-          }
-
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final reports = snapshot.data!.docs;
-          reports
-              .sort((a, b) => b['info']['date'].compareTo(a['info']['date']));
+      body: reportsAsyncValue.when(
+        data: (reports) {
+          final siteReports =
+              reports.where((report) => report.siteName == siteName).toList();
+          siteReports.sort((a, b) => b.date.compareTo(a.date));
 
           return GridView.builder(
-            gridDelegate:
-                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-            itemCount: reports.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+            ),
+            itemCount: siteReports.length,
             itemBuilder: (BuildContext context, int index) {
-              final report = reports[index];
+              final report = siteReports[index];
               return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: GestureDetector(
@@ -101,7 +65,7 @@ class _ReportFilesState extends State<ReportFiles> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ViewReport(docid: reports[index]),
+                        builder: (_) => ReportPreview(report: report),
                       ),
                     );
                   },
@@ -122,7 +86,7 @@ class _ReportFilesState extends State<ReportFiles> {
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
-                            report['info']['siteName'],
+                            report.siteName,
                             style: GoogleFonts.montserrat(
                               fontSize: 14,
                               letterSpacing: .5,
@@ -132,41 +96,21 @@ class _ReportFilesState extends State<ReportFiles> {
                       ),
                       footer: Center(
                         child: Text(
-                          report['info']['date'],
+                          report.date,
                           style: GoogleFonts.montserrat(fontSize: 12),
                         ),
                       ),
-                      child: Stack(
-                        children: [
-                          Center(
-                            child: FutureBuilder<String>(
-                              future: getImageUrl(management),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<String> snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return CircularProgressIndicator();
-                                }
-                                if (snapshot.hasError ||
-                                    !snapshot.hasData ||
-                                    snapshot.data!.isEmpty) {
-                                  return Icon(Icons.grass_outlined,
-                                      color: Colors.green, size: 40);
-                                }
-                                return Image.network(
-                                  snapshot.data!,
-                                  fit: BoxFit.contain,
-                                  height: 100,
-                                  width: 100,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(Icons.grass_outlined,
-                                        color: Colors.green, size: 40);
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ],
+                      child: Center(
+                        child: Image.network(
+                          imageUrl, // Use the imageUrl from the management field
+                          fit: BoxFit.contain,
+                          height: 100,
+                          width: 100,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(Icons.grass_outlined,
+                                color: Colors.green, size: 40);
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -175,6 +119,8 @@ class _ReportFilesState extends State<ReportFiles> {
             },
           );
         },
+        loading: () => Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error: $error')),
       ),
     );
   }
