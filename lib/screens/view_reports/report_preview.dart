@@ -2,10 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/screens/home/home_page.dart';
+import 'package:gemini_landscaping_app/screens/print_save_report/print_save_report.dart';
+import 'package:gemini_landscaping_app/screens/view_reports/edit_report.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../pages/edit_report_page.dart';
-import '../../pages/pdf_page.dart';
+import 'edit_report_page.dart';
+import '../print_save_report/pdf_page.dart';
 import 'package:gemini_landscaping_app/models/site_report.dart';
 
 class ReportPreview extends StatefulWidget {
@@ -17,6 +19,14 @@ class ReportPreview extends StatefulWidget {
 }
 
 class _ReportPreviewState extends State<ReportPreview> {
+  late SiteReport report;
+
+  @override
+  void initState() {
+    super.initState();
+    report = widget.report;
+  }
+
   void deleteReport() {
     showDialog(
       context: context,
@@ -31,16 +41,28 @@ class _ReportPreviewState extends State<ReportPreview> {
               child: Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                // widget.docid.reference.delete().whenComplete(
-                //   () {
-                //     Navigator.pushAndRemoveUntil(
-                //       context,
-                //       MaterialPageRoute(builder: (_) => Home()),
-                //       (route) => false,
-                //     );
-                //   },
-                // );
+              onPressed: () async {
+                try {
+                  await FirebaseFirestore.instance
+                      .collection('SiteReports')
+                      .doc(widget.report.id)
+                      .delete();
+                  Navigator.pop(context);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => Home()),
+                    (route) => false,
+                  );
+                } catch (e) {
+                  print('Error deleting report: $e');
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content:
+                          Text('Failed to delete report. Please try again.'),
+                    ),
+                  );
+                }
               },
               child: Text('Delete'),
             ),
@@ -49,6 +71,31 @@ class _ReportPreviewState extends State<ReportPreview> {
       },
     );
   }
+
+  Future<void> _navigateToEditReport() async {
+    final updatedReport = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditReport(report: report),
+      ),
+    );
+
+    if (updatedReport != null) {
+      setState(() {
+        report = updatedReport;
+      });
+    }
+  }
+
+  Future<void> _navigateToPrintSaveReport() async {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => PrintSaveReport(report: widget.report), 
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -432,23 +479,15 @@ class _ReportPreviewState extends State<ReportPreview> {
                               FirebaseAuth.instance.currentUser?.uid ==
                                   "4Qpgb3aORKhUVXjgT2SNh6zgCWE3")
                           ? () async {
-                              // Navigator.push(
-                              // context,
-                              // MaterialPageRoute(
-                              //   builder: (_) => PrintReport(
-                              //     report: report,
-                              //   ),
-                              // ),
-                              // );
-                              // Update the field in Firestore
+                              _navigateToPrintSaveReport();
                               try {
-                                await FirebaseFirestore.instance
-                                    .collection('SiteReports2023')
-                                    .doc(report.id)
-                                    .set(
-                                  {'filed': true},
-                                  SetOptions(merge: true),
-                                );
+                                // await FirebaseFirestore.instance
+                                //     .collection('SiteReports')
+                                //     .doc(report.id)
+                                //     .set(
+                                //   {'filed': true},
+                                //   SetOptions(merge: true),
+                                // );
                               } catch (error) {
                                 print('Error updating document: $error');
                               }
@@ -488,7 +527,7 @@ class _ReportPreviewState extends State<ReportPreview> {
                       child: const Text(
                         "EDIT REPORT",
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 14,
                           color: Color.fromARGB(255, 251, 251, 251),
                         ),
                       ),
@@ -530,23 +569,5 @@ class _ReportPreviewState extends State<ReportPreview> {
         ),
       ),
     );
-  }
-
-  Future<void> _navigateToEditReport() async {
-    Navigator.pop(context);
-    // final updatedData = await Navigator.push(
-    //   // context,
-    //   // MaterialPageRoute(
-    //   //   // builder: (_) => EditReport(
-    //   //   //   report: widget.report,
-    //   //   // ),
-    //   // ),
-    // // );
-
-    // if (updatedData != null) {
-    //   setState(() {
-    //     // widget.report = updatedData;
-    //   });
-    // }
   }
 }

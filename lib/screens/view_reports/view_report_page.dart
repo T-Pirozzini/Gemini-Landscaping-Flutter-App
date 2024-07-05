@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/screens/home/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../pages/edit_report_page.dart';
-import '../../pages/pdf_page.dart';
+import 'edit_report_page.dart';
+import '../print_save_report/pdf_page.dart';
 
 // ignore: must_be_immutable
 class ViewReport extends StatefulWidget {
@@ -611,7 +611,7 @@ class _ViewReportState extends State<ViewReport> {
     final updatedData = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => EditReport(
+        builder: (_) => EditReportPage(
           docid: docid,
         ),
       ),

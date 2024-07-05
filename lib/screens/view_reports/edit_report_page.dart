@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 
-class EditReport extends StatefulWidget {
+class EditReportPage extends StatefulWidget {
   final DocumentSnapshot docid;
 
-  EditReport({required this.docid});
+  EditReportPage({required this.docid});
 
   @override
-  _EditReportState createState() => _EditReportState();
+  _EditReportPageState createState() => _EditReportPageState();
 }
 
-class _EditReportState extends State<EditReport> {
+class _EditReportPageState extends State<EditReportPage> {
   TextEditingController _dateController = TextEditingController();
   TextEditingController _siteNameController = TextEditingController();
   TextEditingController _addressController = TextEditingController();
