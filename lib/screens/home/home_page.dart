@@ -3,7 +3,9 @@ import "package:flutter/material.dart";
 import 'package:gemini_landscaping_app/pages/announcement_page.dart';
 // import 'package:gemini_landscaping_app/pages/chart_page.dart';
 import 'package:gemini_landscaping_app/pages/profile_page.dart';
+import 'package:gemini_landscaping_app/screens/home/admin_controller.dart';
 import 'package:gemini_landscaping_app/screens/home/reports_controller.dart';
+import 'package:gemini_landscaping_app/screens/home/utility_controller.dart';
 import 'package:gemini_landscaping_app/uploadPhotos.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../auth.dart';
@@ -24,9 +26,8 @@ class _HomeState extends State<Home> {
   int currentIndex = 0;
   final pages = [
     TimeSheetController(),
-    UploadPhotos(),
-    EquipmentPage(),
-    // ChartPage(), // Add when completed
+    AdminController(),
+    UtilityController(),
     AnnouncementPage(),
     ProfilePage(),
   ];
@@ -67,7 +68,7 @@ class _HomeState extends State<Home> {
             size: 30,
           ),
           Icon(
-            Icons.add_a_photo_outlined,
+            Icons.admin_panel_settings_outlined,
             color: Colors.white,
             size: 30,
           ),
@@ -76,11 +77,6 @@ class _HomeState extends State<Home> {
             color: Colors.white,
             size: 30,
           ),
-          // Icon(
-          //   Icons.auto_graph,
-          //   color: Colors.white,
-          //   size: 30,
-          // ),
           Icon(
             Icons.message_outlined,
             color: Colors.white,

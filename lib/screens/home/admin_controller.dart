@@ -1,20 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/pages/folders_page.dart';
-import 'package:gemini_landscaping_app/screens/recent_reports/recent_reports.dart';
 import 'package:gemini_landscaping_app/screens/recent_reports/recent_reports_page.dart';
-import 'package:gemini_landscaping_app/pages/recent_winter_reports_page.dart';
 import 'package:gemini_landscaping_app/pages/restricted_page.dart';
 import 'package:gemini_landscaping_app/screens/site_time/site_time.dart';
 
-class TimeSheetController extends StatefulWidget {
-  const TimeSheetController({super.key});
+class AdminController extends StatefulWidget {
+  const AdminController({super.key});
 
   @override
-  State<TimeSheetController> createState() => _TimeSheetControllerState();
+  State<AdminController> createState() => AdminControllerState();
 }
 
-class _TimeSheetControllerState extends State<TimeSheetController> {
+class AdminControllerState extends State<AdminController> {
   String userRole = '';
   final currentUser = FirebaseAuth.instance.currentUser!;
 
@@ -32,9 +30,9 @@ class _TimeSheetControllerState extends State<TimeSheetController> {
             unselectedLabelColor: Colors.grey.shade400,
             indicatorColor: Colors.white,
             tabs: [
-              Tab(text: 'Recent'),
-              Tab(text: 'All Reports'),
-              Tab(text: 'Winter Reports'),
+              Tab(text: 'Recent (old)'),
+              Tab(text: 'All Reports (old)'),
+              Tab(text: 'Site Time'),
             ],
           ),
         ),
@@ -44,16 +42,16 @@ class _TimeSheetControllerState extends State<TimeSheetController> {
                     "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
             ? TabBarView(
                 children: [
-                  RecentReports(),
+                  RecentReportsPage(),
                   SiteFolders(),
-                  RecentWinterReportsPage(),
+                  SiteTime(),
                 ],
               )
             : TabBarView(
                 children: [
-                  RecentReports(),
                   RestrictedPage(),
-                  RecentWinterReportsPage(),
+                  RestrictedPage(),
+                  RestrictedPage(),
                 ],
               ),
       ),

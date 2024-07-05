@@ -9,15 +9,22 @@ class FirestoreService extends ChangeNotifier {
 
   // fetch all report data
   Future<List<SiteReport>> fetchAllReports() async {
-    final QuerySnapshot snapshot = await _db.collection('SiteReports').get();
+    final QuerySnapshot snapshot = await _db
+        .collection('SiteReports')        
+        .get();
     final List<DocumentSnapshot> documents = snapshot.docs;
 
     return documents.map((doc) {
+      final employeeTimes = doc['employeeTimes'] as Map<String, dynamic>;
+      final employees = employeeTimes.keys.toList();
+
       return SiteReport(
         id: doc.id,
-        siteName: doc['siteName'],
+        siteName: doc['siteInfo']['siteName'],
         totalCombinedDuration: doc['totalCombinedDuration'],
         date: doc['siteInfo']['date'],
+        employees: employees,
+        filed: doc['filed'] ?? false,
       );
     }).toList();
   }
@@ -36,11 +43,43 @@ class FirestoreService extends ChangeNotifier {
     final List<DocumentSnapshot> documents = snapshot.docs;
 
     return documents.map((doc) {
+      final employeeTimes = doc['employeeTimes'] as Map<String, dynamic>;
+      final employees = employeeTimes.keys.toList();
+
       return SiteReport(
         id: doc.id,
         siteName: doc['siteInfo']['siteName'],
         totalCombinedDuration: doc['totalCombinedDuration'],
         date: doc['siteInfo']['date'],
+        employees: employees,
+        filed: doc['filed'] ?? false,
+      );
+    }).toList();
+  }
+
+  // fetch specific month report data
+  Future<List<SiteReport>> fetchSpecificMonthSiteReports(DateTime date) async {
+    final DateTime startOfMonth = DateTime(date.year, date.month, 1);
+    final DateTime endOfMonth = DateTime(date.year, date.month + 1, 0);
+
+    final QuerySnapshot snapshot = await _db
+        .collection('SiteReports')
+        .where('timestamp', isGreaterThan: startOfMonth)
+        .where('timestamp', isLessThanOrEqualTo: endOfMonth)
+        .get();
+    final List<DocumentSnapshot> documents = snapshot.docs;
+
+    return documents.map((doc) {
+      final employeeTimes = doc['employeeTimes'] as Map<String, dynamic>;
+      final employees = employeeTimes.keys.toList();
+
+      return SiteReport(
+        id: doc.id,
+        siteName: doc['siteInfo']['siteName'],
+        totalCombinedDuration: doc['totalCombinedDuration'],
+        date: doc['siteInfo']['date'],
+        employees: employees,
+        filed: doc['filed'] ?? false,
       );
     }).toList();
   }
@@ -58,6 +97,7 @@ class FirestoreService extends ChangeNotifier {
         name: doc['name'],
         status: doc['status'],
         target: doc['target'].toDouble(),
+        id: doc.id,
       );
     }).toList();
   }

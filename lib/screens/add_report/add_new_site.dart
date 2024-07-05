@@ -102,14 +102,19 @@ class _AddNewSiteComponentState extends State<AddNewSiteComponent> {
                                           .collection('SiteList');
 
                                   // Create a new document and set its data
-                                  await siteCollection.add({
+                                  DocumentReference docRef =
+                                      await siteCollection.add({
                                     'name': nameController.text,
                                     'address': addressController.text,
                                     'management': "",
                                     'imageUrl': "",
                                     'status': true,
                                     'addedBy': widget.currentUser.email,
+                                    'target': 1000,
                                   });
+
+                                  // Update the document with its ID
+                                  await docRef.update({'id': docRef.id});
 
                                   // Clear the text fields
                                   nameController.clear();
