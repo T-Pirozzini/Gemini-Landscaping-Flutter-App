@@ -7,16 +7,16 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 // ignore: must_be_immutable
-class SiteReport extends StatefulWidget {
+class PrintReport extends StatefulWidget {
   DocumentSnapshot docid;
-  SiteReport({required this.docid});
+  PrintReport({required this.docid});
   @override
-  State<SiteReport> createState() => _SiteReportState(docid: docid);
+  State<PrintReport> createState() => _PrintReportState(docid: docid);
 }
 
-class _SiteReportState extends State<SiteReport> {
+class _PrintReportState extends State<PrintReport> {
   DocumentSnapshot docid;
-  _SiteReportState({required this.docid});
+  _PrintReportState({required this.docid});
   final pdf = pw.Document();
 
   var date;

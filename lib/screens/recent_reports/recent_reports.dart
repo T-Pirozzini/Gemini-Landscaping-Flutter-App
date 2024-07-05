@@ -1,12 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gemini_landscaping_app/extraReport.dart';
+import 'package:gemini_landscaping_app/pages/addWinterReport.dart';
 import 'package:gemini_landscaping_app/providers/report_provider.dart';
+import 'package:gemini_landscaping_app/screens/add_report/add_site_report.dart';
+import 'package:gemini_landscaping_app/screens/view_reports/report_preview.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:floating_action_bubble/floating_action_bubble.dart';
 
-class RecentReports extends ConsumerWidget {
+class RecentReports extends ConsumerStatefulWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  _RecentReportsState createState() => _RecentReportsState();
+}
+
+class _RecentReportsState extends ConsumerState<RecentReports>
+    with SingleTickerProviderStateMixin {
+  late Animation<double> _animation;
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+
+    _animation = CurvedAnimation(
+      curve: Curves.easeInOut,
+      parent: _animationController,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final reportsAsyncValue = ref.watch(allSiteReportsProvider);
 
     return Scaffold(
@@ -39,65 +73,75 @@ class RecentReports extends ConsumerWidget {
               // Convert duration from minutes to hours
               final durationInHours = report.totalCombinedDuration / 60;
               final formattedDuration = durationInHours.toStringAsFixed(1);
-              return Padding(
-                padding: const EdgeInsets.all(4),
-                child: Container(
-                  height: 65,
-                  child: ListTile(
-                    tileColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      side: const BorderSide(
-                        width: 2.0,
-                        color: Colors.green,
-                      ),
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReportPreview(report: report),
                     ),
-                    title: Text(
-                      report.siteName,
-                      style: TextStyle(
-                        fontSize: 22,
-                      ),
-                    ),
-                    subtitle: Row(
-                      children: [
-                        Text(
-                          'ID: ${report.id.substring(0, 5)}',
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Container(
+                    height: 65,
+                    child: ListTile(
+                      tileColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: const BorderSide(
+                          width: 2.0,
+                          color: Colors.green,
                         ),
-                        report.filed
-                            ? Row(
-                                children: [
-                                  Text(
-                                    ' - filed ',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.green.shade200),
-                                  ),
-                                  Icon(
-                                    Icons.task_alt_outlined,
-                                    color: Colors.green.shade200,
-                                  )
-                                ],
-                              )
-                            : Row(
-                                children: [
-                                  Text(
-                                    ' - in progress ',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.blueGrey.shade200),
-                                  ),
-                                  Icon(
-                                    Icons.pending_outlined,
-                                    color: Colors.blueGrey.shade200,
-                                  )
-                                ],
-                              ),
-                      ],
-                    ),
-                    trailing: Text(
-                      'Date: ${report.date}\nDuration: $formattedDuration hrs\nEmployees: ${report.employees.length}',
-                      style: TextStyle(
-                        fontSize: 14,
+                      ),
+                      title: Text(
+                        report.siteName,
+                        style: TextStyle(
+                          fontSize: 22,
+                        ),
+                      ),
+                      subtitle: Row(
+                        children: [
+                          Text(
+                            'ID: ${report.id.substring(0, 5)}',
+                          ),
+                          report.filed
+                              ? Row(
+                                  children: [
+                                    Text(
+                                      ' - filed ',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.green.shade200),
+                                    ),
+                                    Icon(
+                                      Icons.task_alt_outlined,
+                                      color: Colors.green.shade200,
+                                    )
+                                  ],
+                                )
+                              : Row(
+                                  children: [
+                                    Text(
+                                      ' - in progress ',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.blueGrey.shade200),
+                                    ),
+                                    Icon(
+                                      Icons.pending_outlined,
+                                      color: Colors.blueGrey.shade200,
+                                    )
+                                  ],
+                                ),
+                        ],
+                      ),
+                      trailing: Text(
+                        'Date: ${report.date}\nDuration: $formattedDuration hrs\nEmployees: ${report.employees.length}',
+                        style: TextStyle(
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ),
@@ -108,6 +152,51 @@ class RecentReports extends ConsumerWidget {
         },
         loading: () => Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('Error: $error')),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: FloatingActionBubble(
+        iconColor: Colors.white,
+        backGroundColor: const Color.fromARGB(255, 31, 182, 77),
+        animation: _animation,
+        onPress: () => _animationController.isCompleted
+            ? _animationController.reverse()
+            : _animationController.forward(),
+        iconData: Icons.add,
+        items: <Bubble>[
+          Bubble(
+            title: "Site Report",
+            iconColor: Colors.white,
+            bubbleColor: const Color.fromARGB(255, 59, 82, 73),
+            icon: Icons.note_add_outlined,
+            titleStyle: TextStyle(fontSize: 16, color: Colors.white),
+            onPress: () {
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const AddSiteReport()));
+            },
+          ),
+          Bubble(
+            title: "Extras Report",
+            iconColor: Colors.white,
+            bubbleColor: const Color.fromARGB(255, 59, 82, 73),
+            icon: Icons.add_circle_outline,
+            titleStyle: TextStyle(fontSize: 16, color: Colors.white),
+            onPress: () {
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => const ExtraReport()));
+            },
+          ),
+          Bubble(
+            title: "Winter Report",
+            iconColor: Colors.white,
+            bubbleColor: const Color.fromARGB(255, 59, 82, 73),
+            icon: Icons.cloudy_snowing,
+            titleStyle: TextStyle(fontSize: 16, color: Colors.white),
+            onPress: () {
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (_) => AddWinterReport()));
+            },
+          ),
+        ],
       ),
     );
   }

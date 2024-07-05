@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/models/site_info.dart';
 import 'package:gemini_landscaping_app/models/site_report.dart';
@@ -9,14 +8,34 @@ class FirestoreService extends ChangeNotifier {
 
   // fetch all report data
   Future<List<SiteReport>> fetchAllReports() async {
-    final QuerySnapshot snapshot = await _db
-        .collection('SiteReports')        
-        .get();
+    final QuerySnapshot snapshot = await _db.collection('SiteReports').get();
     final List<DocumentSnapshot> documents = snapshot.docs;
 
     return documents.map((doc) {
       final employeeTimes = doc['employeeTimes'] as Map<String, dynamic>;
-      final employees = employeeTimes.keys.toList();
+      final employees = employeeTimes.entries.map((entry) {
+        final employeeData = entry.value as Map<String, dynamic>;
+        return EmployeeTime(
+          name: entry.key,
+          timeOn: (employeeData['timeOn'] as Timestamp).toDate(),
+          timeOff: (employeeData['timeOff'] as Timestamp).toDate(),
+          duration: employeeData['duration'],
+        );
+      }).toList();
+
+      final services = doc['services'] as Map<String, dynamic>;
+      final mappedServices =
+          services.map((key, value) => MapEntry(key, List<String>.from(value)));
+
+      final materialsList = doc['materials'] as List<dynamic>;
+      final materials = materialsList.map((material) {
+        final materialData = material as Map<String, dynamic>;
+        return MaterialList(
+          cost: materialData['cost'],
+          description: materialData['description'],
+          vendor: materialData['vendor'],
+        );
+      }).toList();
 
       return SiteReport(
         id: doc.id,
@@ -25,6 +44,12 @@ class FirestoreService extends ChangeNotifier {
         date: doc['siteInfo']['date'],
         employees: employees,
         filed: doc['filed'] ?? false,
+        address: doc['siteInfo']['address'],
+        services: mappedServices,
+        materials: materials,
+        description: doc['description'],
+        submittedBy: doc['submittedBy'],
+        timestamp: (doc['timestamp'] as Timestamp).toDate(),
       );
     }).toList();
   }
@@ -44,7 +69,29 @@ class FirestoreService extends ChangeNotifier {
 
     return documents.map((doc) {
       final employeeTimes = doc['employeeTimes'] as Map<String, dynamic>;
-      final employees = employeeTimes.keys.toList();
+      final employees = employeeTimes.entries.map((entry) {
+        final employeeData = entry.value as Map<String, dynamic>;
+        return EmployeeTime(
+          name: entry.key,
+          timeOn: (employeeData['timeOn'] as Timestamp).toDate(),
+          timeOff: (employeeData['timeOff'] as Timestamp).toDate(),
+          duration: employeeData['duration'],
+        );
+      }).toList();
+
+      final services = doc['services'] as Map<String, dynamic>;
+      final mappedServices =
+          services.map((key, value) => MapEntry(key, List<String>.from(value)));
+
+      final materialsList = doc['materials'] as List<dynamic>;
+      final materials = materialsList.map((material) {
+        final materialData = material as Map<String, dynamic>;
+        return MaterialList(
+          cost: materialData['cost'],
+          description: materialData['description'],
+          vendor: materialData['vendor'],
+        );
+      }).toList();
 
       return SiteReport(
         id: doc.id,
@@ -53,6 +100,12 @@ class FirestoreService extends ChangeNotifier {
         date: doc['siteInfo']['date'],
         employees: employees,
         filed: doc['filed'] ?? false,
+        address: doc['siteInfo']['address'],
+        services: mappedServices,
+        materials: materials,
+        description: doc['description'],
+        submittedBy: doc['submittedBy'],
+        timestamp: (doc['timestamp'] as Timestamp).toDate(),
       );
     }).toList();
   }
@@ -71,7 +124,29 @@ class FirestoreService extends ChangeNotifier {
 
     return documents.map((doc) {
       final employeeTimes = doc['employeeTimes'] as Map<String, dynamic>;
-      final employees = employeeTimes.keys.toList();
+      final employees = employeeTimes.entries.map((entry) {
+        final employeeData = entry.value as Map<String, dynamic>;
+        return EmployeeTime(
+          name: entry.key,
+          timeOn: (employeeData['timeOn'] as Timestamp).toDate(),
+          timeOff: (employeeData['timeOff'] as Timestamp).toDate(),
+          duration: employeeData['duration'],
+        );
+      }).toList();
+
+      final services = doc['services'] as Map<String, dynamic>;
+      final mappedServices =
+          services.map((key, value) => MapEntry(key, List<String>.from(value)));
+
+      final materialsList = doc['materials'] as List<dynamic>;
+      final materials = materialsList.map((material) {
+        final materialData = material as Map<String, dynamic>;
+        return MaterialList(
+          cost: materialData['cost'],
+          description: materialData['description'],
+          vendor: materialData['vendor'],
+        );
+      }).toList();
 
       return SiteReport(
         id: doc.id,
@@ -80,6 +155,12 @@ class FirestoreService extends ChangeNotifier {
         date: doc['siteInfo']['date'],
         employees: employees,
         filed: doc['filed'] ?? false,
+        address: doc['siteInfo']['address'],
+        services: mappedServices,
+        materials: materials,
+        description: doc['description'],
+        submittedBy: doc['submittedBy'],
+        timestamp: (doc['timestamp'] as Timestamp).toDate(),
       );
     }).toList();
   }
