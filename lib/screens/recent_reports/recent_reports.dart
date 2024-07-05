@@ -156,12 +156,12 @@ class _RecentReportsState extends ConsumerState<RecentReports>
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionBubble(
         iconColor: Colors.white,
-        backGroundColor: const Color.fromARGB(255, 31, 182, 77),
+        backGroundColor: const Color.fromARGB(255, 59, 82, 73),
         animation: _animation,
         onPress: () => _animationController.isCompleted
             ? _animationController.reverse()
             : _animationController.forward(),
-        iconData: Icons.add,
+        iconData: Icons.post_add_outlined,
         items: <Bubble>[
           Bubble(
             title: "Site Report",
@@ -172,17 +172,6 @@ class _RecentReportsState extends ConsumerState<RecentReports>
             onPress: () {
               Navigator.pushReplacement(
                   context, MaterialPageRoute(builder: (_) => AddSiteReport()));
-            },
-          ),
-          Bubble(
-            title: "Extras Report",
-            iconColor: Colors.white,
-            bubbleColor: const Color.fromARGB(255, 59, 82, 73),
-            icon: Icons.add_circle_outline,
-            titleStyle: TextStyle(fontSize: 16, color: Colors.white),
-            onPress: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const ExtraReport()));
             },
           ),
           Bubble(

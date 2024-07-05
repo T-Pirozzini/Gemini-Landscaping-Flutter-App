@@ -140,8 +140,7 @@ class _SiteFilesState extends State<SiteFiles> {
                         children: [
                           Center(
                             child: FutureBuilder<String>(
-                              future: getImageUrl(
-                                  management),
+                              future: getImageUrl(management),
                               builder: (BuildContext context,
                                   AsyncSnapshot<String> snapshot) {
                                 if (snapshot.connectionState ==
