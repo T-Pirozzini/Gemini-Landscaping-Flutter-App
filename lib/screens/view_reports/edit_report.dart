@@ -17,8 +17,9 @@ class _EditReportState extends State<EditReport> {
   late TextEditingController _dateController;
   late TextEditingController _descriptionController;
   late bool _isRegularMaintenance;
-  late List<Map<String, dynamic>> _employeeTimes;
-  late List<Map<String, dynamic>> _materials;
+  late List<Map<String, TextEditingController>> _employeeTimes;
+  late List<Map<String, TextEditingController>> _materials;
+  late String serviceType;
 
   @override
   void initState() {
@@ -27,11 +28,15 @@ class _EditReportState extends State<EditReport> {
     _descriptionController =
         TextEditingController(text: widget.report.description);
     _isRegularMaintenance = widget.report.isRegularMaintenance;
+    serviceType =
+        _isRegularMaintenance ? 'Regular Maintenance' : 'Additional Service';
     _employeeTimes = widget.report.employees
         .map((employee) => {
               'nameController': TextEditingController(text: employee.name),
-              'timeOn': TimeOfDay.fromDateTime(employee.timeOn),
-              'timeOff': TimeOfDay.fromDateTime(employee.timeOff),
+              'timeOnController': TextEditingController(
+                  text: DateFormat('hh:mm a').format(employee.timeOn)),
+              'timeOffController': TextEditingController(
+                  text: DateFormat('hh:mm a').format(employee.timeOff)),
             })
         .toList();
     _materials = widget.report.materials
@@ -50,9 +55,19 @@ class _EditReportState extends State<EditReport> {
       Duration totalCombinedDuration = Duration();
 
       for (var employee in _employeeTimes) {
-        String name = employee['nameController'].text;
-        TimeOfDay? timeOn = employee['timeOn'];
-        TimeOfDay? timeOff = employee['timeOff'];
+        String name = employee['nameController']!.text;
+        TimeOfDay? timeOn = TimeOfDay(
+            hour: int.parse(employee['timeOnController']!.text.split(":")[0]),
+            minute: int.parse(employee['timeOnController']!
+                .text
+                .split(":")[1]
+                .split(" ")[0]));
+        TimeOfDay? timeOff = TimeOfDay(
+            hour: int.parse(employee['timeOffController']!.text.split(":")[0]),
+            minute: int.parse(employee['timeOffController']!
+                .text
+                .split(":")[1]
+                .split(" ")[0]));
 
         if (name.isNotEmpty && timeOn != null && timeOff != null) {
           Duration duration = _calculateDuration(timeOn, timeOff);
@@ -83,9 +98,9 @@ class _EditReportState extends State<EditReport> {
           "services": widget.report.services,
           "materials": _materials.map((material) {
             return {
-              "vendor": material['vendorController'].text,
-              "description": material['materialController'].text,
-              "cost": material['costController'].text,
+              "vendor": material['vendorController']!.text,
+              "description": material['materialController']!.text,
+              "cost": material['costController']!.text,
             };
           }).toList(),
           "description": _descriptionController.text,
@@ -93,6 +108,7 @@ class _EditReportState extends State<EditReport> {
           "filed": widget.report.filed,
         });
 
+        Navigator.pop(context);
         Navigator.pop(context);
       } catch (e) {
         print('Error updating report: $e');
@@ -127,12 +143,14 @@ class _EditReportState extends State<EditReport> {
     _dateController.dispose();
     _descriptionController.dispose();
     _employeeTimes.forEach((employee) {
-      employee['nameController'].dispose();
+      employee['nameController']!.dispose();
+      employee['timeOnController']!.dispose();
+      employee['timeOffController']!.dispose();
     });
     _materials.forEach((material) {
-      material['vendorController'].dispose();
-      material['materialController'].dispose();
-      material['costController'].dispose();
+      material['vendorController']!.dispose();
+      material['materialController']!.dispose();
+      material['costController']!.dispose();
     });
     super.dispose();
   }
@@ -183,6 +201,24 @@ class _EditReportState extends State<EditReport> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SwitchListTile(
+                  title: Text(serviceType),
+                  value: _isRegularMaintenance,
+                  activeColor: Colors.green,
+                  inactiveThumbColor: const Color.fromARGB(255, 59, 82, 73),
+                  onChanged: (bool value) {
+                    setState(() {
+                      _isRegularMaintenance = value;
+                      serviceType =
+                          value ? 'Regular Maintenance' : 'Additional Service';
+                    });
+                  },
+                ),
+                SizedBox(height: 4),
+                Center(
+                    child: Text(widget.report.siteName,
+                        style: TextStyle(fontSize: 18))),
+                SizedBox(height: 8),
                 TextFormField(
                   controller: _dateController,
                   decoration: InputDecoration(
@@ -212,177 +248,184 @@ class _EditReportState extends State<EditReport> {
                   },
                 ),
                 SizedBox(height: 10),
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    labelText: 'Description',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: null,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 10),
-                SwitchListTile(
-                  title: Text('Regular Maintenance'),
-                  value: _isRegularMaintenance,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _isRegularMaintenance = value;
-                    });
-                  },
-                ),
-                SizedBox(height: 10),
+                Divider(),
                 Text('Employee Times', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 8),
                 ..._employeeTimes.asMap().entries.map((entry) {
                   int index = entry.key;
-                  Map<String, dynamic> employee = entry.value;
+                  Map<String, TextEditingController> employee = entry.value;
                   return Column(
                     children: [
-                      TextFormField(
-                        controller: employee['nameController'],
-                        decoration: InputDecoration(
-                          labelText: 'Employee Name',
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter an employee name';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 10),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(
+                          Container(
+                            width: 150,
+                            padding: EdgeInsets.only(right: 10),
                             child: TextFormField(
-                              readOnly: true,
+                              controller: employee['nameController'],
                               decoration: InputDecoration(
-                                labelText: 'Time On',
+                                labelText: 'Employee Name',
                                 border: OutlineInputBorder(),
                               ),
-                              controller: TextEditingController(
-                                text: employee['timeOn'].format(context),
-                              ),
-                              onTap: () async {
-                                TimeOfDay? pickedTime = await showTimePicker(
-                                  context: context,
-                                  initialTime: employee['timeOn'],
-                                );
-                                if (pickedTime != null) {
-                                  setState(() {
-                                    employee['timeOn'] = pickedTime;
-                                  });
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter an employee name';
                                 }
+                                return null;
                               },
                             ),
                           ),
-                          SizedBox(width: 10),
                           Expanded(
-                            child: TextFormField(
-                              readOnly: true,
-                              decoration: InputDecoration(
-                                labelText: 'Time Off',
-                                border: OutlineInputBorder(),
-                              ),
-                              controller: TextEditingController(
-                                text: employee['timeOff'].format(context),
-                              ),
-                              onTap: () async {
-                                TimeOfDay? pickedTime = await showTimePicker(
-                                  context: context,
-                                  initialTime: employee['timeOff'],
-                                );
-                                if (pickedTime != null) {
-                                  setState(() {
-                                    employee['timeOff'] = pickedTime;
-                                  });
-                                }
-                              },
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    readOnly: true,
+                                    decoration: InputDecoration(
+                                      labelText: 'Time On',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    controller: employee['timeOnController'],
+                                    onTap: () async {
+                                      TimeOfDay? pickedTime =
+                                          await showTimePicker(
+                                        context: context,
+                                        initialTime: TimeOfDay.now(),
+                                      );
+                                      if (pickedTime != null) {
+                                        setState(() {
+                                          employee['timeOnController']!.text =
+                                              pickedTime.format(context);
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: TextFormField(
+                                    readOnly: true,
+                                    decoration: InputDecoration(
+                                      labelText: 'Time Off',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    controller: employee['timeOffController'],
+                                    onTap: () async {
+                                      TimeOfDay? pickedTime =
+                                          await showTimePicker(
+                                        context: context,
+                                        initialTime: TimeOfDay.now(),
+                                      );
+                                      if (pickedTime != null) {
+                                        setState(() {
+                                          employee['timeOffController']!.text =
+                                              pickedTime.format(context);
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                Container(
+                                  width: 40,
+                                  child: MaterialButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _employeeTimes.removeAt(index);
+                                      });
+                                    },
+                                    child: Icon(Icons.delete),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _employeeTimes.removeAt(index);
-                          });
-                        },
-                        child: Text('Remove Employee'),
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.red,
-                        ),
-                      ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 4),
                     ],
                   );
                 }).toList(),
-                ElevatedButton(
+                MaterialButton(
+                  color: const Color.fromARGB(255, 59, 82, 73),
                   onPressed: () {
                     setState(() {
                       _employeeTimes.add({
                         'nameController': TextEditingController(),
-                        'timeOn': TimeOfDay.now(),
-                        'timeOff': TimeOfDay.now(),
+                        'timeOnController': TextEditingController(),
+                        'timeOffController': TextEditingController(),
                       });
                     });
                   },
-                  child: Text('Add Employee'),
+                  child: Text(
+                    'Add Employee',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
                 SizedBox(height: 10),
+                Divider(),
                 Text('Materials', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 8),
                 ..._materials.asMap().entries.map((entry) {
                   int index = entry.key;
-                  Map<String, dynamic> material = entry.value;
+                  Map<String, TextEditingController> material = entry.value;
                   return Column(
                     children: [
-                      TextFormField(
-                        controller: material['vendorController'],
-                        decoration: InputDecoration(
-                          labelText: 'Vendor',
-                          border: OutlineInputBorder(),
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              controller: material['vendorController'],
+                              decoration: InputDecoration(
+                                labelText: 'Vendor',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 4),
+                          Expanded(
+                            flex: 2,
+                            child: TextFormField(
+                              controller: material['materialController'],
+                              decoration: InputDecoration(
+                                labelText: 'Material Description',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 4),
+                          Expanded(
+                            flex: 1,
+                            child: TextFormField(
+                              keyboardType: TextInputType.number,
+                              controller: material['costController'],
+                              decoration: InputDecoration(
+                                labelText: 'Cost',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            width: 40,
+                            child: MaterialButton(
+                              onPressed: () {
+                                setState(() {
+                                  _materials.removeAt(index);
+                                });
+                              },
+                              child: Icon(Icons.delete),
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 10),
-                      TextFormField(
-                        controller: material['materialController'],
-                        decoration: InputDecoration(
-                          labelText: 'Material Description',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      TextFormField(
-                        controller: material['costController'],
-                        decoration: InputDecoration(
-                          labelText: 'Cost',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _materials.removeAt(index);
-                          });
-                        },
-                        child: Text('Remove Material'),
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.red,
-                        ),
-                      ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 4),
                     ],
                   );
                 }).toList(),
-                ElevatedButton(
+                MaterialButton(
+                  color: const Color.fromARGB(255, 59, 82, 73),
                   onPressed: () {
                     setState(() {
                       _materials.add({
@@ -392,8 +435,24 @@ class _EditReportState extends State<EditReport> {
                       });
                     });
                   },
-                  child: Text('Add Material'),
+                  child: Text(
+                    'Add Material',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
+                SizedBox(height: 10),
+                Divider(),
+                Text('Description', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 8),
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(
+                    labelText: 'Description',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: null,
+                ),
+                SizedBox(height: 10),
               ],
             ),
           ),

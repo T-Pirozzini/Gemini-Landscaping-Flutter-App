@@ -88,18 +88,17 @@ class _ReportPreviewState extends State<ReportPreview> {
   }
 
   Future<void> _navigateToPrintSaveReport() async {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => PrintSaveReport(report: widget.report), 
-    ),
-  );
-}
-
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PrintSaveReport(report: widget.report),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final report = widget.report;
+    final report = this.report;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
@@ -460,6 +459,7 @@ class _ReportPreviewState extends State<ReportPreview> {
               SizedBox(height: 4),
               Text(report.timestamp.toString(),
                   style: TextStyle(fontStyle: FontStyle.italic)),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -481,13 +481,13 @@ class _ReportPreviewState extends State<ReportPreview> {
                           ? () async {
                               _navigateToPrintSaveReport();
                               try {
-                                // await FirebaseFirestore.instance
-                                //     .collection('SiteReports')
-                                //     .doc(report.id)
-                                //     .set(
-                                //   {'filed': true},
-                                //   SetOptions(merge: true),
-                                // );
+                                await FirebaseFirestore.instance
+                                    .collection('SiteReports')
+                                    .doc(report.id)
+                                    .set(
+                                  {'filed': true},
+                                  SetOptions(merge: true),
+                                );
                               } catch (error) {
                                 print('Error updating document: $error');
                               }
@@ -496,7 +496,7 @@ class _ReportPreviewState extends State<ReportPreview> {
                       child: Text(
                         "GENERATE PDF",
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 14,
                           color: Colors.white,
                         ),
                       ),
