@@ -87,15 +87,15 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
         build: (context) {
           return pw.Column(
             children: [
-              pw.Container(
-                child: pw.SvgImage(
-                  svg: _gemini_logo,
-                  height: 80,
+              pw.Expanded(
+                child: pw.Container(
+                  child: pw.SvgImage(
+                    svg: _gemini_logo,
+                    height: 80,
+                  ),
                 ),
               ),
-              pw.SizedBox(
-                height: 10,
-              ),
+              pw.SizedBox(height: 25),
               pw.Center(
                 child: pw.Text(
                   'SITE REPORT $year',
@@ -182,6 +182,7 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                   ),
                 ],
               ),
+              // pw.Spacer(),
               // Team & Time ON/OFF Table
               pw.Container(
                 margin: const pw.EdgeInsets.all(10.0),
@@ -273,6 +274,7 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                   ],
                 ),
               ),
+              // pw.Spacer(),
               pw.Divider(),
               // SERVICES TABLE
               pw.Container(
@@ -324,6 +326,7 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                   }).toList(),
                 ),
               ),
+              // pw.Spacer(),
               pw.Divider(),
               // DESCRIPTION
               pw.Container(
@@ -337,6 +340,7 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                 child: pw.Text(report.description,
                     style: const pw.TextStyle(fontSize: 10)),
               ),
+              // pw.Spacer(),
               pw.Divider(),
               // MATERIALS TABLE
               pw.Container(
@@ -412,6 +416,7 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                   ],
                 ),
               ),
+              pw.Spacer(),
               pw.Text('Submitted by: ${report.submittedBy}',
                   style: const pw.TextStyle(fontSize: 10)),
             ],
