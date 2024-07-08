@@ -50,59 +50,58 @@ class FirestoreService extends ChangeNotifier {
         description: doc['description'],
         submittedBy: doc['submittedBy'],
         timestamp: (doc['timestamp'] as Timestamp).toDate(),
-        isRegularMaintenance: doc['isRegularMaintenance'],        
+        isRegularMaintenance: doc['isRegularMaintenance'],
       );
     }).toList();
   }
 
   // fetch all reports stream
   Stream<List<SiteReport>> fetchAllReportsStream() {
-  return _db.collection('SiteReports').snapshots().map((snapshot) {
-    return snapshot.docs.map((doc) {
-      final employeeTimes = doc['employeeTimes'] as Map<String, dynamic>;
-      final employees = employeeTimes.entries.map((entry) {
-        final employeeData = entry.value as Map<String, dynamic>;
-        return EmployeeTime(
-          name: entry.key,
-          timeOn: (employeeData['timeOn'] as Timestamp).toDate(),
-          timeOff: (employeeData['timeOff'] as Timestamp).toDate(),
-          duration: employeeData['duration'],
+    return _db.collection('SiteReports').snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final employeeTimes = doc['employeeTimes'] as Map<String, dynamic>;
+        final employees = employeeTimes.entries.map((entry) {
+          final employeeData = entry.value as Map<String, dynamic>;
+          return EmployeeTime(
+            name: entry.key,
+            timeOn: (employeeData['timeOn'] as Timestamp).toDate(),
+            timeOff: (employeeData['timeOff'] as Timestamp).toDate(),
+            duration: employeeData['duration'],
+          );
+        }).toList();
+
+        final services = doc['services'] as Map<String, dynamic>;
+        final mappedServices = services
+            .map((key, value) => MapEntry(key, List<String>.from(value)));
+
+        final materialsList = doc['materials'] as List<dynamic>;
+        final materials = materialsList.map((material) {
+          final materialData = material as Map<String, dynamic>;
+          return MaterialList(
+            cost: materialData['cost'],
+            description: materialData['description'],
+            vendor: materialData['vendor'],
+          );
+        }).toList();
+
+        return SiteReport(
+          id: doc.id,
+          siteName: doc['siteInfo']['siteName'],
+          totalCombinedDuration: doc['totalCombinedDuration'],
+          date: doc['siteInfo']['date'],
+          employees: employees,
+          filed: doc['filed'] ?? false,
+          address: doc['siteInfo']['address'],
+          services: mappedServices,
+          materials: materials,
+          description: doc['description'],
+          submittedBy: doc['submittedBy'],
+          timestamp: (doc['timestamp'] as Timestamp).toDate(),
+          isRegularMaintenance: doc['isRegularMaintenance'],
         );
       }).toList();
-
-      final services = doc['services'] as Map<String, dynamic>;
-      final mappedServices =
-          services.map((key, value) => MapEntry(key, List<String>.from(value)));
-
-      final materialsList = doc['materials'] as List<dynamic>;
-      final materials = materialsList.map((material) {
-        final materialData = material as Map<String, dynamic>;
-        return MaterialList(
-          cost: materialData['cost'],
-          description: materialData['description'],
-          vendor: materialData['vendor'],
-        );
-      }).toList();
-
-      return SiteReport(
-        id: doc.id,
-        siteName: doc['siteInfo']['siteName'],
-        totalCombinedDuration: doc['totalCombinedDuration'],
-        date: doc['siteInfo']['date'],
-        employees: employees,
-        filed: doc['filed'] ?? false,
-        address: doc['siteInfo']['address'],
-        services: mappedServices,
-        materials: materials,
-        description: doc['description'],
-        submittedBy: doc['submittedBy'],
-        timestamp: (doc['timestamp'] as Timestamp).toDate(),
-        isRegularMaintenance: doc['isRegularMaintenance'],
-      );
-    }).toList();
-  });
-}
-
+    });
+  }
 
   // fetch current month report data
   Future<List<SiteReport>> fetchCurrentMonthSiteReports() async {
@@ -170,6 +169,7 @@ class FirestoreService extends ChangeNotifier {
         .collection('SiteReports')
         .where('timestamp', isGreaterThan: startOfMonth)
         .where('timestamp', isLessThanOrEqualTo: endOfMonth)
+        .where("isRegularMaintenance", isEqualTo: true)
         .get();
     final List<DocumentSnapshot> documents = snapshot.docs;
 
