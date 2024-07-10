@@ -54,6 +54,9 @@ class _EditReportState extends State<EditReport> {
       Map<String, dynamic> employeeTimesMap = {};
       Duration totalCombinedDuration = Duration();
 
+      DateTime selectedDate =
+          DateFormat('MMMM d, yyyy').parse(_dateController.text);
+
       for (var employee in _employeeTimes) {
         String name = employee['nameController']!.text;
         TimeOfDay? timeOn = TimeOfDay(
@@ -74,8 +77,8 @@ class _EditReportState extends State<EditReport> {
           totalCombinedDuration += duration;
 
           employeeTimesMap[name] = {
-            'timeOn': _convertTimeOfDayToTimestamp(timeOn),
-            'timeOff': _convertTimeOfDayToTimestamp(timeOff),
+            'timeOn': convertDateAndTimeToTimestamp(selectedDate, timeOn),
+            'timeOff': convertDateAndTimeToTimestamp(selectedDate, timeOff),
             'duration': duration.inMinutes,
           };
         }
@@ -121,10 +124,9 @@ class _EditReportState extends State<EditReport> {
     }
   }
 
-  Timestamp _convertTimeOfDayToTimestamp(TimeOfDay time) {
-    final DateTime now = DateTime.now();
+  Timestamp convertDateAndTimeToTimestamp(DateTime date, TimeOfDay time) {
     final DateTime dateTime =
-        DateTime(now.year, now.month, now.day, time.hour, time.minute);
+        DateTime(date.year, date.month, date.day, time.hour, time.minute);
     return Timestamp.fromDate(dateTime);
   }
 

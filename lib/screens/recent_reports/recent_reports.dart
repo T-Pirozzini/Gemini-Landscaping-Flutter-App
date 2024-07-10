@@ -95,12 +95,16 @@ class _RecentReportsState extends ConsumerState<RecentReports>
                           color: Colors.green,
                         ),
                       ),
-                      title: Text(
-                        report.siteName,
-                        style: TextStyle(
-                          fontSize: 22,
+                      title: FittedBox(
+                        alignment: Alignment.centerLeft,
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          report.siteName,
+                          style: TextStyle(
+                            fontSize: 22,
+                          ),
                         ),
-                      ),
+                      ),                      
                       subtitle: Row(
                         children: [
                           Text(

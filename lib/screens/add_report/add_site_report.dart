@@ -88,10 +88,18 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   // Employee Times Component
   void addEmployeeTime() {
     setState(() {
+      TimeOfDay timeOn = TimeOfDay.now();
+      TimeOfDay timeOff = TimeOfDay.now();
+
+      if (employeeTimes.isNotEmpty) {
+        timeOn = employeeTimes.last['timeOn'];
+        timeOff = employeeTimes.last['timeOff'];
+      }
+
       employeeTimes.add({
         'nameController': TextEditingController(),
-        'timeOn': TimeOfDay.now(),
-        'timeOff': TimeOfDay.now(),
+        'timeOn': timeOn,
+        'timeOff': timeOff,
       });
     });
   }
@@ -162,10 +170,15 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     });
   }
 
-  Timestamp convertTimeOfDayToTimestamp(TimeOfDay time) {
-    final DateTime now = DateTime.now();
+  void deleteMaterial(int index) {
+    setState(() {
+      materials.removeAt(index);
+    });
+  }
+
+  Timestamp convertDateAndTimeToTimestamp(DateTime date, TimeOfDay time) {
     final DateTime dateTime =
-        DateTime(now.year, now.month, now.day, time.hour, time.minute);
+        DateTime(date.year, date.month, date.day, time.hour, time.minute);
     return Timestamp.fromDate(dateTime);
   }
 
@@ -226,6 +239,9 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     Map<String, dynamic> employeeTimesMap = {};
     Duration totalCombinedDuration = Duration();
 
+    DateTime selectedDate =
+        DateFormat('MMMM d, yyyy').parse(dateController.text);
+
     for (var employee in employeeTimes) {
       String name = employee['nameController'].text;
       TimeOfDay? timeOn = employee['timeOn'];
@@ -236,8 +252,8 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         totalCombinedDuration += duration;
 
         employeeTimesMap[name] = {
-          'timeOn': convertTimeOfDayToTimestamp(timeOn),
-          'timeOff': convertTimeOfDayToTimestamp(timeOff),
+          'timeOn': convertDateAndTimeToTimestamp(selectedDate, timeOn),
+          'timeOff': convertDateAndTimeToTimestamp(selectedDate, timeOff),
           'duration': duration.inMinutes,
         };
       }
@@ -504,10 +520,28 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                 Map<String, dynamic> material = entry.value;
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: MaterialComponent(
-                    vendorController: material['vendorController'],
-                    materialController: material['materialController'],
-                    costController: material['costController'],
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: MaterialComponent(
+                          vendorController: material['vendorController'],
+                          materialController: material['materialController'],
+                          costController: material['costController'],
+                        ),
+                      ),
+                      SizedBox(
+                        width: 20,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.grey,
+                            size: 24,
+                          ),
+                          onPressed: () => deleteMaterial(index),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               }).toList(),
