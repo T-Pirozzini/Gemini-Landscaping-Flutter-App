@@ -34,9 +34,9 @@ class _EditReportState extends State<EditReport> {
         .map((employee) => {
               'nameController': TextEditingController(text: employee.name),
               'timeOnController': TextEditingController(
-                  text: DateFormat('hh:mm a').format(employee.timeOn)),
+                  text: DateFormat('h:mm a').format(employee.timeOn)),
               'timeOffController': TextEditingController(
-                  text: DateFormat('hh:mm a').format(employee.timeOff)),
+                  text: DateFormat('h:mm a').format(employee.timeOff)),
             })
         .toList();
     _materials = widget.report.materials
@@ -54,31 +54,29 @@ class _EditReportState extends State<EditReport> {
       Map<String, dynamic> employeeTimesMap = {};
       Duration totalCombinedDuration = Duration();
 
-      DateTime selectedDate =
+      DateTime reportDate =
           DateFormat('MMMM d, yyyy').parse(_dateController.text);
 
       for (var employee in _employeeTimes) {
         String name = employee['nameController']!.text;
-        TimeOfDay? timeOn = TimeOfDay(
-            hour: int.parse(employee['timeOnController']!.text.split(":")[0]),
-            minute: int.parse(employee['timeOnController']!
-                .text
-                .split(":")[1]
-                .split(" ")[0]));
-        TimeOfDay? timeOff = TimeOfDay(
-            hour: int.parse(employee['timeOffController']!.text.split(":")[0]),
-            minute: int.parse(employee['timeOffController']!
-                .text
-                .split(":")[1]
-                .split(" ")[0]));
+        TimeOfDay? timeOn = _parseTimeOfDay(employee['timeOnController']!.text);
+        TimeOfDay? timeOff =
+            _parseTimeOfDay(employee['timeOffController']!.text);
 
         if (name.isNotEmpty && timeOn != null && timeOff != null) {
           Duration duration = _calculateDuration(timeOn, timeOff);
+
+          // Convert TimeOfDay to Timestamp
+          Timestamp timeOnTimestamp =
+              _convertTimeOfDayToTimestamp(timeOn, reportDate);
+          Timestamp timeOffTimestamp =
+              _convertTimeOfDayToTimestamp(timeOff, reportDate);
+
           totalCombinedDuration += duration;
 
           employeeTimesMap[name] = {
-            'timeOn': convertDateAndTimeToTimestamp(selectedDate, timeOn),
-            'timeOff': convertDateAndTimeToTimestamp(selectedDate, timeOff),
+            'timeOn': timeOnTimestamp,
+            'timeOff': timeOffTimestamp,
             'duration': duration.inMinutes,
           };
         }
@@ -124,20 +122,66 @@ class _EditReportState extends State<EditReport> {
     }
   }
 
-  Timestamp convertDateAndTimeToTimestamp(DateTime date, TimeOfDay time) {
-    final DateTime dateTime =
-        DateTime(date.year, date.month, date.day, time.hour, time.minute);
+  Timestamp _convertTimeOfDayToTimestamp(TimeOfDay time, DateTime date) {
+    int hour = time.hour;
+    if (time.period == DayPeriod.pm && hour != 12) {
+      hour = (hour % 12) + 12; // Correctly convert PM hours
+    } else if (time.period == DayPeriod.am && hour == 12) {
+      hour = 0; // Convert 12 AM to 00 hours
+    }
+
+    final DateTime dateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      hour,
+      time.minute,
+    );
+
     return Timestamp.fromDate(dateTime);
   }
 
   Duration _calculateDuration(TimeOfDay startTime, TimeOfDay endTime) {
-    final DateTime now = DateTime.now();
+    // Get the date from _dateController
+    DateTime reportDate =
+        DateFormat('MMMM d, yyyy').parse(_dateController.text);
+
+    // Create DateTime instances for start and end times on the selected report date
     final DateTime startDateTime = DateTime(
-        now.year, now.month, now.day, startTime.hour, startTime.minute);
-    final DateTime endDateTime =
-        DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+      reportDate.year,
+      reportDate.month,
+      reportDate.day,
+      startTime.hour,
+      startTime.minute,
+    );
+
+    DateTime endDateTime = DateTime(
+      reportDate.year,
+      reportDate.month,
+      reportDate.day,
+      endTime.hour,
+      endTime.minute,
+    );
+
+    // Ensure end time is after start time to prevent negative duration
+    if (endDateTime.isBefore(startDateTime)) {
+      endDateTime = endDateTime
+          .add(Duration(days: 1)); // Add a day if end is before start
+    }
 
     return endDateTime.difference(startDateTime);
+  }
+
+  // Helper function to parse TimeOfDay correctly with AM/PM
+  TimeOfDay _parseTimeOfDay(String timeString) {
+    int hour = int.parse(timeString.split(":")[0]);
+    int minute = int.parse(timeString.split(":")[1].split(" ")[0]);
+    bool isPM = timeString.contains("PM");
+
+    if (isPM && hour < 12) hour += 12; // Convert PM hour to 24-hour format
+    if (!isPM && hour == 12) hour = 0; // Handle midnight case
+
+    return TimeOfDay(hour: hour, minute: minute);
   }
 
   @override
@@ -290,10 +334,12 @@ class _EditReportState extends State<EditReport> {
                                     ),
                                     controller: employee['timeOnController'],
                                     onTap: () async {
+                                      TimeOfDay initialTime = _parseTimeOfDay(
+                                          employee['timeOnController']!.text);
                                       TimeOfDay? pickedTime =
                                           await showTimePicker(
                                         context: context,
-                                        initialTime: TimeOfDay.now(),
+                                        initialTime: initialTime,
                                       );
                                       if (pickedTime != null) {
                                         setState(() {
@@ -314,10 +360,12 @@ class _EditReportState extends State<EditReport> {
                                     ),
                                     controller: employee['timeOffController'],
                                     onTap: () async {
+                                      TimeOfDay initialTime = _parseTimeOfDay(
+                                          employee['timeOffController']!.text);
                                       TimeOfDay? pickedTime =
                                           await showTimePicker(
                                         context: context,
-                                        initialTime: TimeOfDay.now(),
+                                        initialTime: initialTime,
                                       );
                                       if (pickedTime != null) {
                                         setState(() {
