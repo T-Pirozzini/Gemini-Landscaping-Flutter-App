@@ -38,11 +38,12 @@ class ReportFolders extends ConsumerWidget {
                   final site = siteList[index];
                   final siteReports = reports
                       .where((report) => report.siteName == site.name)
-                      .toList();                  
+                      .toList();
                   final imageUrl = site.imageUrl;
 
                   return Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 4.0, horizontal: 6.0),
                     child: ListTile(
                       leading: Image.network(
                         imageUrl,

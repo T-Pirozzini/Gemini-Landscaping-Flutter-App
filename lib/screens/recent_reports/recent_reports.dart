@@ -44,6 +44,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
     final reportsAsyncValue = ref.watch(allSiteReportsStreamProvider);
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         title: Text("Most Recent Reports",
             style: GoogleFonts.montserrat(
@@ -83,22 +84,30 @@ class _RecentReportsState extends ConsumerState<RecentReports>
                   );
                 },
                 child: Padding(
-                  padding: const EdgeInsets.all(4),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
                   child: Container(
                     height: 65,
                     child: ListTile(
+                      dense: true,
                       tileColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
-                        side: const BorderSide(
+                        side: BorderSide(
                           width: 2.0,
-                          color: Colors.green,
+                          color: report.isRegularMaintenance
+                              ? Colors.green
+                              : Colors.blueGrey,
                         ),
                       ),
-                      title: Text(
-                        report.siteName,
-                        style: TextStyle(
-                          fontSize: 22,
+                      title: FittedBox(
+                        alignment: Alignment.centerLeft,
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          report.siteName,
+                          style: TextStyle(
+                            fontSize: 22,
+                          ),
                         ),
                       ),
                       subtitle: Row(
