@@ -19,22 +19,15 @@ class SiteTime extends ConsumerStatefulWidget {
 
 class _SiteTimeState extends ConsumerState<SiteTime> {
   List<Color> colors = [
-    Colors.redAccent,
-    Colors.greenAccent,
-    Colors.blueAccent,
-    Colors.orangeAccent,
-    Colors.purpleAccent,
-    Colors.yellowAccent,
-    Colors.lightBlueAccent,
-    Colors.pinkAccent,
     Colors.cyanAccent,
-    Colors.limeAccent,
+    Colors.lightBlueAccent,
     Colors.indigoAccent,
-    Colors.tealAccent,
-    Colors.amberAccent,
+    Colors.greenAccent,
+    Colors.yellowAccent,
+    Colors.orangeAccent,
+    Colors.pinkAccent,
+    Colors.redAccent,
   ];
-
-  DateTime _selectedMonth = DateTime.now();
 
   void _incrementMonth() {
     ref.read(selectedMonthProvider.notifier).state = DateTime(
@@ -121,7 +114,7 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(DateFormat("MMMM yyyy").format(_selectedMonth)),
+        title: Text(DateFormat("MMMM yyyy").format(selectedMonth)),
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         centerTitle: true,
         leading: IconButton(
