@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_landscaping_app/providers/report_provider.dart';
 import 'package:gemini_landscaping_app/providers/site_list_provider.dart';
+import 'package:gemini_landscaping_app/screens/all_reports/report_files.dart';
 import 'package:gemini_landscaping_app/screens/site_time/number_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -25,7 +26,7 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
     Colors.greenAccent,
     Colors.yellowAccent,
     Colors.orangeAccent,
-    Colors.pinkAccent,
+    Colors.deepOrangeAccent,
     Colors.redAccent,
   ];
 
@@ -115,6 +116,9 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
     return Scaffold(
       appBar: AppBar(
         title: Text(DateFormat("MMMM yyyy").format(selectedMonth)),
+        titleTextStyle: GoogleFonts.montserrat(
+          fontSize: 20,
+        ),
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         centerTitle: true,
         leading: IconButton(
@@ -202,117 +206,131 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
                       );
                     }
 
-                    return Column(
-                      children: [
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            site.name,
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ReportFiles(
+                              siteName: site.name,
+                              imageUrl: site.imageUrl,
                             ),
                           ),
-                        ),
-                        SizedBox(height: 4),
-                        Expanded(
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              SizedBox(
-                                height: 250,
-                                width: 250,
-                                child: PieChart(
-                                  PieChartData(
-                                    sections: sections,
-                                    centerSpaceRadius: double.infinity,
-                                    borderData: FlBorderData(show: false),
+                        );
+                      },
+                      child: Column(
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              site.name,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Expanded(
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                SizedBox(
+                                  height: 250,
+                                  width: 250,
+                                  child: PieChart(
+                                    PieChartData(
+                                      sections: sections,
+                                      centerSpaceRadius: double.infinity,
+                                      borderData: FlBorderData(show: false),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    '${(totalDuration / 60).toStringAsFixed(1)} / ${(site.target / 60).toStringAsFixed(1)} hrs',
-                                    style: GoogleFonts.openSans(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    '${(progress * 100).toStringAsFixed(1)}%',
-                                    style: GoogleFonts.openSans(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                              site.imageUrl.isNotEmpty
-                                  ? Opacity(
-                                      opacity: 0.3,
-                                      child: Image.network(
-                                        site.imageUrl,
-                                        height: 80,
-                                        width: 80,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return const Icon(
-                                            Icons.grass_rounded,
-                                            size: 80,
-                                            color: Colors.green,
-                                          );
-                                        },
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      '${(totalDuration / 60).toStringAsFixed(1)} / ${(site.target / 60).toStringAsFixed(1)} hrs',
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                    )
-                                  : Opacity(
-                                      opacity: 0.3,
-                                      child: const Icon(
-                                        Icons.grass_rounded,
-                                        size: 80,
-                                        color: Colors.green,
-                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                            ],
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      '${(progress * 100).toStringAsFixed(1)}%',
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                                site.imageUrl.isNotEmpty
+                                    ? Opacity(
+                                        opacity: 0.3,
+                                        child: Image.network(
+                                          site.imageUrl,
+                                          height: 80,
+                                          width: 80,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return const Icon(
+                                              Icons.grass_rounded,
+                                              size: 80,
+                                              color: Colors.green,
+                                            );
+                                          },
+                                        ),
+                                      )
+                                    : Opacity(
+                                        opacity: 0.3,
+                                        child: const Icon(
+                                          Icons.grass_rounded,
+                                          size: 80,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Reports: $reportCount',
-                          style: const TextStyle(
-                            fontSize: 12,
+                          Text(
+                            'Reports: $reportCount',
+                            style: const TextStyle(
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.track_changes),
-                                onPressed: () => _adjustSiteTarget(context, ref,
-                                    site.id, site.name, site.target),
-                                iconSize: 18,
-                                color: Colors.blueGrey,
-                                tooltip: "Adjust the target",
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.toggle_off),
-                                onPressed: () =>
-                                    _setSiteToInactive(context, site.id),
-                                iconSize: 18,
-                                color: Colors.blueGrey,
-                                tooltip: "Set site to inactive",
-                              ),
-                            ],
+                          SizedBox(
+                            height: 20,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.track_changes,
+                                      color: Colors.red),
+                                  onPressed: () => _adjustSiteTarget(context,
+                                      ref, site.id, site.name, site.target),
+                                  iconSize: 18,
+                                  color: Colors.blueGrey,
+                                  tooltip: "Adjust the target",
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.toggle_off),
+                                  onPressed: () =>
+                                      _setSiteToInactive(context, site.id),
+                                  iconSize: 18,
+                                  color: Colors.blueGrey,
+                                  tooltip: "Set site to inactive",
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Divider(thickness: 2, color: Colors.black),
-                      ],
+                          Divider(thickness: 2, color: Colors.black),
+                        ],
+                      ),
                     );
                   },
                 );

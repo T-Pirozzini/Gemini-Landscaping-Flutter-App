@@ -63,7 +63,7 @@ class _EditReportState extends State<EditReport> {
         TimeOfDay? timeOff =
             _parseTimeOfDay(employee['timeOffController']!.text);
 
-        if (name.isNotEmpty && timeOn != null && timeOff != null) {
+        if (name.isNotEmpty) {
           Duration duration = _calculateDuration(timeOn, timeOff);
 
           // Convert TimeOfDay to Timestamp
@@ -174,14 +174,39 @@ class _EditReportState extends State<EditReport> {
 
   // Helper function to parse TimeOfDay correctly with AM/PM
   TimeOfDay _parseTimeOfDay(String timeString) {
-    int hour = int.parse(timeString.split(":")[0]);
-    int minute = int.parse(timeString.split(":")[1].split(" ")[0]);
-    bool isPM = timeString.contains("PM");
+    if (timeString.isEmpty) {
+      throw FormatException("Time string is empty");
+    }
 
-    if (isPM && hour < 12) hour += 12; // Convert PM hour to 24-hour format
-    if (!isPM && hour == 12) hour = 0; // Handle midnight case
+    try {
+      List<String> parts = timeString.split(" ");
+      if (parts.length != 2) {
+        throw FormatException("Invalid format");
+      }
 
-    return TimeOfDay(hour: hour, minute: minute);
+      String timePart = parts[0];
+      String periodPart = parts[1].toUpperCase();
+
+      List<String> timeComponents = timePart.split(":");
+      if (timeComponents.length != 2) {
+        throw FormatException("Invalid format");
+      }
+
+      int hour = int.parse(timeComponents[0]);
+      int minute = int.parse(timeComponents[1]);
+
+      if (hour < 1 || hour > 12 || minute < 0 || minute > 59) {
+        throw FormatException("Invalid time value");
+      }
+
+      bool isPM = periodPart == "PM";
+      if (isPM && hour < 12) hour += 12; // Convert PM hour to 24-hour format
+      if (!isPM && hour == 12) hour = 0; // Handle midnight case
+
+      return TimeOfDay(hour: hour, minute: minute);
+    } catch (e) {
+      throw FormatException("Invalid time format: $timeString");
+    }
   }
 
   @override
@@ -334,8 +359,8 @@ class _EditReportState extends State<EditReport> {
                                     ),
                                     controller: employee['timeOnController'],
                                     onTap: () async {
-                                      TimeOfDay initialTime = _parseTimeOfDay(
-                                          employee['timeOnController']!.text);
+                                      TimeOfDay initialTime = TimeOfDay.now();
+
                                       TimeOfDay? pickedTime =
                                           await showTimePicker(
                                         context: context,
@@ -360,8 +385,7 @@ class _EditReportState extends State<EditReport> {
                                     ),
                                     controller: employee['timeOffController'],
                                     onTap: () async {
-                                      TimeOfDay initialTime = _parseTimeOfDay(
-                                          employee['timeOffController']!.text);
+                                      TimeOfDay initialTime = TimeOfDay.now();
                                       TimeOfDay? pickedTime =
                                           await showTimePicker(
                                         context: context,
