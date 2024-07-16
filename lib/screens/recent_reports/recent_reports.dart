@@ -100,13 +100,18 @@ class _RecentReportsState extends ConsumerState<RecentReports>
                               : Colors.blueGrey,
                         ),
                       ),
+                      leading: report.isRegularMaintenance
+                          ? Icon(Icons.grass)
+                          : Icon(Icons.add_circle_outline),
+                      minLeadingWidth: 2,
                       title: FittedBox(
                         alignment: Alignment.centerLeft,
                         fit: BoxFit.scaleDown,
                         child: Text(
                           report.siteName,
-                          style: TextStyle(
-                            fontSize: 22,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 20,
+                            letterSpacing: .5,
                           ),
                         ),
                       ),
@@ -148,8 +153,8 @@ class _RecentReportsState extends ConsumerState<RecentReports>
                       ),
                       trailing: Text(
                         '${report.date}\nDuration: $formattedDuration hrs\nEmployees: ${report.employees.length}',
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 10,
                         ),
                       ),
                     ),

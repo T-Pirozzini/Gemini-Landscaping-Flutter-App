@@ -32,7 +32,7 @@ class AdminControllerState extends State<AdminController> {
             tabs: [
               Tab(text: 'Site Time'),
               Tab(text: 'Recent (old)'),
-              Tab(text: 'All Reports (old)'),
+              Tab(text: 'All (old)'),
             ],
           ),
         ),
