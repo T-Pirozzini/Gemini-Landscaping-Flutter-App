@@ -30,9 +30,9 @@ class AdminControllerState extends State<AdminController> {
             unselectedLabelColor: Colors.grey.shade400,
             indicatorColor: Colors.white,
             tabs: [
+              Tab(text: 'Site Time'),
               Tab(text: 'Recent (old)'),
               Tab(text: 'All Reports (old)'),
-              Tab(text: 'Site Time'),
             ],
           ),
         ),
@@ -42,9 +42,9 @@ class AdminControllerState extends State<AdminController> {
                     "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
             ? TabBarView(
                 children: [
+                  SiteTime(),
                   RecentReportsPage(),
                   SiteFolders(),
-                  SiteTime(),
                 ],
               )
             : TabBarView(

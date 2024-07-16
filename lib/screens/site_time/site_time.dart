@@ -25,7 +25,7 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
     Colors.greenAccent,
     Colors.yellowAccent,
     Colors.orangeAccent,
-    Colors.pinkAccent,
+    Colors.deepOrangeAccent,
     Colors.redAccent,
   ];
 
