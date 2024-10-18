@@ -167,8 +167,28 @@ class _RecentReportsState extends ConsumerState<RecentReports>
               if (item['type'] == 'report') {
                 // Display the report details
                 final report = item['report'];
-                final durationInHours = report.totalCombinedDuration / 60;
-                final formattedDuration = durationInHours.toStringAsFixed(1);
+                // final durationInHours = report.totalCombinedDuration / 60;
+                // final formattedDuration = durationInHours.toStringAsFixed(1);
+
+                // Get the first employee's timeOn and timeOff
+                final firstEmployee =
+                    report.employees.isNotEmpty ? report.employees.first : null;
+                final timeOn = firstEmployee != null
+                    ? DateFormat('hh:mm a').format(firstEmployee.timeOn)
+                    : 'N/A';
+                final timeOff = firstEmployee != null
+                    ? DateFormat('hh:mm a').format(firstEmployee.timeOff)
+                    : 'N/A';
+
+                // Convert the total duration from minutes to hours and minutes
+                final int totalMinutes = report.totalCombinedDuration;
+                final int hours =
+                    totalMinutes ~/ 60; // Get the whole number of hours
+                final int minutes =
+                    totalMinutes % 60; // Get the remaining minutes
+
+// Format the duration as "Xhrs Ymins"
+                final formattedDuration = '${hours}hrs ${minutes}mins';
 
                 return GestureDetector(
                   onTap: () {
@@ -245,11 +265,18 @@ class _RecentReportsState extends ConsumerState<RecentReports>
                                   ),
                           ],
                         ),
-                        trailing: Text(
-                          '${report.date}\nDuration: $formattedDuration hrs\nEmployees: ${report.employees.length}',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 10,
-                          ),
+                        trailing: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            if (firstEmployee != null) ...[
+                              Text('Employees: ${report.employees.length}',
+                                  style: GoogleFonts.montserrat(fontSize: 10)),
+                              Text('$timeOn - $timeOff',
+                                  style: GoogleFonts.montserrat(fontSize: 10)),
+                            ],
+                            Text('Site Time: $formattedDuration',
+                                style: GoogleFonts.montserrat(fontSize: 10)),
+                          ],
                         ),
                       ),
                     ),
