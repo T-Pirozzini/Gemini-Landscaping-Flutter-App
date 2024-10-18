@@ -282,14 +282,16 @@ class _ReportPreviewState extends State<ReportPreview> {
                           Container(
                             alignment: Alignment.center,
                             child: Text(
-                              DateFormat('hh:mm a').format(employee.timeOn),
+                              DateFormat('hh:mm a')
+                                  .format(employee.timeOn.toLocal()),
                               style: GoogleFonts.montserrat(fontSize: 14),
                             ),
                           ),
                           Container(
                             alignment: Alignment.center,
                             child: Text(
-                              DateFormat('hh:mm a').format(employee.timeOff),
+                              DateFormat('hh:mm a')
+                                  .format(employee.timeOff.toLocal()),
                               style: GoogleFonts.montserrat(fontSize: 14),
                             ),
                           ),

@@ -54,7 +54,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode 14
         versionName flutterVersionName
         multiDexEnabled true
@@ -81,7 +81,23 @@ flutter {
     source '../..'
 }
 
+repositories {
+    google()
+    mavenCentral()
+    maven { url 'https://storage.googleapis.com/download.flutter.io' }
+}
+
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation platform('com.google.firebase:firebase-bom:31.2.0')
+    implementation platform('com.google.firebase:firebase-bom:32.0.0')
+    implementation 'com.google.firebase:firebase-auth:21.1.0'
+    implementation 'com.google.android.recaptcha:recaptcha:18.0.1'
+    implementation 'androidx.multidex:multidex:2.0.1'
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.firebase:firebase-auth:21.1.0'
+        force 'com.google.android.recaptcha:recaptcha:18.0.1'
+    }
 }

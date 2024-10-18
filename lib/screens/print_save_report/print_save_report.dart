@@ -192,7 +192,9 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                     pw.TableRow(children: [
                       pw.Container(
                         alignment: pw.Alignment.center,
-                        color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                        color: report.isRegularMaintenance
+                            ? PdfColor(0.5, 0.8, 0.3, 0.1)
+                            : PdfColor(0.4, 0.5, 0.7, 0.2),
                         height: 15,
                         child: pw.Text('NAME',
                             style:
@@ -200,7 +202,9 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                       ),
                       pw.Container(
                         alignment: pw.Alignment.center,
-                        color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                        color: report.isRegularMaintenance
+                            ? PdfColor(0.5, 0.8, 0.3, 0.1)
+                            : PdfColor(0.4, 0.5, 0.7, 0.2),
                         height: 15,
                         child: pw.Text('ON',
                             style:
@@ -208,7 +212,9 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                       ),
                       pw.Container(
                         alignment: pw.Alignment.center,
-                        color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                        color: report.isRegularMaintenance
+                            ? PdfColor(0.5, 0.8, 0.3, 0.1)
+                            : PdfColor(0.4, 0.5, 0.7, 0.2),
                         height: 15,
                         child: pw.Text('OFF',
                             style:
@@ -216,7 +222,9 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                       ),
                       pw.Container(
                         alignment: pw.Alignment.center,
-                        color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                        color: report.isRegularMaintenance
+                            ? PdfColor(0.5, 0.8, 0.3, 0.1)
+                            : PdfColor(0.4, 0.5, 0.7, 0.2),
                         height: 15,
                         child: pw.Text('HOURS',
                             style:
@@ -233,14 +241,18 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                         pw.Container(
                           alignment: pw.Alignment.center,
                           child: pw.Text(
-                              DateFormat('hh:mm a').format(employee.timeOn),
-                              style: const pw.TextStyle(fontSize: 10)),
+                            DateFormat('hh:mm a')
+                                .format(employee.timeOn.toLocal()),
+                            style: const pw.TextStyle(fontSize: 10),
+                          ),
                         ),
                         pw.Container(
                           alignment: pw.Alignment.center,
                           child: pw.Text(
-                              DateFormat('hh:mm a').format(employee.timeOff),
-                              style: const pw.TextStyle(fontSize: 10)),
+                            DateFormat('hh:mm a')
+                                .format(employee.timeOff.toLocal()),
+                            style: const pw.TextStyle(fontSize: 10),
+                          ),
                         ),
                         pw.Container(
                           alignment: pw.Alignment.center,
@@ -292,12 +304,18 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                     final serviceItems = entry.value;
 
                     return pw.TableRow(
-                      decoration: const pw.BoxDecoration(
+                      decoration: pw.BoxDecoration(
                         border: pw.TableBorder(
                           bottom: pw.BorderSide(
-                              color: PdfColor(0.5, 0.8, 0.3, 0.1), width: 2),
+                              color: report.isRegularMaintenance
+                                  ? PdfColor(0.5, 0.8, 0.3, 0.1)
+                                  : PdfColor(0.4, 0.5, 0.7, 0.2),
+                              width: 2),
                           top: pw.BorderSide(
-                              color: PdfColor(0.5, 0.8, 0.3, 0.1), width: 2),
+                              color: report.isRegularMaintenance
+                                  ? PdfColor(0.5, 0.8, 0.3, 0.1)
+                                  : PdfColor(0.4, 0.5, 0.7, 0.2),
+                              width: 2),
                         ),
                       ),
                       children: [
@@ -351,7 +369,9 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                     pw.TableRow(children: [
                       pw.Container(
                         alignment: pw.Alignment.center,
-                        color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                        color: report.isRegularMaintenance
+                            ? PdfColor(0.5, 0.8, 0.3, 0.1)
+                            : PdfColor(0.4, 0.5, 0.7, 0.2),
                         height: 15,
                         child: pw.Text('MATERIAL',
                             style:
@@ -359,7 +379,9 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                       ),
                       pw.Container(
                         alignment: pw.Alignment.center,
-                        color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                        color: report.isRegularMaintenance
+                            ? PdfColor(0.5, 0.8, 0.3, 0.1)
+                            : PdfColor(0.4, 0.5, 0.7, 0.2),
                         height: 15,
                         child: pw.Text('VENDOR',
                             style:
@@ -367,7 +389,9 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                       ),
                       pw.Container(
                         alignment: pw.Alignment.center,
-                        color: const PdfColor(0.5, 0.8, 0.3, 0.1),
+                        color: report.isRegularMaintenance
+                            ? PdfColor(0.5, 0.8, 0.3, 0.1)
+                            : PdfColor(0.4, 0.5, 0.7, 0.2),
                         height: 15,
                         child: pw.Text('AMOUNT \$',
                             style:
