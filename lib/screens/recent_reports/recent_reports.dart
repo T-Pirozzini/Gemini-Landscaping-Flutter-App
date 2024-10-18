@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gemini_landscaping_app/extraReport.dart';
+import 'package:gemini_landscaping_app/models/site_report.dart';
 import 'package:gemini_landscaping_app/pages/addWinterReport.dart';
 import 'package:gemini_landscaping_app/providers/report_provider.dart';
 import 'package:gemini_landscaping_app/screens/add_report/add_site_report.dart';
@@ -58,109 +58,206 @@ class _RecentReportsState extends ConsumerState<RecentReports>
       ),
       body: reportsAsyncValue.when(
         data: (reports) {
+          // Ensure we parse the dates consistently and sort by date first (descending)
           reports.sort((a, b) {
             final dateA = DateFormat('MMMM d, yyyy').parse(a.date);
             final dateB = DateFormat('MMMM d, yyyy').parse(b.date);
-            return dateB.compareTo(dateA); // Sort in descending order
+            return dateB.compareTo(dateA); // Sort most recent first
           });
 
-          // Limit the number of reports to 50
+          // Get the most recent 50 reports
           final limitedReports = reports.take(50).toList();
 
+          // Group the limited reports by date, then by submittedBy
+          final groupedByDate = <DateTime, Map<String, List<SiteReport>>>{};
+
+          for (var report in limitedReports) {
+            final reportDate = DateFormat('MMMM d, yyyy').parse(report.date);
+
+            // Initialize date group if not present
+            if (!groupedByDate.containsKey(reportDate)) {
+              groupedByDate[reportDate] = {};
+            }
+
+            final submittedBy = report.submittedBy;
+
+            // Initialize submittedBy group within the date if not present
+            if (!groupedByDate[reportDate]!.containsKey(submittedBy)) {
+              groupedByDate[reportDate]![submittedBy] = [];
+            }
+
+            // Add the report to the appropriate group
+            groupedByDate[reportDate]![submittedBy]!.add(report);
+          }
+
+          // Sort each employee's reports by latest timeOff within the same date group
+          groupedByDate.forEach((date, reportsByEmployee) {
+            reportsByEmployee.forEach((employee, employeeReports) {
+              employeeReports.sort((a, b) {
+                final latestTimeOffA = a.employees
+                    .map((e) => e.timeOff)
+                    .reduce((a, b) => a.isAfter(b) ? a : b);
+                final latestTimeOffB = b.employees
+                    .map((e) => e.timeOff)
+                    .reduce((a, b) => a.isAfter(b) ? a : b);
+
+                return latestTimeOffB.compareTo(latestTimeOffA);
+              });
+            });
+          });
+
+          // Flatten the grouped structure while maintaining the order
+          final List<Map<String, dynamic>> reportsList = [];
+          groupedByDate.forEach((date, reportsByEmployee) {
+            final formattedDate =
+                DateFormat('MMMM d, yyyy').format(date); // Format DateTime
+
+            reportsList.add({"date": formattedDate, "type": "date"});
+            reportsByEmployee.forEach((submittedBy, employeeReports) {
+              final firstName = submittedBy.split('@')[0];
+              final capitalizedFirstName = firstName[0].toUpperCase() +
+                  firstName.substring(1).toLowerCase();
+              reportsList
+                  .add({"name": capitalizedFirstName, "type": "employee"});
+              for (var report in employeeReports) {
+                reportsList.add({"report": report, "type": "report"});
+              }
+              reportsList.add({"divider": true, "type": "divider"});
+            });
+          });
+
           return ListView.builder(
-            itemCount: limitedReports.length,
+            itemCount: reportsList.length,
             itemBuilder: (context, index) {
-              final report = limitedReports[index];
-              // Convert duration from minutes to hours
-              final durationInHours = report.totalCombinedDuration / 60;
-              final formattedDuration = durationInHours.toStringAsFixed(1);
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReportPreview(report: report),
+              final item = reportsList[index];
+
+              if (item['type'] == 'date') {
+                // Display the date header in bold
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    item['date'],
+                    style: GoogleFonts.montserrat(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
                     ),
-                  );
-                },
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                  child: Container(
-                    height: 65,
-                    child: ListTile(
-                      dense: true,
-                      tileColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(
-                          width: 2.0,
-                          color: report.isRegularMaintenance
-                              ? Colors.green
-                              : Colors.blueGrey,
-                        ),
+                  ),
+                );
+              }
+
+              if (item['type'] == 'employee') {
+                // Display the first part of the email (before @)
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'Submitted by: ${item['name']}',
+                    style: GoogleFonts.montserrat(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                );
+              }
+
+              if (item['type'] == 'divider') {
+                // Display a divider after each group
+                return Divider(thickness: 2);
+              }
+
+              if (item['type'] == 'report') {
+                // Display the report details
+                final report = item['report'];
+                final durationInHours = report.totalCombinedDuration / 60;
+                final formattedDuration = durationInHours.toStringAsFixed(1);
+
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReportPreview(report: report),
                       ),
-                      leading: report.isRegularMaintenance
-                          ? Icon(Icons.grass)
-                          : Icon(Icons.add_circle_outline),
-                      minLeadingWidth: 2,
-                      title: FittedBox(
-                        alignment: Alignment.centerLeft,
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          report.siteName,
+                    );
+                  },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
+                    child: Container(
+                      height: 65,
+                      child: ListTile(
+                        dense: true,
+                        tileColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: BorderSide(
+                            width: 2.0,
+                            color: report.isRegularMaintenance
+                                ? Colors.green
+                                : Colors.blueGrey,
+                          ),
+                        ),
+                        leading: report.isRegularMaintenance
+                            ? Icon(Icons.grass)
+                            : Icon(Icons.add_circle_outline),
+                        minLeadingWidth: 2,
+                        title: FittedBox(
+                          alignment: Alignment.centerLeft,
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            report.siteName,
+                            style: GoogleFonts.montserrat(
+                              fontSize: 20,
+                              letterSpacing: .5,
+                            ),
+                          ),
+                        ),
+                        subtitle: Row(
+                          children: [
+                            Text('ID: ${report.id.substring(0, 5)}'),
+                            report.filed
+                                ? Row(
+                                    children: [
+                                      Text(
+                                        ' - filed ',
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.green.shade200),
+                                      ),
+                                      Icon(
+                                        Icons.task_alt_outlined,
+                                        color: Colors.green.shade200,
+                                      )
+                                    ],
+                                  )
+                                : Row(
+                                    children: [
+                                      Text(
+                                        ' - in progress ',
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.blueGrey.shade200),
+                                      ),
+                                      Icon(
+                                        Icons.pending_outlined,
+                                        color: Colors.blueGrey.shade200,
+                                      )
+                                    ],
+                                  ),
+                          ],
+                        ),
+                        trailing: Text(
+                          '${report.date}\nDuration: $formattedDuration hrs\nEmployees: ${report.employees.length}',
                           style: GoogleFonts.montserrat(
-                            fontSize: 20,
-                            letterSpacing: .5,
+                            fontSize: 10,
                           ),
-                        ),
-                      ),
-                      subtitle: Row(
-                        children: [
-                          Text(
-                            'ID: ${report.id.substring(0, 5)}',
-                          ),
-                          report.filed
-                              ? Row(
-                                  children: [
-                                    Text(
-                                      ' - filed ',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.green.shade200),
-                                    ),
-                                    Icon(
-                                      Icons.task_alt_outlined,
-                                      color: Colors.green.shade200,
-                                    )
-                                  ],
-                                )
-                              : Row(
-                                  children: [
-                                    Text(
-                                      ' - in progress ',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.blueGrey.shade200),
-                                    ),
-                                    Icon(
-                                      Icons.pending_outlined,
-                                      color: Colors.blueGrey.shade200,
-                                    )
-                                  ],
-                                ),
-                        ],
-                      ),
-                      trailing: Text(
-                        '${report.date}\nDuration: $formattedDuration hrs\nEmployees: ${report.employees.length}',
-                        style: GoogleFonts.montserrat(
-                          fontSize: 10,
                         ),
                       ),
                     ),
                   ),
-                ),
-              );
+                );
+              }
+
+              return SizedBox.shrink();
             },
           );
         },
