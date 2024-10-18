@@ -87,6 +87,25 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
         build: (context) {
           return pw.Column(
             children: [
+              pw.Align(
+                alignment: pw.Alignment.topLeft,
+                child: report.isRegularMaintenance
+                    ? pw.Text(
+                        "Regular Maintenance Report",
+                        style: pw.TextStyle(
+                          fontSize: 12,
+                          color: PdfColor(0.5, 0.8, 0.3, 1),
+                        ),
+                      )
+                    : pw.Text(
+                        "Additional Service Report",
+                        style: pw.TextStyle(
+                          fontSize: 12,
+                          color: PdfColor(0.4, 0.5, 0.7, 1),
+                        ),
+                      ),
+              ),
+
               pw.Expanded(
                 child: pw.Container(
                   child: pw.SvgImage(
