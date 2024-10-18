@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_landscaping_app/screens/view_reports/report_preview.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gemini_landscaping_app/providers/report_provider.dart';
+import 'package:intl/intl.dart';
 
 class ReportFiles extends ConsumerWidget {
   final String siteName;
@@ -49,7 +50,11 @@ class ReportFiles extends ConsumerWidget {
         data: (reports) {
           final siteReports =
               reports.where((report) => report.siteName == siteName).toList();
-          siteReports.sort((a, b) => b.date.compareTo(a.date));
+          siteReports.sort((a, b) {
+            final dateA = DateFormat('MMMM d, yyyy').parse(a.date);
+            final dateB = DateFormat('MMMM d, yyyy').parse(b.date);
+            return dateB.compareTo(dateA); // Sort by most recent date
+          });
 
           return GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
