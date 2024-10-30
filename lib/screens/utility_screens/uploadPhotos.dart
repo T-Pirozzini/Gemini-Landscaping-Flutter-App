@@ -1,13 +1,13 @@
-import 'dart:typed_data';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-// import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-// import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 class UploadPhotos extends StatefulWidget {
   const UploadPhotos({super.key});
@@ -17,130 +17,163 @@ class UploadPhotos extends StatefulWidget {
 }
 
 class _UploadPhotosState extends State<UploadPhotos> {
-  List<String> imageUrls = []; // List to store image URLs
-  File? image;
+  List<Map<String, dynamic>> imageFolders = [];
   final picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    fetchImagesFromFirebaseStorage();
+    fetchFoldersFromFirestore();
   }
 
-  Future<void> _uploadImage() async {
+  Future<void> _uploadImage(String folderName, String documentId) async {
     try {
       final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
       if (pickedFile != null) {
         final File imageFile = File(pickedFile.path);
+        final String imageName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-        // Compress the image before uploading
-        // final Uint8List compressedImageData =
-        //     await FlutterImageCompress.compressWithFile(
-        //   imageFile.path,
-        //   quality: 70,
-        // ) as Uint8List;
-
+        // Upload image to Firebase Storage
         final Reference storageReference = FirebaseStorage.instance
             .ref()
-            .child('images/${DateTime.now()}.jpg');
+            .child('images/$folderName/$imageName');
 
-        // final UploadTask uploadTask =
-        //     storageReference.putData(compressedImageData);
+        final UploadTask uploadTask = storageReference.putFile(imageFile);
+        await uploadTask.whenComplete(() async {
+          final imageUrl = await storageReference.getDownloadURL();
 
-        // await uploadTask.whenComplete(() async {
-        //   final imageUrl = await storageReference.getDownloadURL();
-        //   // Save the imageUrl to Firestore or use it as needed.
-        //   print('Image URL: $imageUrl');
+          // Save image data to Firestore under the specific site document's images subcollection
+          FirebaseFirestore.instance
+              .collection('SiteList')
+              .doc(documentId)
+              .collection('images')
+              .add({
+            'url': imageUrl,
+            'uploadDate': Timestamp.now(),
+            'imageName': imageName,
+          });
 
-        //   // Update the imageUrls list with the new image URL
-        //   setState(() {
-        //     imageUrls.add(imageUrl);
-        //   });
-        // });
+          print('Uploaded image URL: $imageUrl');
 
-        setState(() {
-          image = imageFile;
+          // Refresh the displayed images
+          fetchFoldersFromFirestore();
         });
       }
     } catch (e) {
-      print(e.toString());
+      print('Error uploading image: $e');
     }
   }
 
-  void fetchImagesFromFirebaseStorage() async {
+  void fetchFoldersFromFirestore() async {
     try {
-      final ListResult result =
-          await FirebaseStorage.instance.ref('images/').list();
+      final folderSnapshot =
+          await FirebaseFirestore.instance.collection('SiteList').get();
 
-      for (final Reference ref in result.items) {
-        final imageUrl = await ref.getDownloadURL();
-        print('Image URL: $imageUrl');
-        setState(() {
-          imageUrls.add(imageUrl);
+      List<Map<String, dynamic>> fetchedFolders = [];
+      for (var folder in folderSnapshot.docs) {
+        final folderData = folder.data();
+        final imagesSnapshot =
+            await folder.reference.collection('images').get();
+
+        List<Map<String, dynamic>> images = [];
+        for (var doc in imagesSnapshot.docs) {
+          final imageData = doc.data();
+          images.add(imageData);
+        }
+
+        // Sort images by uploadDate in descending order
+        images.sort((a, b) => (b['uploadDate'] as Timestamp)
+            .compareTo(a['uploadDate'] as Timestamp));
+
+        fetchedFolders.add({
+          'folderName': folderData["name"],
+          'documentId': folder.id,
+          'images': images,
         });
       }
+
+      setState(() {
+        imageFolders = fetchedFolders;
+      });
     } catch (e) {
-      print('Error fetching images: $e');
+      print('Error fetching folders: $e');
     }
   }
 
-  void _showEnlargedImage(String imageUrl) {
+  Future<void> _downloadImage(String imageUrl) async {
+    try {
+      // Fetch the image bytes from the URL
+      final response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode == 200) {
+        // Get the external storage directory
+        final directory = await getExternalStorageDirectory();
+        final picturesDir = Directory('${directory!.path}/Pictures');
+        if (!await picturesDir.exists()) {
+          await picturesDir.create(recursive: true);
+        }
+
+        // Create a unique file name for the image
+        final imageName =
+            'downloaded_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final filePath = '${picturesDir.path}/$imageName';
+
+        // Save the bytes to a file
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
+
+        // Add to the gallery by saving to the "Pictures" directory
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Image saved to gallery: $filePath')),
+        );
+      } else {
+        throw Exception('Failed to download image');
+      }
+    } catch (e) {
+      print('Error downloading image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to download image')),
+      );
+    }
+  }
+
+  void _showImageOptionsDialog(String folderName, String documentId) async {
+    // Display a dialog to confirm upload location
     showDialog(
       context: context,
-      builder: (_) => Dialog(
-        child: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: CachedNetworkImage(
-            imageUrl: imageUrl,
-            placeholder: (context, url) => CircularProgressIndicator(),
-          ),
+      builder: (context) => AlertDialog(
+        // title: Text('Upload an image to $folderName'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Upload an image to $folderName'),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _uploadImage(folderName, documentId);
+              },
+              child: Text('Select Image'),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  // Future<void> _saveImage(String imageUrl) async {
-  //   try {
-  //     final response = await http.get(Uri.parse(imageUrl));
-  //     if (response.statusCode == 200) {
-  //       final Uint8List uint8List = response.bodyBytes;
-  //       // final success = await ImageGallerySaver.saveImage(uint8List);
-
-  //       if (success != null && success.isNotEmpty) {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(content: Text('Image saved to gallery')),
-  //         );
-  //       } else {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(content: Text('Failed to save image')),
-  //         );
-  //       }
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Failed to download image')),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     print(e.toString());
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Error: $e')),
-  //     );
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
-        title: Text("Upload Photos",
-            style: GoogleFonts.montserrat(
-                fontSize: 18,
-                color: Colors.black,
-                fontWeight: FontWeight.w500)),
+        title: Text(
+          "Upload Photos",
+          style: GoogleFonts.montserrat(
+            fontSize: 18,
+            color: Colors.black,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         toolbarHeight: 25,
         backgroundColor: Colors.green.shade100,
         elevation: 0,
@@ -148,59 +181,121 @@ class _UploadPhotosState extends State<UploadPhotos> {
       ),
       body: Column(
         children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: _uploadImage,
-                child: Text('Upload Image'),
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                      const Color.fromARGB(255, 31, 182, 77)),
-                ),
-              ),
-              SizedBox(height: 10),
-              Text('Hint: long press to save image',
-                  style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
-            ],
-          ),
+          SizedBox(height: 10),
+          Text('Tap an image for enlarged view. Long press to download'),
           Expanded(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-              ),
-              itemCount: imageUrls.length,
-              itemBuilder: (context, index) {
-                final imageUrl = imageUrls[index];
-                return Container(
-                  padding: EdgeInsets.all(2.0),
-                  margin: EdgeInsets.all(5.0),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    border: Border.all(
-                      color: Colors.grey,
-                      width: 1.0,
+            child: ListView.builder(
+              itemCount: imageFolders.length,
+              itemBuilder: (context, folderIndex) {
+                final folder = imageFolders[folderIndex];
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ExpansionTile(
+                    collapsedBackgroundColor: Colors.grey.shade300,
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(folder['folderName']),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey.shade800,
+                          ),
+                          onPressed: () => _showImageOptionsDialog(
+                            folder['folderName'],
+                            folder['documentId'],
+                          ),
+                          child: Icon(
+                            Icons.add_a_photo,
+                            size: 20,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      _showEnlargedImage(imageUrl);
-                    },
-                    onLongPress: () {
-                      // _saveImage(imageUrl);
-                    },
-                    child: CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      placeholder: (context, url) =>
-                          CircularProgressIndicator(),
-                    ),
+                    children: [
+                      SingleChildScrollView(
+                        child: Container(
+                          height: 400,
+                          child: GridView.builder(
+                            physics: AlwaysScrollableScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 8.0,
+                              mainAxisSpacing: 8.0,
+                            ),
+                            itemCount: folder['images'].length,
+                            itemBuilder: (context, imageIndex) {
+                              final image = folder['images'][imageIndex];
+
+                              // Format the uploadDate
+                              final uploadDate =
+                                  (image['uploadDate'] as Timestamp).toDate();
+                              final formattedDate =
+                                  DateFormat('dd MMM yyyy').format(uploadDate);
+
+                              return Column(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      _showEnlargedImage(image['url']);
+                                    },
+                                    onLongPress: () {
+                                      _downloadImage(image['url']);
+                                    },
+                                    child: Container(
+                                      width: 100,
+                                      height: 100,
+                                      child: CachedNetworkImage(
+                                        imageUrl: image['url'],
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) =>
+                                            CircularProgressIndicator(),
+                                        errorWidget: (context, url, error) =>
+                                            Icon(Icons.error),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    formattedDate,
+                                    style: TextStyle(
+                                        fontSize: 12, color: Colors.grey),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showEnlargedImage(String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        insetPadding: EdgeInsets.all(10),
+        child: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: InteractiveViewer(
+            child: CachedNetworkImage(
+              imageUrl: imageUrl,
+              fit: BoxFit.contain,
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => Icon(Icons.error),
+            ),
+          ),
+        ),
       ),
     );
   }
