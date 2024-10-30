@@ -67,8 +67,11 @@ class _UploadPhotosState extends State<UploadPhotos> {
 
   void fetchFoldersFromFirestore() async {
     try {
-      final folderSnapshot =
-          await FirebaseFirestore.instance.collection('SiteList').get();
+      final folderSnapshot = await FirebaseFirestore.instance
+          .collection('SiteList')
+          .where('status',
+              isEqualTo: true) // Only include folders with status true
+          .get();
 
       List<Map<String, dynamic>> fetchedFolders = [];
       for (var folder in folderSnapshot.docs) {
