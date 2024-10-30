@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UploadPhotos extends StatefulWidget {
   const UploadPhotos({super.key});
@@ -69,8 +70,7 @@ class _UploadPhotosState extends State<UploadPhotos> {
     try {
       final folderSnapshot = await FirebaseFirestore.instance
           .collection('SiteList')
-          .where('status',
-              isEqualTo: true) // Only include folders with status true
+          .where('status', isEqualTo: true)
           .get();
 
       List<Map<String, dynamic>> fetchedFolders = [];
@@ -82,6 +82,7 @@ class _UploadPhotosState extends State<UploadPhotos> {
         List<Map<String, dynamic>> images = [];
         for (var doc in imagesSnapshot.docs) {
           final imageData = doc.data();
+          imageData['documentId'] = doc.id;
           images.add(imageData);
         }
 
@@ -101,6 +102,50 @@ class _UploadPhotosState extends State<UploadPhotos> {
       });
     } catch (e) {
       print('Error fetching folders: $e');
+    }
+  }
+
+  Future<void> _deleteImage(
+      String imageUrl, String folderId, String imageDocId) async {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final authorizedUsers = [
+      "5wwYztIxTifV0EQk3N7dfXsY0jm1",
+      "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
+    ];
+
+    if (authorizedUsers.contains(currentUserId)) {
+      try {
+        // Delete image from Firebase Storage
+        final Reference storageRef =
+            FirebaseStorage.instance.refFromURL(imageUrl);
+        await storageRef.delete();
+
+        // Delete image document from Firestore
+        await FirebaseFirestore.instance
+            .collection('SiteList')
+            .doc(folderId)
+            .collection('images')
+            .doc(imageDocId)
+            .delete();
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Photo deleted successfully')),
+        );
+
+        // Refresh the displayed images
+        fetchFoldersFromFirestore();
+      } catch (e) {
+        print('Error deleting image: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete image')),
+        );
+      }
+    } else {
+      // Show unauthorized message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('You are not authorized to delete this photo')),
+      );
     }
   }
 
@@ -192,7 +237,8 @@ class _UploadPhotosState extends State<UploadPhotos> {
               itemBuilder: (context, folderIndex) {
                 final folder = imageFolders[folderIndex];
                 return Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
                   child: ExpansionTile(
                     collapsedBackgroundColor: Colors.grey.shade300,
                     title: Row(
@@ -238,25 +284,59 @@ class _UploadPhotosState extends State<UploadPhotos> {
 
                               return Column(
                                 children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      _showEnlargedImage(image['url']);
-                                    },
-                                    onLongPress: () {
-                                      _downloadImage(image['url']);
-                                    },
-                                    child: Container(
-                                      width: 100,
-                                      height: 100,
-                                      child: CachedNetworkImage(
-                                        imageUrl: image['url'],
-                                        fit: BoxFit.cover,
-                                        placeholder: (context, url) =>
-                                            CircularProgressIndicator(),
-                                        errorWidget: (context, url, error) =>
-                                            Icon(Icons.error),
+                                  Stack(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          _showEnlargedImage(image['url']);
+                                        },
+                                        onLongPress: () {
+                                          _downloadImage(image['url']);
+                                        },
+                                        child: Container(
+                                          width: 100,
+                                          height: 100,
+                                          child: CachedNetworkImage(
+                                            imageUrl: image['url'],
+                                            fit: BoxFit.cover,
+                                            placeholder: (context, url) =>
+                                                CircularProgressIndicator(),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    Icon(Icons.error),
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                      Positioned(
+                                        top:
+                                            4, 
+                                        right:
+                                            4, 
+                                        child: CircleAvatar(
+                                          backgroundColor: Colors.white,
+                                          radius:
+                                              12, 
+                                          child: IconButton(
+                                            padding: EdgeInsets
+                                                .zero, 
+                                            constraints:
+                                                BoxConstraints(), 
+                                            icon: Icon(
+                                              Icons.delete,
+                                              color: Colors.black,
+                                              size: 16, 
+                                            ),
+                                            onPressed: () {
+                                              _deleteImage(
+                                                image['url'],
+                                                folder['documentId'],
+                                                image['documentId'],
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   SizedBox(height: 4),
                                   Text(
