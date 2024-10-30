@@ -4,10 +4,10 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+// import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+// import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class UploadPhotos extends StatefulWidget {
   const UploadPhotos({super.key});
@@ -35,29 +35,29 @@ class _UploadPhotosState extends State<UploadPhotos> {
         final File imageFile = File(pickedFile.path);
 
         // Compress the image before uploading
-        final Uint8List compressedImageData =
-            await FlutterImageCompress.compressWithFile(
-          imageFile.path,
-          quality: 70,
-        ) as Uint8List;
+        // final Uint8List compressedImageData =
+        //     await FlutterImageCompress.compressWithFile(
+        //   imageFile.path,
+        //   quality: 70,
+        // ) as Uint8List;
 
         final Reference storageReference = FirebaseStorage.instance
             .ref()
             .child('images/${DateTime.now()}.jpg');
 
-        final UploadTask uploadTask =
-            storageReference.putData(compressedImageData);
+        // final UploadTask uploadTask =
+        //     storageReference.putData(compressedImageData);
 
-        await uploadTask.whenComplete(() async {
-          final imageUrl = await storageReference.getDownloadURL();
-          // Save the imageUrl to Firestore or use it as needed.
-          print('Image URL: $imageUrl');
+        // await uploadTask.whenComplete(() async {
+        //   final imageUrl = await storageReference.getDownloadURL();
+        //   // Save the imageUrl to Firestore or use it as needed.
+        //   print('Image URL: $imageUrl');
 
-          // Update the imageUrls list with the new image URL
-          setState(() {
-            imageUrls.add(imageUrl);
-          });
-        });
+        //   // Update the imageUrls list with the new image URL
+        //   setState(() {
+        //     imageUrls.add(imageUrl);
+        //   });
+        // });
 
         setState(() {
           image = imageFile;
@@ -102,34 +102,34 @@ class _UploadPhotosState extends State<UploadPhotos> {
     );
   }
 
-  Future<void> _saveImage(String imageUrl) async {
-    try {
-      final response = await http.get(Uri.parse(imageUrl));
-      if (response.statusCode == 200) {
-        final Uint8List uint8List = response.bodyBytes;
-        final success = await ImageGallerySaver.saveImage(uint8List);
+  // Future<void> _saveImage(String imageUrl) async {
+  //   try {
+  //     final response = await http.get(Uri.parse(imageUrl));
+  //     if (response.statusCode == 200) {
+  //       final Uint8List uint8List = response.bodyBytes;
+  //       // final success = await ImageGallerySaver.saveImage(uint8List);
 
-        if (success != null && success.isNotEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Image saved to gallery')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save image')),
-          );
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to download image')),
-        );
-      }
-    } catch (e) {
-      print(e.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    }
-  }
+  //       if (success != null && success.isNotEmpty) {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(content: Text('Image saved to gallery')),
+  //         );
+  //       } else {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(content: Text('Failed to save image')),
+  //         );
+  //       }
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Failed to download image')),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     print(e.toString());
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error: $e')),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -188,7 +188,7 @@ class _UploadPhotosState extends State<UploadPhotos> {
                       _showEnlargedImage(imageUrl);
                     },
                     onLongPress: () {
-                      _saveImage(imageUrl);
+                      // _saveImage(imageUrl);
                     },
                     child: CachedNetworkImage(
                       imageUrl: imageUrl,
