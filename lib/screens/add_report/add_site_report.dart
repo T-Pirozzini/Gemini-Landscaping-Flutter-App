@@ -338,7 +338,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
 
   @override
   Widget build(BuildContext context) {
-    final sitesAsyncValue = ref.watch(siteListProvider);
+    // final sitesAsyncValue = ref.watch(siteListProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
@@ -404,6 +404,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                   AddNewSiteComponent(
                     currentUser: currentUser,
                     onSiteAdded: () {
+                      // ignore: unused_result
                       ref.refresh(siteListProvider);
                     },
                   ),

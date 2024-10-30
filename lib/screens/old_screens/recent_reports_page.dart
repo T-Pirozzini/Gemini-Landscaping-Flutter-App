@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gemini_landscaping_app/pages/addWinterReport.dart';
-import 'package:gemini_landscaping_app/providers/report_provider.dart';
+import 'package:gemini_landscaping_app/screens/winter_reports/addWinterReport.dart';
 import 'package:gemini_landscaping_app/screens/add_report/add_site_report.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../view_reports/view_report_page.dart';
 import '../../auth.dart';
 import '../auth/auth_page.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
-import 'package:gemini_landscaping_app/extraReport.dart';
+import 'package:gemini_landscaping_app/screens/old_screens/extraReport.dart';
 
 class RecentReportsPage extends StatefulWidget {
   const RecentReportsPage({super.key});

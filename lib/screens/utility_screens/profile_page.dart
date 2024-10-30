@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../auth.dart';
-import '../screens/auth/auth_page.dart';
+import '../../auth.dart';
+import '../auth/auth_page.dart';
 import 'package:lottie/lottie.dart';
 
 class ProfilePage extends StatefulWidget {

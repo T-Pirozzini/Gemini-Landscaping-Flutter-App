@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_landscaping_app/models/site_report.dart';
-import 'package:gemini_landscaping_app/pages/addWinterReport.dart';
+import 'package:gemini_landscaping_app/screens/winter_reports/addWinterReport.dart';
 import 'package:gemini_landscaping_app/providers/report_provider.dart';
 import 'package:gemini_landscaping_app/screens/add_report/add_site_report.dart';
 import 'package:gemini_landscaping_app/screens/view_reports/report_preview.dart';
