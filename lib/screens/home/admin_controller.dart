@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:gemini_landscaping_app/screens/all_reports/folders_page.dart';
-import 'package:gemini_landscaping_app/screens/recent_reports/recent_reports_page.dart';
-import 'package:gemini_landscaping_app/pages/restricted_page.dart';
+import 'package:gemini_landscaping_app/screens/utility_screens/restricted_page.dart';
 import 'package:gemini_landscaping_app/screens/site_time/site_time.dart';
 
 class AdminController extends StatefulWidget {
@@ -19,7 +17,7 @@ class AdminControllerState extends State<AdminController> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 1,
       child: Scaffold(
         backgroundColor: const Color(0xFFDFD3C3),
         appBar: AppBar(
@@ -31,8 +29,8 @@ class AdminControllerState extends State<AdminController> {
             indicatorColor: Colors.white,
             tabs: [
               Tab(text: 'Site Time'),
-              Tab(text: 'Recent (old)'),
-              Tab(text: 'All (old)'),
+              // Tab(text: 'Recent (old)'),
+              // Tab(text: 'All (old)'),
             ],
           ),
         ),
@@ -43,15 +41,15 @@ class AdminControllerState extends State<AdminController> {
             ? TabBarView(
                 children: [
                   SiteTime(),
-                  RecentReportsPage(),
-                  SiteFolders(),
+                  // RecentReportsPage(),
+                  // SiteFolders(),
                 ],
               )
             : TabBarView(
                 children: [
                   RestrictedPage(),
-                  RestrictedPage(),
-                  RestrictedPage(),
+                  // RestrictedPage(),
+                  // RestrictedPage(),
                 ],
               ),
       ),

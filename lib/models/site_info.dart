@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class SiteInfo {
   final String address;
   final String imageUrl;

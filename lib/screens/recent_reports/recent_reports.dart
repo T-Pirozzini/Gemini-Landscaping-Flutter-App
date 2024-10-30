@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_landscaping_app/models/site_report.dart';
-import 'package:gemini_landscaping_app/pages/addWinterReport.dart';
+import 'package:gemini_landscaping_app/screens/winter_reports/addWinterReport.dart';
 import 'package:gemini_landscaping_app/providers/report_provider.dart';
 import 'package:gemini_landscaping_app/screens/add_report/add_site_report.dart';
 import 'package:gemini_landscaping_app/screens/view_reports/report_preview.dart';
@@ -46,7 +46,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: Text("Most Recent Reports",
+        title: Text("Recent Site Reports",
             style: GoogleFonts.montserrat(
                 fontSize: 18,
                 color: Colors.black,
@@ -133,13 +133,17 @@ class _RecentReportsState extends ConsumerState<RecentReports>
 
               if (item['type'] == 'date') {
                 // Display the date header in bold
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    item['date'],
-                    style: GoogleFonts.montserrat(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                return Container(
+                  color: Colors.grey.shade800,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      item['date'],
+                      style: GoogleFonts.montserrat(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 );
@@ -202,82 +206,80 @@ class _RecentReportsState extends ConsumerState<RecentReports>
                   child: Padding(
                     padding:
                         const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                    child: Container(
-                      height: 65,
-                      child: ListTile(
-                        dense: true,
-                        tileColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(
-                            width: 2.0,
-                            color: report.isRegularMaintenance
-                                ? Colors.green
-                                : Colors.blueGrey,
+                    child: ListTile(
+                      dense: true,
+                      tileColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(
+                          width: 2.0,
+                          color: report.isRegularMaintenance
+                              ? Colors.green
+                              : Colors.blueGrey,
+                        ),
+                      ),
+                      leading: report.isRegularMaintenance
+                          ? Icon(Icons.grass)
+                          : Icon(Icons.add_circle_outline),
+                      minLeadingWidth: 2,
+                      title: FittedBox(
+                        alignment: Alignment.centerLeft,
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          report.siteName,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 16,
+                            letterSpacing: .5,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        leading: report.isRegularMaintenance
-                            ? Icon(Icons.grass)
-                            : Icon(Icons.add_circle_outline),
-                        minLeadingWidth: 2,
-                        title: FittedBox(
-                          alignment: Alignment.centerLeft,
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            report.siteName,
-                            style: GoogleFonts.montserrat(
-                              fontSize: 20,
-                              letterSpacing: .5,
-                            ),
-                          ),
-                        ),
-                        subtitle: Row(
-                          children: [
-                            Text('ID: ${report.id.substring(0, 5)}'),
-                            report.filed
-                                ? Row(
-                                    children: [
-                                      Text(
-                                        ' - filed ',
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.green.shade200),
-                                      ),
-                                      Icon(
-                                        Icons.task_alt_outlined,
-                                        color: Colors.green.shade200,
-                                      )
-                                    ],
-                                  )
-                                : Row(
-                                    children: [
-                                      Text(
-                                        ' - in progress ',
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.blueGrey.shade200),
-                                      ),
-                                      Icon(
-                                        Icons.pending_outlined,
-                                        color: Colors.blueGrey.shade200,
-                                      )
-                                    ],
-                                  ),
+                      ),
+                      subtitle: Row(
+                        children: [
+                          Text('ID: ${report.id.substring(0, 5)}'),
+                          report.filed
+                              ? Row(
+                                  children: [
+                                    Text(
+                                      ' - filed ',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.green.shade200),
+                                    ),
+                                    Icon(
+                                      Icons.task_alt_outlined,
+                                      color: Colors.green.shade200,
+                                    )
+                                  ],
+                                )
+                              : Row(
+                                  children: [
+                                    Text(
+                                      ' - in progress ',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.blueGrey.shade200),
+                                    ),
+                                    Icon(
+                                      Icons.pending_outlined,
+                                      color: Colors.blueGrey.shade200,
+                                    )
+                                  ],
+                                ),
+                        ],
+                      ),
+                      trailing: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (firstEmployee != null) ...[
+                            Text('Employees: ${report.employees.length}',
+                                style: GoogleFonts.montserrat(fontSize: 12)),
+                            Text('$timeOn - $timeOff',
+                                style: GoogleFonts.montserrat(fontSize: 12)),
                           ],
-                        ),
-                        trailing: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            if (firstEmployee != null) ...[
-                              Text('Employees: ${report.employees.length}',
-                                  style: GoogleFonts.montserrat(fontSize: 10)),
-                              Text('$timeOn - $timeOff',
-                                  style: GoogleFonts.montserrat(fontSize: 10)),
-                            ],
-                            Text('Site Time: $formattedDuration',
-                                style: GoogleFonts.montserrat(fontSize: 10)),
-                          ],
-                        ),
+                          Text('Site Time: $formattedDuration',
+                              style: GoogleFonts.montserrat(fontSize: 12)),
+                        ],
                       ),
                     ),
                   ),

@@ -48,16 +48,15 @@ dependencies:
   google_fonts: ^4.0.3
   syncfusion_flutter_charts: ^21.1.41  
   firebase_storage: ^11.2.7
-  image_picker: ^1.0.4
-  image_gallery_saver: ^2.0.3
-  cached_network_image: ^3.3.1
-  # firebase_app_check: ^0.2.0  
-  photo_view: ^0.14.0
-  flutter_image_compress: ^2.0.4
+  image_picker: ^1.0.4  
+  cached_network_image: ^3.3.1  
+  photo_view: ^0.14.0  
   firebase_core: ^2.16.0
   fl_chart: ^0.67.0
   flutter_riverpod: ^2.5.1
-  numberpicker: ^2.1.2
+  numberpicker: ^2.1.2    
+  # image_gallery_saver: ^2.0.3
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

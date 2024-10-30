@@ -6,8 +6,6 @@ import 'package:gemini_landscaping_app/screens/print_save_report/print_save_repo
 import 'package:gemini_landscaping_app/screens/view_reports/edit_report.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'edit_report_page.dart';
-import '../print_save_report/pdf_page.dart';
 import 'package:gemini_landscaping_app/models/site_report.dart';
 
 class ReportPreview extends StatefulWidget {
