@@ -33,13 +33,14 @@ target 'Runner' do
   use_modular_headers!
 
   pod 'FirebaseFirestore'
+  pod 'FirebaseStorage'  # Ensure Firebase Storage is explicitly included
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    # Fix for unsupported -G flag in BoringSSL-GRPC
+    # Remove problematic compiler flag for BoringSSL-GRPC
     if target.name == 'BoringSSL-GRPC'
       target.source_build_phase.files.each do |file|
         if file.settings && file.settings['COMPILER_FLAGS']
@@ -52,14 +53,21 @@ post_install do |installer|
 
     flutter_additional_ios_build_settings(target)
 
-    # Architecture settings
+    # Set iOS Deployment Target to 13.0 for improved Xcode compatibility
     target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
       config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES' if config.name == 'Debug'
       config.build_settings['ARCHS'] = 'arm64'
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      
+      # Define module for Firebase to resolve non-modular header issues
+      if target.name.start_with?('firebase')
+        config.build_settings['DEFINES_MODULE'] = 'YES'
+      end
     end
   end
 end
+
 
 
 
