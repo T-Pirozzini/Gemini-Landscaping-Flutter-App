@@ -1,7 +1,7 @@
-# Define a global platform for your project
-platform :ios, '13.0'
+# Uncomment this line to define a global platform for your project
+platform :ios, '12.0'
 
-# CocoaPods analytics sends network stats synchronously affecting Flutter build latency.
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
@@ -9,10 +9,6 @@ project 'Runner', {
   'Profile' => :release,
   'Release' => :release,
 }
-
-# Add sources to ensure dependency resolution
-source 'https://github.com/CocoaPods/Specs.git'
-source 'https://github.com/firebase/firebase-ios-sdk'
 
 def flutter_root
   generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
@@ -32,24 +28,19 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  # Use static frameworks for better compatibility with gRPC and other dependencies
-  use_frameworks! :linkage => :static
-
+  use_frameworks!
+  use_modular_headers!
   pod 'FirebaseFirestore'
-  pod 'FirebaseStorage'
-  
-  # Explicitly add gRPC dependencies
-  pod 'gRPC-Core'
-  pod 'gRPC-C++'
-  pod 'BoringSSL-GRPC'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    # Remove problematic compiler flag for BoringSSL-GRPC
-    if target.name == 'BoringSSL-GRPC' || target.name.inclu
+    flutter_additional_ios_build_settings(target)
+  end
+end
+
 
 
 # #!/bin/sh
