@@ -28,11 +28,16 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  # Use modular headers to avoid non-modular header issues
+  # Use modular headers for gRPC compatibility
   use_modular_headers!
 
   pod 'FirebaseFirestore'
-  pod 'FirebaseStorage'  # Ensure Firebase Storage is explicitly included
+  pod 'FirebaseStorage'
+  
+  # Explicitly add gRPC dependencies with modular headers
+  pod 'gRPC-Core', :modular_headers => true
+  pod 'gRPC-C++', :modular_headers => true
+  pod 'BoringSSL-GRPC', :modular_headers => true
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
@@ -59,9 +64,10 @@ post_install do |installer|
       config.build_settings['ARCHS'] = 'arm64'
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
 
-      # Set "Allow Non-modular Includes In Framework Modules" to "YES"
+      # Allow non-modular includes
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
     end
   end
 end
+
 
