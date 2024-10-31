@@ -35,8 +35,8 @@ target 'Runner' do
   pod 'FirebaseFirestore', '10.3.0'
   pod 'FirebaseStorage', '10.3.0'
   pod 'gRPC-Core', '1.34.0'
-  pod 'gRPC-C++', '1.34.0'
-  pod 'BoringSSL-GRPC', '1.1.0'
+  pod 'gRPC-C++', '1.34.0'  
+  pod 'BoringSSL-GRPC', :modular_headers => true
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
