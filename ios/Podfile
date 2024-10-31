@@ -48,6 +48,10 @@ post_install do |installer|
 end
 
 
+# IN CODE MAGIC
+# set the ios version to 15.0 and cocoapods to 1.12.0
+# The above code for toolchain needs to be included for ios version 15 builds
+# The pre-build script is as follow:
 
 # #!/bin/sh
 # set -e  # Exit on first failed command
