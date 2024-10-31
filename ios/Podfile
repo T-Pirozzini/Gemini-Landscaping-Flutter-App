@@ -51,6 +51,13 @@ post_install do |installer|
       end
     end
 
+    # Mark FirebaseStorage as a static framework
+    if target.name == 'firebase_storage'
+      target.build_configurations.each do |config|
+        config.build_settings['MACH_O_TYPE'] = 'staticlib'
+      end
+    end
+
     flutter_additional_ios_build_settings(target)
 
     # Set iOS Deployment Target to 13.0 for improved Xcode compatibility
@@ -59,14 +66,10 @@ post_install do |installer|
       config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES' if config.name == 'Debug'
       config.build_settings['ARCHS'] = 'arm64'
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
-      
-      # Define module for Firebase to resolve non-modular header issues
-      if target.name.start_with?('firebase')
-        config.build_settings['DEFINES_MODULE'] = 'YES'
-      end
     end
   end
 end
+
 
 
 
