@@ -50,17 +50,24 @@ post_install do |installer|
 
     flutter_additional_ios_build_settings(target)
 
+    # Apply force_load flags for BoringSSL-GRPC and gRPC-Core to ensure symbols are linked
+    if ['BoringSSL-GRPC', 'gRPC-Core', 'gRPC-C++'].include?(target.name)
+      target.build_configurations.each do |config|
+        config.build_settings['OTHER_LDFLAGS'] ||= ''
+        config.build_settings['OTHER_LDFLAGS'] += ' -framework BoringSSL -framework gRPC-Core -framework gRPC-C++'
+        config.build_settings['OTHER_LDFLAGS'] += ' -force_load $(PODS_ROOT)/BoringSSL-GRPC/libBoringSSL.a -force_load $(PODS_ROOT)/gRPC-Core/libgRPC-Core.a'
+      end
+    end
+
     target.build_configurations.each do |config|
       config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES' if config.name == 'Debug'
       config.build_settings['ARCHS'] = 'arm64'
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
-
-      # Explicitly remove unsupported `-G` option if present
-      config.build_settings['OTHER_CFLAGS'] = config.build_settings['OTHER_CFLAGS'].to_s.gsub('-G', '')
-      config.build_settings['OTHER_LDFLAGS'] = config.build_settings['OTHER_LDFLAGS'].to_s.gsub('-G', '')
     end
   end
 end
+
+
 
 
 
