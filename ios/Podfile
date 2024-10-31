@@ -28,24 +28,24 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  # Use modular headers for gRPC compatibility
+  # Use modular headers for compatibility without dynamic frameworks
   use_modular_headers!
 
-  pod 'FirebaseFirestore'
-  pod 'FirebaseStorage'
-  
-  # Explicitly add gRPC dependencies with modular headers
-  pod 'gRPC-Core', :modular_headers => true
-  pod 'gRPC-C++', :modular_headers => true
-  pod 'BoringSSL-GRPC', :modular_headers => true
+  # Pin dependencies to stable versions
+  pod 'FirebaseFirestore', '10.3.0'
+  pod 'FirebaseStorage', '10.3.0'
+  pod 'gRPC-Core', '1.34.0'
+  pod 'gRPC-C++', '1.34.0'
+  pod 'BoringSSL-GRPC', '1.1.0'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
+# Post-installation configuration for compatibility
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     # Remove problematic compiler flag for BoringSSL-GRPC
-    if target.name == 'BoringSSL-GRPC'
+    if target.name == 'BoringSSL-GRPC' || target.name.include?('gRPC')
       target.source_build_phase.files.each do |file|
         if file.settings && file.settings['COMPILER_FLAGS']
           flags = file.settings['COMPILER_FLAGS'].split
@@ -53,22 +53,23 @@ post_install do |installer|
           file.settings['COMPILER_FLAGS'] = flags.join(' ')
         end
       end
+
+      # Set iOS Deployment Target to 13.0 for improved Xcode compatibility
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+        config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES' if config.name == 'Debug'
+        config.build_settings['ARCHS'] = 'arm64'
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+
+        # Allow non-modular includes
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+      end
     end
 
     flutter_additional_ios_build_settings(target)
-
-    # Set iOS Deployment Target to 13.0 for improved Xcode compatibility
-    target.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
-      config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES' if config.name == 'Debug'
-      config.build_settings['ARCHS'] = 'arm64'
-      config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
-
-      # Allow non-modular includes
-      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
-    end
   end
 end
+
 
 # #!/bin/sh
 # set -e  # Exit on first failed command
