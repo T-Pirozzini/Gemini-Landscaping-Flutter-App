@@ -4,6 +4,8 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:gemini_landscaping_app/models/schedule_model.dart';
 import 'package:gemini_landscaping_app/models/site_info.dart';
+import 'package:gemini_landscaping_app/screens/schedule/components/time_column.dart';
+import 'package:gemini_landscaping_app/screens/schedule/components/truck_column.dart';
 import 'package:gemini_landscaping_app/screens/schedule/week_view_screen.dart';
 import 'package:gemini_landscaping_app/services/schedule_service.dart';
 import 'package:intl/intl.dart';
@@ -43,122 +45,50 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    const double timeSlotHeight = 40.0;
-    const int slotsPerDay = 20;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            IconButton(
-              icon: Icon(Icons.arrow_left),
-              onPressed: () => _changeDate(-1),
-            ),
-            Text(
-                'Schedule - ${DateFormat('MMM d, yyyy').format(selectedDate)}'),
-            IconButton(
-              icon: Icon(Icons.arrow_right),
-              onPressed: () => _changeDate(1),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.local_shipping),
-            onPressed: () => _showTruckManager(context),
-          ),
-          IconButton(
-            icon: Icon(Icons.calendar_view_week),
-            onPressed: () => Navigator.push(
-                context, MaterialPageRoute(builder: (_) => WeekViewScreen())),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Row
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 80,
-                  height: 40,
-                  color: Colors.grey[200],
-                  child: Center(
-                      child: Text('Time', style: TextStyle(fontSize: 12))),
-                ),
-                ...trucks.map((truck) => Container(
-                      width: 150,
-                      height: 40,
-                      color: truck.color.withOpacity(0.2),
-                      child: Center(
-                          child:
-                              Text(truck.name, style: TextStyle(fontSize: 12))),
-                    )),
-              ],
-            ),
-            // Schedule Grid
-            Expanded(
-              child: SingleChildScrollView(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: 80,
-                      child: TimeColumn(hoveredSlotIndex: _hoveredSlotIndex),
-                    ),
-                    ...trucks.map((truck) => TruckColumn(
-                          truck: truck,
-                          schedule: schedule
-                              .where((entry) => entry.truckId == truck.id)
-                              .toList(),
-                          onHover: (index) =>
-                              setState(() => _hoveredSlotIndex = index),
-                          onDrop: (entry, slotTime) =>
-                              _updateScheduleEntry(entry, slotTime, truck.id),
-                          selectedDate: selectedDate,
-                        )),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showSitePicker(context),
-        child: Icon(Icons.add),
-      ),
-    );
-  }
-
-  void _addScheduleEntry(
-      SiteInfo site, DateTime start, DateTime end, Equipment? truck) async {
-    final entry = ScheduleEntry(
-      site: site,
-      startTime: start,
-      endTime: end,
-      truckId: truck?.id,
-    );
-    await _service.addScheduleEntry(entry);
-    await _loadData();
+  void _updateHoveredSlotIndex(int? slotIndex) {
+    setState(() {
+      _hoveredSlotIndex = slotIndex;
+    });
   }
 
   void _updateScheduleEntry(
       ScheduleEntry entry, DateTime newStart, String newTruckId) async {
     final duration = entry.endTime.difference(entry.startTime);
     final newEnd = newStart.add(duration);
+
     final updatedEntry = ScheduleEntry(
       id: entry.id,
       site: entry.site,
       startTime: newStart,
       endTime: newEnd,
       truckId: newTruckId,
+      notes: entry.notes,
+    );
+
+    // Update Firestore
+    await _service.updateScheduleEntry(updatedEntry);
+
+    // Update local schedule and re-render
+    setState(() {
+      final index = schedule.indexOf(entry);
+      if (index != -1) {
+        schedule[index] = updatedEntry;
+      }
+    });
+
+    print(
+        'Updated entry startTime: ${updatedEntry.startTime}, endTime: ${updatedEntry.endTime}'); // Debug
+    await _loadData(); // Ensure consistency with Firestore
+  }
+
+  void _updateScheduleEntryWithNewEndTime(
+      ScheduleEntry entry, DateTime newEndTime, String truckId) async {
+    final updatedEntry = ScheduleEntry(
+      id: entry.id,
+      site: entry.site,
+      startTime: entry.startTime,
+      endTime: newEndTime,
+      truckId: truckId,
       notes: entry.notes,
     );
     await _service.updateScheduleEntry(updatedEntry);
@@ -301,6 +231,141 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
+  void _showSitePickerForSlot(
+      BuildContext context, Equipment truck, int slotIndex) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        SiteInfo? selectedSite;
+        TimeOfDay startTime =
+            TimeOfDay(hour: 7 + (slotIndex ~/ 2), minute: (slotIndex % 2) * 30);
+        TimeOfDay? endTime =
+            TimeOfDay(hour: 9, minute: 30); // Default end time, user can change
+        Equipment? selectedTruck = truck;
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text('Add Site to Schedule'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButton<SiteInfo>(
+                      hint: Text('Select a Site'),
+                      value: selectedSite,
+                      onChanged: (SiteInfo? value) =>
+                          setDialogState(() => selectedSite = value),
+                      items: activeSites.map((site) {
+                        return DropdownMenuItem(
+                            value: site, child: Text(site.name));
+                      }).toList(),
+                    ),
+                    SizedBox(height: 16),
+                    // Truck dropdown is prefilled and disabled
+                    DropdownButton<Equipment>(
+                      hint: Text('Truck'),
+                      value: selectedTruck,
+                      onChanged: null, // Disable changing truck
+                      items: [
+                        DropdownMenuItem(
+                          value: selectedTruck,
+                          child: Row(
+                            children: [
+                              Container(
+                                  width: 16,
+                                  height: 16,
+                                  color: selectedTruck!.color),
+                              SizedBox(width: 8),
+                              Text(selectedTruck.name),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                            'Start: ${startTime.format(context)}'), // Prefilled and read-only
+                        ElevatedButton(
+                          onPressed: null, // Disable changing start time
+                          child: Text('Pick Start',
+                              style: TextStyle(color: Colors.grey)),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('End: ${endTime?.format(context) ?? 'Not set'}'),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final picked = await showTimePicker(
+                              context: context,
+                              initialTime: endTime ?? TimeOfDay.now(),
+                            );
+                            if (picked != null)
+                              setDialogState(() => endTime = picked);
+                          },
+                          child: Text('Pick End'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('Cancel')),
+                TextButton(
+                  onPressed: () {
+                    if (selectedSite != null && endTime != null) {
+                      final start = DateTime(
+                          selectedDate.year,
+                          selectedDate.month,
+                          selectedDate.day,
+                          startTime.hour,
+                          startTime.minute);
+                      final end = DateTime(
+                          selectedDate.year,
+                          selectedDate.month,
+                          selectedDate.day,
+                          endTime!
+                              .hour, // Add ! since we checked endTime != null
+                          endTime!
+                              .minute // Add ! since we checked endTime != null
+                          );
+                      if (end.isAfter(start)) {
+                        _addScheduleEntry(
+                            selectedSite!, start, end, selectedTruck);
+                        Navigator.pop(context);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text('End time must be after start time')),
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text('Please select a site and end time')),
+                      );
+                    }
+                  },
+                  child: Text('Add'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _showTruckManager(BuildContext context) {
     String truckName = '';
     int truckYear = DateTime.now().year;
@@ -395,133 +460,157 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       },
     );
   }
-}
 
-class TimeColumn extends StatelessWidget {
-  final int? hoveredSlotIndex;
-  const TimeColumn({required this.hoveredSlotIndex});
-
-  @override
-  Widget build(BuildContext context) {
-    const double timeSlotHeight = 40.0;
-    const int slotsPerDay = 20;
-
-    return Column(
-      children: List.generate(slotsPerDay, (index) {
-        final hour = 7 + (index ~/ 2);
-        final minute = (index % 2) * 30;
-        final time = DateTime.now()
-            .copyWith(hour: hour, minute: minute, second: 0, millisecond: 0);
-        return Container(
-          height: timeSlotHeight,
-          width: 80,
-          color: hoveredSlotIndex == index
-              ? Colors.green.withOpacity(0.3)
-              : Colors.transparent,
-          child: Center(
-            child: Text(
-              DateFormat('h:mm a').format(time),
-              style: const TextStyle(fontSize: 12),
-            ),
-          ),
-        );
-      }),
+  void _addScheduleEntry(
+      SiteInfo site, DateTime start, DateTime end, Equipment? truck) async {
+    final entry = ScheduleEntry(
+      site: site,
+      startTime: start,
+      endTime: end,
+      truckId: truck?.id,
     );
+    await _service.addScheduleEntry(entry);
+    await _loadData();
   }
-}
-
-class TruckColumn extends StatelessWidget {
-  final Equipment truck;
-  final List<ScheduleEntry> schedule;
-  final Function(int?) onHover;
-  final Function(ScheduleEntry, DateTime) onDrop;
-  final DateTime selectedDate;
-
-  const TruckColumn({
-    required this.truck,
-    required this.schedule,
-    required this.onHover,
-    required this.onDrop,
-    required this.selectedDate,
-  });
 
   @override
   Widget build(BuildContext context) {
     const double timeSlotHeight = 40.0;
     const int slotsPerDay = 20;
 
-    return SizedBox(
-      width: 150,
-      child: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            IconButton(
+              icon: Icon(Icons.arrow_left),
+              onPressed: () => _changeDate(-1),
+            ),
+            // Custom title with weekday and date
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: DateFormat('EEEE')
+                        .format(selectedDate), // e.g., "Monday"
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  TextSpan(
+                    text:
+                        ' (${DateFormat('MMM d, yyyy').format(selectedDate)})', // e.g., "(March 12, 2025)"
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.arrow_right),
+              onPressed: () => _changeDate(1),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.local_shipping),
+            onPressed: () => _showTruckManager(context),
+          ),
+          IconButton(
+            icon: Icon(Icons.calendar_view_week),
+            onPressed: () => Navigator.push(
+                context, MaterialPageRoute(builder: (_) => WeekViewScreen())),
+          ),
+        ],
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            height: timeSlotHeight * slotsPerDay,
-            child: Stack(
-              children: [
-                ...List.generate(slotsPerDay, (index) {
-                  final hour = 7 + (index ~/ 2);
-                  final minute = (index % 2) * 30;
-                  final slotTime = DateTime(selectedDate.year,
-                      selectedDate.month, selectedDate.day, hour, minute);
-                  return Positioned(
-                    top: index * timeSlotHeight,
-                    left: 0,
-                    right: 0,
-                    height: timeSlotHeight,
-                    child: DragTarget<ScheduleEntry>(
-                      onWillAcceptWithDetails: (details) {
-                        onHover(index);
-                        return true;
-                      },
-                      onLeave: (_) => onHover(null),
-                      onAcceptWithDetails: (details) =>
-                          onDrop(details.data, slotTime),
-                      builder: (context, candidateData, rejectedData) =>
-                          Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              color: Colors.grey.withOpacity(0.2), width: 1),
-                        ),
+          // Header Row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 80,
+                height: 40,
+                color: Colors.grey[200],
+                child:
+                    Center(child: Text('Time', style: TextStyle(fontSize: 12))),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: trucks
+                        .map((truck) => Container(
+                              width: 150,
+                              height: 40,
+                              color: truck.color.withOpacity(0.2),
+                              child: Center(
+                                  child: Text(truck.name,
+                                      style: TextStyle(fontSize: 12))),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // Schedule Grid
+          Expanded(
+            child: SingleChildScrollView(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Sticky TimeColumn
+                  SizedBox(
+                    width: 80,
+                    child: TimeColumn(hoveredSlotIndex: _hoveredSlotIndex),
+                  ),
+                  // Scrollable Truck Columns
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: trucks
+                            .map((truck) => TruckColumn(
+                                  truck: truck,
+                                  schedule: schedule
+                                      .where(
+                                          (entry) => entry.truckId == truck.id)
+                                      .toList(),
+                                  onHover: _updateHoveredSlotIndex,
+                                  onDrop: (entry, slotTime) =>
+                                      _updateScheduleEntry(
+                                          entry, slotTime, truck.id),
+                                  onTapSlot: (index) => _showSitePickerForSlot(
+                                      context, truck, index),
+                                  onResize: (entry, newEndTime) =>
+                                      _updateScheduleEntryWithNewEndTime(
+                                          entry, newEndTime, truck.id),
+                                  onResizeHover:
+                                      _updateHoveredSlotIndex, // New callback for resize hover
+                                  selectedDate: selectedDate,
+                                ))
+                            .toList(),
                       ),
                     ),
-                  );
-                }),
-                ...schedule.map((entry) {
-                  final startMinutes =
-                      entry.startTime.hour * 60 + entry.startTime.minute;
-                  final endMinutes =
-                      entry.endTime.hour * 60 + entry.endTime.minute;
-                  final startOffset = (startMinutes - 7 * 60) / 30;
-                  final durationSlots = (endMinutes - startMinutes) / 30;
-
-                  return Positioned(
-                    top: startOffset * timeSlotHeight,
-                    left: 0,
-                    right: 0,
-                    height: durationSlots * timeSlotHeight,
-                    child: Draggable<ScheduleEntry>(
-                      data: entry,
-                      feedback: Material(
-                        elevation: 4,
-                        child: Container(
-                          width: 150,
-                          height: durationSlots * timeSlotHeight,
-                          color: truck.color.withOpacity(0.8),
-                          child: Center(child: Text(entry.site.name)),
-                        ),
-                      ),
-                      childWhenDragging: const SizedBox.shrink(),
-                      child: Container(
-                        color: truck.color.withOpacity(0.5),
-                        child: Center(child: Text(entry.site.name)),
-                      ),
-                    ),
-                  );
-                }),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showSitePicker(context),
+        child: Icon(Icons.add),
       ),
     );
   }

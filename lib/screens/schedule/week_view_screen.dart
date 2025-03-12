@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:gemini_landscaping_app/models/schedule_model.dart';
-import 'package:gemini_landscaping_app/screens/schedule/schedule_screen.dart';
+import 'package:gemini_landscaping_app/screens/schedule/components/time_column.dart';
 import 'package:gemini_landscaping_app/services/schedule_service.dart';
 import 'package:intl/intl.dart';
 
