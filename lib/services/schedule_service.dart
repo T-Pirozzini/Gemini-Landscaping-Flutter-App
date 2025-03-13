@@ -30,6 +30,7 @@ class ScheduleService {
     final snapshot = await _firestore
         .collection('equipment')
         .where('equipmentType', isEqualTo: 'Truck')
+        .where('active', isEqualTo: true)
         .get();
     return snapshot.docs
         .map((doc) => Equipment.fromMap(doc.id, doc.data()))
@@ -48,21 +49,26 @@ class ScheduleService {
     final sites = await fetchActiveSites();
     return snapshot.docs.map((doc) {
       final data = doc.data();
-      final site = sites.firstWhere((s) => s.id == data['siteId']);
+      final site = sites.firstWhere(
+        (s) => s.id == data['siteId'],
+        orElse: () =>
+            throw Exception('Site not found for siteId: ${data['siteId']}'),
+      );
       return ScheduleEntry.fromMap(doc.id, data, site);
     }).toList();
   }
 
   Future<void> addTruck(
-      String name, int year, String serialNumber, Color color) async {
-    await _firestore.collection('equipment').add({
-      'name': name,
-      'year': year,
-      'equipmentType': 'Truck',
-      'serialNumber': serialNumber,
-      'color': color.value,
-    });
-  }
+    String name, int year, String serialNumber, Color color, {bool isActive = true}) async {
+  await _firestore.collection('equipment').add({
+    'name': name,
+    'year': year,
+    'equipmentType': 'Truck',
+    'serialNumber': serialNumber,
+    'color': color.value,
+    'active': isActive,
+  });
+}
 
   Future<void> addScheduleEntry(ScheduleEntry entry) async {
     await _firestore.collection('Schedules').add(entry.toMap());

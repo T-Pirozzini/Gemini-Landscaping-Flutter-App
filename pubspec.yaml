@@ -59,6 +59,7 @@ dependencies:
   path_provider: ^2.1.5
   flutter_colorpicker: ^1.1.0
   iconify_flutter: ^0.0.7
+  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_test:

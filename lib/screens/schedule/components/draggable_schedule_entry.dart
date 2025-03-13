@@ -1,7 +1,9 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:gemini_landscaping_app/models/schedule_model.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class DraggableScheduleEntry extends StatefulWidget {
   final ScheduleEntry entry;
@@ -30,6 +32,7 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
   double currentHeight;
   late double initialHeight;
   double dragOffset = 0.0;
+  bool isMoving = false;
 
   _DraggableScheduleEntryState()
       : currentHeight = 0,
@@ -101,6 +104,20 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
     widget.onResizeHover(null);
   }
 
+  void _onDragStarted() {
+    setState(() {
+      isMoving = true;
+    });
+    print('Dragging the entry started');
+  }
+
+  void _onDragEnd(DraggableDetails details) {
+    setState(() {
+      isMoving = false;
+    });
+    print('Dragging the entry ended');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -114,38 +131,58 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
               width: 150,
               height: initialHeight,
               color: widget.truck.color.withOpacity(0.8),
-              child: Center(child: Text(widget.entry.site.name)),
-            ),
-          ),
-          childWhenDragging: const SizedBox.shrink(),
-          child: Container(
-            color: widget.truck.color.withOpacity(0.5),
-            height: currentHeight,
-            child: Center(child: Text(widget.entry.site.name)),
-          ),
-        ),
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onVerticalDragStart: _onVerticalDragStart,
-            onVerticalDragUpdate: _onVerticalDragUpdate,
-            onVerticalDragEnd: _onVerticalDragEnd,
-            child: Container(
-              height: 20,
-              color: Colors.black.withOpacity(0.3),
               child: Center(
-                child: Icon(
-                  Icons.drag_handle,
-                  size: 16,
-                  color: Colors.white,
+                child: AutoSizeText(
+                  widget.entry.site.name,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
+                  maxLines: 1,
                 ),
               ),
             ),
           ),
+          childWhenDragging: const SizedBox.shrink(),
+          onDragStarted: _onDragStarted,
+          onDragEnd: _onDragEnd,
+          child: Container(
+            color: widget.truck.color.withOpacity(0.5),
+            height: currentHeight,
+            child: Center(
+              child: AutoSizeText(
+                widget.entry.site.name,
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                ),
+                maxLines: 1,
+              ),
+            ),
+          ),
         ),
+        if (!isMoving)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onVerticalDragStart: _onVerticalDragStart,
+              onVerticalDragUpdate: _onVerticalDragUpdate,
+              onVerticalDragEnd: _onVerticalDragEnd,
+              child: Container(
+                height: 20,
+                color: Colors.black.withOpacity(0.3),
+                child: Center(
+                  child: Icon(
+                    Icons.drag_handle,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }

@@ -7,6 +7,7 @@ import 'package:gemini_landscaping_app/screens/schedule/components/time_column.d
 import 'package:gemini_landscaping_app/screens/schedule/components/truck_column.dart';
 import 'package:gemini_landscaping_app/screens/schedule/week_view_screen.dart';
 import 'package:gemini_landscaping_app/services/schedule_service.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/fa6_solid.dart';
@@ -49,6 +50,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     print('Loaded trucks: ${trucks.length}');
     trucks.forEach((truck) => print('Truck: ${truck.name}, ${truck.id}'));
     schedule = await _service.fetchSchedules(selectedDate);
+    final activeTruckIds = trucks.map((truck) => truck.id).toSet();
+    schedule = schedule
+        .where((entry) =>
+            entry.truckId == null || activeTruckIds.contains(entry.truckId!))
+        .toList();
     setState(() {});
   }
 
@@ -385,6 +391,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     showDialog(
       context: context,
       builder: (context) {
+        bool isActive = true;
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
@@ -441,6 +448,17 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                         ),
                       ],
                     ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Active:', style: GoogleFonts.roboto()),
+                        Switch(
+                          value: isActive,
+                          onChanged: (value) =>
+                              setDialogState(() => isActive = value),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -452,7 +470,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   onPressed: () async {
                     if (truckName.isNotEmpty && serialNumber.isNotEmpty) {
                       await _service.addTruck(
-                          truckName, truckYear, serialNumber, truckColor);
+                          truckName, truckYear, serialNumber, truckColor,
+                          isActive: isActive);
                       await _loadData();
                       Navigator.pop(context);
                     } else {
@@ -486,7 +505,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 59, 82, 73),
         title: Row(
           children: [
             IconButton(
@@ -499,8 +520,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   children: [
                     TextSpan(
                       text: DateFormat('EEEE').format(selectedDate),
-                      style: TextStyle(
-                        fontSize: 20,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -527,25 +548,23 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             children: [
               IconButton(
                 icon: Stack(
-                  clipBehavior: Clip
-                      .none, 
+                  clipBehavior: Clip.none,
                   children: [
-                   
                     Iconify(
                       Fa6Solid.truck_pickup,
                       color: Colors.white,
-                      size: 24, 
-                    ),                    
+                      size: 24,
+                    ),
                     Positioned(
                       top: -4,
-                      right: -4, 
+                      right: -4,
                       child: Icon(
-                        Icons.add_circle, 
+                        Icons.add_circle,
                         color: Colors.black54,
-                        size: 18, 
+                        size: 18,
                         shadows: [
                           Shadow(
-                            color: Colors.black26, 
+                            color: Colors.black26,
                             offset: Offset(1, 1),
                             blurRadius: 2,
                           ),
@@ -611,6 +630,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color.fromARGB(255, 59, 82, 73),
         onPressed: () => _showSitePicker(context),
         child: Icon(Icons.add),
       ),

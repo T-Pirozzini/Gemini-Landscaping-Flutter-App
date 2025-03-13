@@ -41,7 +41,10 @@ class TruckColumn extends StatelessWidget {
               width: double.infinity,
               color: truck.color.withOpacity(0.2),
               child: Center(
-                  child: Text(truck.name, style: TextStyle(fontSize: 12))),
+                  child: Text(truck.name,
+                      style: TextStyle(
+                        fontSize: 12,
+                      ))),
             ),
           Container(
             height: timeSlotHeight * slotsPerDay,
