@@ -63,10 +63,12 @@ class _EquipmentPageState extends State<EquipmentPage> {
                   Map<String, dynamic> data =
                       document.data() as Map<String, dynamic>;
                   return Equipment(
+                    id: document.id,
                     name: data['name'] ?? '',
                     year: data['year'] ?? 0,
-                    equipment: data['equipmentType'] ?? '',
+                    equipmentType: data['equipmentType'] ?? '',
                     serialNumber: data['serialNumber'] ?? '',
+                    color: Color(data['color'] as int? ?? Colors.blue.value),
                   );
                 }).toList();
 
@@ -158,7 +160,8 @@ class _EquipmentPageState extends State<EquipmentPage> {
                                   ),
                                 ],
                               ),
-                              leading: _getEquipmentIcon(equipment.equipment),
+                              leading:
+                                  _getEquipmentIcon(equipment.equipmentType),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -207,7 +210,7 @@ class _EquipmentPageState extends State<EquipmentPage> {
                                         equipment.name,
                                         equipment.year,
                                         equipment.serialNumber,
-                                        equipment.equipment,
+                                        equipment.equipmentType,
                                         document.id,
                                       );
                                     },

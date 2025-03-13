@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
+import 'package:gemini_landscaping_app/screens/schedule/schedule_screen.dart';
 import 'package:gemini_landscaping_app/screens/utility_screens/announcement_page.dart';
 import 'package:gemini_landscaping_app/screens/utility_screens/profile_page.dart';
 import 'package:gemini_landscaping_app/screens/home/admin_controller.dart';
@@ -8,7 +9,6 @@ import 'package:gemini_landscaping_app/screens/home/utility_controller.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../auth.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -26,7 +26,8 @@ class _HomeState extends State<Home> {
     TimeSheetController(),
     AdminController(),
     UtilityController(),
-    AnnouncementPage(),
+    // AnnouncementPage(),
+    ScheduleScreen(),
     ProfilePage(),
   ];
 
