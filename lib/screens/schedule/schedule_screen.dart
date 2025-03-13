@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
@@ -9,6 +8,8 @@ import 'package:gemini_landscaping_app/screens/schedule/components/truck_column.
 import 'package:gemini_landscaping_app/screens/schedule/week_view_screen.dart';
 import 'package:gemini_landscaping_app/services/schedule_service.dart';
 import 'package:intl/intl.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/fa6_solid.dart';
 
 class ScheduleScreen extends StatefulWidget {
   @override
@@ -341,11 +342,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           startTime.hour,
                           startTime.minute);
                       final end = DateTime(
-                          selectedDate.year,
-                          selectedDate.month,
-                          selectedDate.day,
-                          endTime!.hour,
-                          endTime!.minute,
+                        selectedDate.year,
+                        selectedDate.month,
+                        selectedDate.day,
+                        endTime!.hour,
+                        endTime!.minute,
                       );
                       if (end.isAfter(start)) {
                         _addScheduleEntry(
@@ -484,9 +485,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const double timeSlotHeight = 40.0;
-    const int slotsPerDay = 20;
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -525,9 +523,40 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.local_shipping),
-            onPressed: () => _showTruckManager(context),
+          Stack(
+            children: [
+              IconButton(
+                icon: Stack(
+                  clipBehavior: Clip
+                      .none, 
+                  children: [
+                   
+                    Iconify(
+                      Fa6Solid.truck_pickup,
+                      color: Colors.white,
+                      size: 24, 
+                    ),                    
+                    Positioned(
+                      top: -4,
+                      right: -4, 
+                      child: Icon(
+                        Icons.add_circle, 
+                        color: Colors.black54,
+                        size: 18, 
+                        shadows: [
+                          Shadow(
+                            color: Colors.black26, 
+                            offset: Offset(1, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                onPressed: () => _showTruckManager(context),
+              ),
+            ],
           ),
           IconButton(
             icon: Icon(Icons.calendar_view_week),
@@ -556,17 +585,26 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               // TruckColumns with integrated truck titles
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: trucks.map((truck) => TruckColumn(
-                  truck: truck,
-                  schedule: schedule.where((entry) => entry.truckId == truck.id).toList(),
-                  onHover: _updateHoveredSlotIndex,
-                  onDrop: (entry, slotTime) => _updateScheduleEntry(entry, slotTime, truck.id),
-                  onTapSlot: (index) => _showSitePickerForSlot(context, truck, index),
-                  onResize: (entry, newEndTime) => _updateScheduleEntryWithNewEndTime(entry, newEndTime, truck.id),
-                  onResizeHover: _updateHoveredSlotIndex,
-                  selectedDate: selectedDate,
-                  includeTruckTitle: true, // Add truck title as the top slot
-                )).toList(),
+                children: trucks
+                    .map((truck) => TruckColumn(
+                          truck: truck,
+                          schedule: schedule
+                              .where((entry) => entry.truckId == truck.id)
+                              .toList(),
+                          onHover: _updateHoveredSlotIndex,
+                          onDrop: (entry, slotTime) =>
+                              _updateScheduleEntry(entry, slotTime, truck.id),
+                          onTapSlot: (index) =>
+                              _showSitePickerForSlot(context, truck, index),
+                          onResize: (entry, newEndTime) =>
+                              _updateScheduleEntryWithNewEndTime(
+                                  entry, newEndTime, truck.id),
+                          onResizeHover: _updateHoveredSlotIndex,
+                          selectedDate: selectedDate,
+                          includeTruckTitle:
+                              true, // Add truck title as the top slot
+                        ))
+                    .toList(),
               ),
             ],
           ),

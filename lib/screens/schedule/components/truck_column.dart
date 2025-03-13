@@ -29,7 +29,7 @@ class TruckColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double timeSlotHeight = 40.0;
-    const int slotsPerDay = 20;
+    const int slotsPerDay = 22;
 
     return SizedBox(
       width: 150,
