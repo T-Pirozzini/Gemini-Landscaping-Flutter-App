@@ -22,11 +22,24 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   List<Equipment> trucks = [];
   DateTime selectedDate = DateTime.now();
   int? _hoveredSlotIndex;
+  final ScrollController _verticalScrollController = ScrollController();
+  final ScrollController _horizontalScrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    // Ensure initial scroll position is at the top
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _verticalScrollController.jumpTo(0);
+    });
+  }
+
+  @override
+  void dispose() {
+    _verticalScrollController.dispose();
+    _horizontalScrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -65,10 +78,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       notes: entry.notes,
     );
 
-    // Update Firestore
     await _service.updateScheduleEntry(updatedEntry);
 
-    // Update local schedule and re-render
     setState(() {
       final index = schedule.indexOf(entry);
       if (index != -1) {
@@ -77,8 +88,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     });
 
     print(
-        'Updated entry startTime: ${updatedEntry.startTime}, endTime: ${updatedEntry.endTime}'); // Debug
-    await _loadData(); // Ensure consistency with Firestore
+        'Updated entry startTime: ${updatedEntry.startTime}, endTime: ${updatedEntry.endTime}');
+    await _loadData();
   }
 
   void _updateScheduleEntryWithNewEndTime(
@@ -333,11 +344,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           selectedDate.year,
                           selectedDate.month,
                           selectedDate.day,
-                          endTime!
-                              .hour, // Add ! since we checked endTime != null
-                          endTime!
-                              .minute // Add ! since we checked endTime != null
-                          );
+                          endTime!.hour,
+                          endTime!.minute,
+                      );
                       if (end.isAfter(start)) {
                         _addScheduleEntry(
                             selectedSite!, start, end, selectedTruck);
@@ -486,28 +495,27 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               icon: Icon(Icons.arrow_left),
               onPressed: () => _changeDate(-1),
             ),
-            // Custom title with weekday and date
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: DateFormat('EEEE')
-                        .format(selectedDate), // e.g., "Monday"
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+            Expanded(
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: DateFormat('EEEE').format(selectedDate),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                  TextSpan(
-                    text:
-                        ' (${DateFormat('MMM d, yyyy').format(selectedDate)})', // e.g., "(March 12, 2025)"
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
+                    TextSpan(
+                      text: ' (${DateFormat('MMM d').format(selectedDate)})',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             IconButton(
@@ -528,85 +536,41 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header Row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+      body: SingleChildScrollView(
+        controller: _verticalScrollController,
+        scrollDirection: Axis.vertical,
+        child: SingleChildScrollView(
+          controller: _horizontalScrollController,
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
+              // TimeColumn with "Time" as the top slot
+              SizedBox(
                 width: 80,
-                height: 40,
-                color: Colors.grey[200],
-                child:
-                    Center(child: Text('Time', style: TextStyle(fontSize: 12))),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: trucks
-                        .map((truck) => Container(
-                              width: 150,
-                              height: 40,
-                              color: truck.color.withOpacity(0.2),
-                              child: Center(
-                                  child: Text(truck.name,
-                                      style: TextStyle(fontSize: 12))),
-                            ))
-                        .toList(),
-                  ),
+                child: TimeColumn(
+                  hoveredSlotIndex: _hoveredSlotIndex,
+                  includeTimeTitle: true, // Add "Time" as the top slot
                 ),
+              ),
+              // TruckColumns with integrated truck titles
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: trucks.map((truck) => TruckColumn(
+                  truck: truck,
+                  schedule: schedule.where((entry) => entry.truckId == truck.id).toList(),
+                  onHover: _updateHoveredSlotIndex,
+                  onDrop: (entry, slotTime) => _updateScheduleEntry(entry, slotTime, truck.id),
+                  onTapSlot: (index) => _showSitePickerForSlot(context, truck, index),
+                  onResize: (entry, newEndTime) => _updateScheduleEntryWithNewEndTime(entry, newEndTime, truck.id),
+                  onResizeHover: _updateHoveredSlotIndex,
+                  selectedDate: selectedDate,
+                  includeTruckTitle: true, // Add truck title as the top slot
+                )).toList(),
               ),
             ],
           ),
-          // Schedule Grid
-          Expanded(
-            child: SingleChildScrollView(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Sticky TimeColumn
-                  SizedBox(
-                    width: 80,
-                    child: TimeColumn(hoveredSlotIndex: _hoveredSlotIndex),
-                  ),
-                  // Scrollable Truck Columns
-                  Expanded(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: trucks
-                            .map((truck) => TruckColumn(
-                                  truck: truck,
-                                  schedule: schedule
-                                      .where(
-                                          (entry) => entry.truckId == truck.id)
-                                      .toList(),
-                                  onHover: _updateHoveredSlotIndex,
-                                  onDrop: (entry, slotTime) =>
-                                      _updateScheduleEntry(
-                                          entry, slotTime, truck.id),
-                                  onTapSlot: (index) => _showSitePickerForSlot(
-                                      context, truck, index),
-                                  onResize: (entry, newEndTime) =>
-                                      _updateScheduleEntryWithNewEndTime(
-                                          entry, newEndTime, truck.id),
-                                  onResizeHover:
-                                      _updateHoveredSlotIndex, // New callback for resize hover
-                                  selectedDate: selectedDate,
-                                ))
-                            .toList(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showSitePicker(context),

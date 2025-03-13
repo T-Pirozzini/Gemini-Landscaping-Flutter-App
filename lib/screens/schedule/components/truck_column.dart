@@ -12,6 +12,7 @@ class TruckColumn extends StatelessWidget {
   final Function(ScheduleEntry, DateTime) onResize;
   final Function(int?) onResizeHover;
   final DateTime selectedDate;
+  final bool includeTruckTitle; // New parameter to include the truck title
 
   const TruckColumn({
     required this.truck,
@@ -22,6 +23,7 @@ class TruckColumn extends StatelessWidget {
     required this.onResize,
     required this.onResizeHover,
     required this.selectedDate,
+    this.includeTruckTitle = false,
   });
 
   @override
@@ -33,6 +35,14 @@ class TruckColumn extends StatelessWidget {
       width: 150,
       child: Column(
         children: [
+          if (includeTruckTitle)
+            Container(
+              height: timeSlotHeight,
+              width: double.infinity,
+              color: truck.color.withOpacity(0.2),
+              child: Center(
+                  child: Text(truck.name, style: TextStyle(fontSize: 12))),
+            ),
           Container(
             height: timeSlotHeight * slotsPerDay,
             child: Stack(

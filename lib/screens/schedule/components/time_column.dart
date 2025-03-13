@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class TimeColumn extends StatelessWidget {
   final int? hoveredSlotIndex;
-  const TimeColumn({required this.hoveredSlotIndex});
+  final bool includeTimeTitle; // New parameter to include the "Time" title
+
+  const TimeColumn({
+    required this.hoveredSlotIndex,
+    this.includeTimeTitle = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -11,25 +15,35 @@ class TimeColumn extends StatelessWidget {
     const int slotsPerDay = 20;
 
     return Column(
-      children: List.generate(slotsPerDay, (index) {
-        final hour = 7 + (index ~/ 2);
-        final minute = (index % 2) * 30;
-        final time = DateTime.now()
-            .copyWith(hour: hour, minute: minute, second: 0, millisecond: 0);
-        return Container(
-          height: timeSlotHeight,
-          width: 80,
-          color: hoveredSlotIndex == index
-              ? Colors.green.withOpacity(0.3)
-              : Colors.transparent,
-          child: Center(
-            child: Text(
-              DateFormat('h:mm a').format(time),
-              style: const TextStyle(fontSize: 12),
-            ),
+      children: [
+        if (includeTimeTitle)
+          Container(
+            height: timeSlotHeight,
+            width: double.infinity,
+            color: Colors.grey[200],
+            child: Center(child: Text('Time', style: TextStyle(fontSize: 12))),
           ),
-        );
-      }),
+        ...List.generate(slotsPerDay, (index) {
+          final hour = 7 + (index ~/ 2);
+          final minute = (index % 2) * 30;
+          final isHovered = hoveredSlotIndex == index;
+
+          return Container(
+            height: timeSlotHeight,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: isHovered ? Colors.blue.withOpacity(0.2) : Colors.transparent,
+              border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+            ),
+            child: Center(
+              child: Text(
+                minute == 0 ? '$hour:00' : '$hour:30',
+                style: TextStyle(fontSize: 12),
+              ),
+            ),
+          );
+        }),
+      ],
     );
   }
 }
