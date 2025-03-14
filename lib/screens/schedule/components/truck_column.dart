@@ -12,7 +12,8 @@ class TruckColumn extends StatelessWidget {
   final Function(ScheduleEntry, DateTime) onResize;
   final Function(int?) onResizeHover;
   final DateTime selectedDate;
-  final bool includeTruckTitle; // New parameter to include the truck title
+  final bool includeTruckTitle;
+  final VoidCallback onRefresh;
 
   const TruckColumn({
     required this.truck,
@@ -24,6 +25,7 @@ class TruckColumn extends StatelessWidget {
     required this.onResizeHover,
     required this.selectedDate,
     this.includeTruckTitle = false,
+    required this.onRefresh,
   });
 
   @override
@@ -135,6 +137,7 @@ class TruckColumn extends StatelessWidget {
                       onResize: onResize,
                       onResizeHover: onResizeHover,
                       selectedDate: selectedDate,
+                      onRefresh: onRefresh,
                     ),
                   );
                 }),

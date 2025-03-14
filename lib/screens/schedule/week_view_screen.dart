@@ -26,7 +26,7 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
   }
 
   Future<void> _loadWeekData() async {
-    trucks = await _service.fetchTrucks();
+    trucks = await _service.fetchActiveTrucks();
     for (var day in weekDays) {
       weekSchedules[day] = await _service.fetchSchedules(day);
     }
@@ -53,35 +53,50 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
                         Container(
                           height: 40,
                           width: trucks.length * 150.0,
-                          child: Center(child: Text(DateFormat('MMM d').format(day))),
+                          child: Center(
+                              child: Text(DateFormat('MMM d').format(day))),
                         ),
                         Row(
-                          children: trucks.map((truck) => SizedBox(
-                                width: 150,
-                                height: timeSlotHeight * slotsPerDay,
-                                child: Stack(
-                                  children: weekSchedules[day]
-                                          ?.where((entry) => entry.truckId == truck.id)
-                                          .map((entry) {
-                                    final startMinutes = entry.startTime.hour * 60 + entry.startTime.minute;
-                                    final endMinutes = entry.endTime.hour * 60 + entry.endTime.minute;
-                                    final startOffset = (startMinutes - 7 * 60) / 30;
-                                    final durationSlots = (endMinutes - startMinutes) / 30;
+                          children: trucks
+                              .map((truck) => SizedBox(
+                                    width: 150,
+                                    height: timeSlotHeight * slotsPerDay,
+                                    child: Stack(
+                                      children: weekSchedules[day]
+                                              ?.where((entry) =>
+                                                  entry.truckId == truck.id)
+                                              .map((entry) {
+                                            final startMinutes =
+                                                entry.startTime.hour * 60 +
+                                                    entry.startTime.minute;
+                                            final endMinutes =
+                                                entry.endTime.hour * 60 +
+                                                    entry.endTime.minute;
+                                            final startOffset =
+                                                (startMinutes - 7 * 60) / 30;
+                                            final durationSlots =
+                                                (endMinutes - startMinutes) /
+                                                    30;
 
-                                    return Positioned(
-                                      top: startOffset * timeSlotHeight,
-                                      left: 0,
-                                      right: 0,
-                                      height: durationSlots * timeSlotHeight,
-                                      child: Container(
-                                        color: truck.color.withOpacity(0.5),
-                                        child: Center(child: Text(entry.site.name)),
-                                      ),
-                                    );
-                                  }).toList() ??
-                                      [],
-                                ),
-                              )).toList(),
+                                            return Positioned(
+                                              top: startOffset * timeSlotHeight,
+                                              left: 0,
+                                              right: 0,
+                                              height: durationSlots *
+                                                  timeSlotHeight,
+                                              child: Container(
+                                                color: truck.color
+                                                    .withOpacity(0.5),
+                                                child: Center(
+                                                    child:
+                                                        Text(entry.site.name)),
+                                              ),
+                                            );
+                                          }).toList() ??
+                                          [],
+                                    ),
+                                  ))
+                              .toList(),
                         ),
                       ],
                     )),

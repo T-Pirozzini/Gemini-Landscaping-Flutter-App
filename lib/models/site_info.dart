@@ -16,4 +16,30 @@ class SiteInfo {
     required this.target,
     required this.id,
   });
+
+  // Convert SiteInfo to a Map for Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'address': address,
+      'imageUrl': imageUrl,
+      'management': management,
+      'name': name,
+      'status': status,
+      'target': target,
+      'id': id,
+    };
+  }
+
+  // Factory constructor to create SiteInfo from Firestore (optional for now)
+  factory SiteInfo.fromMap(Map<String, dynamic> map, String id) {
+    return SiteInfo(
+      address: map['address'] ?? '',
+      imageUrl: map['imageUrl'] ?? '',
+      management: map['management'] ?? '',
+      name: map['name'] ?? '',
+      status: map['status'] ?? false,
+      target: (map['target'] as num?)?.toDouble() ?? 0.0,
+      id: id,
+    );
+  }
 }

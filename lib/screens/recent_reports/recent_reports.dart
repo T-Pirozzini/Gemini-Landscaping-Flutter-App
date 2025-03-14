@@ -310,7 +310,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
             icon: Icons.note_add_outlined,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
-              Navigator.pushReplacement(
+              Navigator.push(
                   context, MaterialPageRoute(builder: (_) => AddSiteReport()));
             },
           ),
@@ -321,7 +321,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
             icon: Icons.cloudy_snowing,
             titleStyle: TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
-              Navigator.pushReplacement(context,
+              Navigator.push(context,
                   MaterialPageRoute(builder: (_) => AddWinterReport()));
             },
           ),

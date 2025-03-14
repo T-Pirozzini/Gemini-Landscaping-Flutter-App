@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
@@ -8,6 +9,8 @@ import 'package:gemini_landscaping_app/screens/schedule/components/truck_column.
 import 'package:gemini_landscaping_app/screens/schedule/week_view_screen.dart';
 import 'package:gemini_landscaping_app/services/schedule_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconify_flutter/icons/fontisto.dart';
+import 'package:iconify_flutter/icons/material_symbols.dart';
 import 'package:intl/intl.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/fa6_solid.dart';
@@ -21,11 +24,16 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   final ScheduleService _service = ScheduleService();
   List<ScheduleEntry> schedule = [];
   List<SiteInfo> activeSites = [];
-  List<Equipment> trucks = [];
+  List<Equipment> activeTrucks = [];
+  List<Equipment> allTrucks = [];
   DateTime selectedDate = DateTime.now();
   int? _hoveredSlotIndex;
   final ScrollController _verticalScrollController = ScrollController();
   final ScrollController _horizontalScrollController = ScrollController();
+
+  // Controllers for the Add Site Dialog
+  final _nameController = TextEditingController();
+  final _addressController = TextEditingController();
 
   @override
   void initState() {
@@ -41,16 +49,19 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   void dispose() {
     _verticalScrollController.dispose();
     _horizontalScrollController.dispose();
+    _nameController.dispose(); // Dispose controllers here
+    _addressController.dispose();
     super.dispose();
   }
 
   Future<void> _loadData() async {
     activeSites = await _service.fetchActiveSites();
-    trucks = await _service.fetchTrucks();
-    print('Loaded trucks: ${trucks.length}');
-    trucks.forEach((truck) => print('Truck: ${truck.name}, ${truck.id}'));
+    activeTrucks = await _service.fetchActiveTrucks();
+    allTrucks = await _service.fetchAllTrucks();
+    print('Loaded trucks: ${activeTrucks.length}');
+    activeTrucks.forEach((truck) => print('Truck: ${truck.name}, ${truck.id}'));
     schedule = await _service.fetchSchedules(selectedDate);
-    final activeTruckIds = trucks.map((truck) => truck.id).toSet();
+    final activeTruckIds = activeTrucks.map((truck) => truck.id).toSet();
     schedule = schedule
         .where((entry) =>
             entry.truckId == null || activeTruckIds.contains(entry.truckId!))
@@ -146,7 +157,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       value: selectedTruck,
                       onChanged: (Equipment? value) =>
                           setDialogState(() => selectedTruck = value),
-                      items: trucks.map((truck) {
+                      items: activeTrucks.map((truck) {
                         return DropdownMenuItem(
                           value: truck,
                           child: Row(
@@ -490,6 +501,116 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
+  void _showTruckManagerDialog(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        List<Equipment> localTrucks = List.from(allTrucks);
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text('Manage Trucks', style: GoogleFonts.roboto()),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: localTrucks.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    Equipment truck = entry.value;
+
+                    return ListTile(
+                      leading: GestureDetector(
+                        onTap: () async {
+                          Color currentColor = localTrucks[index].color;
+                          Color? selectedColor =
+                              currentColor; // Track the selected color
+
+                          final picked = await showDialog<Color>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('Pick a Color',
+                                  style: GoogleFonts.roboto()),
+                              content: SingleChildScrollView(
+                                child: BlockPicker(
+                                  pickerColor: currentColor,
+                                  onColorChanged: (color) {
+                                    setDialogState(() {
+                                      localTrucks[index] = localTrucks[index]
+                                          .copyWith(color: color);
+                                      selectedColor =
+                                          color; // Update the selected color
+                                    });
+                                  },
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context,
+                                      selectedColor), // Return the selected color
+                                  child: Text('Select',
+                                      style: GoogleFonts.roboto()),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (picked != null &&
+                              picked.value != currentColor.value) {
+                            setDialogState(() {
+                              localTrucks[index] =
+                                  localTrucks[index].copyWith(color: picked);
+                            });
+                            print(
+                                'Attempting to update truck with id: ${localTrucks[index].id}, active: ${localTrucks[index].active}, color: ${picked.value.toRadixString(16).padLeft(8, '0')}');
+                            await _service.updateTruck(localTrucks[index].id,
+                                localTrucks[index].active, picked);
+                            await _loadData();
+                          } else {
+                            print(
+                                'No color change detected: picked = ${picked?.value.toRadixString(16).padLeft(8, '0')}, current = ${currentColor.value.toRadixString(16).padLeft(8, '0')}');
+                            // Revert the dialog UI if no update
+                            setDialogState(() {
+                              localTrucks[index] = localTrucks[index]
+                                  .copyWith(color: currentColor);
+                            });
+                          }
+                        },
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          color: localTrucks[index].color,
+                        ),
+                      ),
+                      title: Text(truck.name, style: GoogleFonts.roboto()),
+                      trailing: Switch(
+                        value: localTrucks[index].active,
+                        onChanged: (value) async {
+                          setDialogState(() {
+                            localTrucks[index] =
+                                localTrucks[index].copyWith(active: value);
+                          });
+                          await _service.updateTruck(localTrucks[index].id,
+                              value, localTrucks[index].color);
+                          await _loadData();
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Close', style: GoogleFonts.roboto()),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _addScheduleEntry(
       SiteInfo site, DateTime start, DateTime end, Equipment? truck) async {
     final entry = ScheduleEntry(
@@ -500,6 +621,113 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
     await _service.addScheduleEntry(entry);
     await _loadData();
+  }
+
+  void _showAddSiteDialog(BuildContext context) {
+    final _formKey = GlobalKey<FormState>(); // For form validation
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            'Add New Site',
+            style: GoogleFonts.montserrat(),
+          ),
+          content: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Name field (mandatory)
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Site Name',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a site name';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  // Address field (optional)
+                  TextFormField(
+                    controller: _addressController,
+                    decoration: InputDecoration(
+                      labelText: 'Address (Optional)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close dialog
+              },
+              child: Text('Cancel', style: GoogleFonts.roboto()),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Validate the form
+                if (_formKey.currentState!.validate()) {
+                  try {
+                    // Create a reference to the SiteList collection
+                    final siteRef =
+                        FirebaseFirestore.instance.collection('SiteList');
+
+                    // Generate a new document ID
+                    final newDocRef = siteRef.doc(); // Auto-generate ID
+
+                    // Create a new SiteInfo instance with default values
+                    final newSite = SiteInfo(
+                      address: _addressController.text.trim().isEmpty
+                          ? ""
+                          : _addressController.text
+                              .trim(), // Default to "" if empty
+                      imageUrl: "", // Default value
+                      management: "", // Default value
+                      name: _nameController.text.trim(),
+                      status: true, // Default to true
+                      target: 0.0, // Default value
+                      id: newDocRef.id, // Use the generated ID
+                    );
+
+                    // Save to Firestore
+                    await newDocRef.set(newSite.toMap());
+
+                    // Show success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Site added successfully!')),
+                    );
+
+                    // Clear controllers after successful save
+                    _nameController.clear();
+                    _addressController.clear();
+
+                    // Close the dialog
+                    Navigator.pop(context);
+                  } catch (e) {
+                    // Show error message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to add site: $e')),
+                    );
+                  }
+                }
+              },
+              child: Text('Save', style: GoogleFonts.roboto()),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -551,24 +779,24 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                   clipBehavior: Clip.none,
                   children: [
                     Iconify(
-                      Fa6Solid.truck_pickup,
+                      Fontisto.truck,
                       color: Colors.white,
                       size: 24,
                     ),
                     Positioned(
-                      top: -4,
-                      right: -4,
-                      child: Icon(
-                        Icons.add_circle,
-                        color: Colors.black54,
-                        size: 18,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            offset: Offset(1, 1),
-                            blurRadius: 2,
-                          ),
-                        ],
+                      top: -8,
+                      right: -8,
+                      child: Container(
+                        padding: EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade800,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.add,
+                          size: 14,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -604,7 +832,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               // TruckColumns with integrated truck titles
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: trucks
+                children: activeTrucks
                     .map((truck) => TruckColumn(
                           truck: truck,
                           schedule: schedule
@@ -620,8 +848,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                   entry, newEndTime, truck.id),
                           onResizeHover: _updateHoveredSlotIndex,
                           selectedDate: selectedDate,
-                          includeTruckTitle:
-                              true, // Add truck title as the top slot
+                          includeTruckTitle: true,
+                          onRefresh: _loadData,
                         ))
                     .toList(),
               ),
@@ -629,10 +857,108 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color.fromARGB(255, 59, 82, 73),
-        onPressed: () => _showSitePicker(context),
-        child: Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+            onPressed: () => _showSitePicker(context),
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                Iconify(
+                  MaterialSymbols.today_outline,
+                  size: 28,
+                  color: Colors.white,
+                ),
+                Positioned(
+                  top: -8,
+                  right: -8,
+                  child: Container(
+                    padding: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade800,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.add_circle,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            heroTag: 'addSite',
+          ),
+          SizedBox(height: 10), // Spacing between FABs
+          FloatingActionButton(
+            backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+            onPressed: () => _showTruckManagerDialog(context),
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                Iconify(
+                  Fontisto.truck,
+                  size: 28,
+                  color: Colors.white,
+                ),
+                Positioned(
+                  top: -8,
+                  right: -8,
+                  child: Container(
+                    padding: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade800,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.settings,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            heroTag: 'manageTrucks', // Unique heroTag to avoid conflicts
+          ),
+          SizedBox(height: 10),
+          FloatingActionButton(
+            backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+            onPressed: () => _showAddSiteDialog(context),
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  Icons.location_city,
+                  size: 28,
+                  color: Colors.white,
+                ),
+                Positioned(
+                  top: -8,
+                  right: -8,
+                  child: Container(
+                    padding: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade800,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.add,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            heroTag: 'addNewSite',
+          ),
+        ],
       ),
     );
   }

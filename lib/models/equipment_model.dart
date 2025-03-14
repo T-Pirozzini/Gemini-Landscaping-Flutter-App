@@ -42,4 +42,17 @@ class Equipment {
       active: data['active'] as bool? ?? true,
     );
   }
+
+  // Add copyWith method to create a new instance with updated values
+  Equipment copyWith({String? id, String? name, int? year, String? equipmentType, String? serialNumber, Color? color, bool? active}) {
+    return Equipment(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      year: year ?? this.year,
+      equipmentType: equipmentType ?? this.equipmentType,
+      serialNumber: serialNumber ?? this.serialNumber,
+      color: color ?? this.color,
+      active: active ?? this.active,
+    );
+  }
 }

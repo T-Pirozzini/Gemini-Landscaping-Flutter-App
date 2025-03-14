@@ -26,11 +26,21 @@ class ScheduleService {
     }).toList();
   }
 
-  Future<List<Equipment>> fetchTrucks() async {
+  Future<List<Equipment>> fetchActiveTrucks() async {
     final snapshot = await _firestore
         .collection('equipment')
         .where('equipmentType', isEqualTo: 'Truck')
         .where('active', isEqualTo: true)
+        .get();
+    return snapshot.docs
+        .map((doc) => Equipment.fromMap(doc.id, doc.data()))
+        .toList();
+  }
+
+  Future<List<Equipment>> fetchAllTrucks() async {
+    final snapshot = await _firestore
+        .collection('equipment')
+        .where('equipmentType', isEqualTo: 'Truck')
         .get();
     return snapshot.docs
         .map((doc) => Equipment.fromMap(doc.id, doc.data()))
@@ -58,17 +68,36 @@ class ScheduleService {
     }).toList();
   }
 
-  Future<void> addTruck(
-    String name, int year, String serialNumber, Color color, {bool isActive = true}) async {
-  await _firestore.collection('equipment').add({
-    'name': name,
-    'year': year,
-    'equipmentType': 'Truck',
-    'serialNumber': serialNumber,
-    'color': color.value,
-    'active': isActive,
-  });
-}
+  Future<void> addTruck(String name, int year, String serialNumber, Color color,
+      {bool isActive = true}) async {
+    await _firestore.collection('equipment').add({
+      'name': name,
+      'year': year,
+      'equipmentType': 'Truck',
+      'serialNumber': serialNumber,
+      'color': color.value,
+      'active': isActive,
+    });
+  }
+
+  Future<void> updateTruck(String truckId, bool active, Color color) async {
+    try {
+      print(
+          'Updating truck $truckId with active: $active, color: ${color.value} (hex: ${color.value.toRadixString(16).padLeft(8, '0')})');
+      await _firestore
+          .collection('equipment')
+          .doc(truckId)
+          .update({'active': active, 'color': color.value});
+      print('Truck $truckId updated successfully');
+      // Fetch and print the updated document to verify
+      final updatedDoc =
+          await _firestore.collection('equipment').doc(truckId).get();
+      print('Verified updated data: ${updatedDoc.data()}');
+    } catch (e) {
+      print('Error updating truck $truckId: $e');
+      throw Exception('Failed to update truck: $e');
+    }
+  }
 
   Future<void> addScheduleEntry(ScheduleEntry entry) async {
     await _firestore.collection('Schedules').add(entry.toMap());
@@ -80,6 +109,29 @@ class ScheduleService {
           .collection('Schedules')
           .doc(entry.id)
           .update(entry.toMap());
+    }
+  }
+
+  Future<void> updateScheduleEntryNotes(
+      String scheduleEntryId, String notes) async {
+    try {
+      await _firestore.collection('Schedules').doc(scheduleEntryId).update({
+        'notes': notes,
+      });
+      print('Updated notes for schedule entry $scheduleEntryId');
+    } catch (e) {
+      print('Error updating notes for schedule entry $scheduleEntryId: $e');
+      throw Exception('Failed to update notes: $e');
+    }
+  }
+
+  Future<void> deleteScheduleEntry(String scheduleEntryId) async {
+    try {
+      await _firestore.collection('Schedules').doc(scheduleEntryId).delete();
+      print('Deleted schedule entry $scheduleEntryId');
+    } catch (e) {
+      print('Error deleting schedule entry $scheduleEntryId: $e');
+      throw Exception('Failed to delete schedule entry: $e');
     }
   }
 }

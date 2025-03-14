@@ -1,9 +1,12 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:gemini_landscaping_app/models/schedule_model.dart';
+import 'package:gemini_landscaping_app/screens/add_report/add_site_report.dart';
+import 'package:gemini_landscaping_app/services/schedule_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/mdi.dart';
 
 class DraggableScheduleEntry extends StatefulWidget {
   final ScheduleEntry entry;
@@ -13,6 +16,7 @@ class DraggableScheduleEntry extends StatefulWidget {
   final Function(ScheduleEntry, DateTime) onResize;
   final Function(int?) onResizeHover;
   final DateTime selectedDate;
+  final VoidCallback onRefresh;
 
   const DraggableScheduleEntry({
     required this.entry,
@@ -22,6 +26,7 @@ class DraggableScheduleEntry extends StatefulWidget {
     required this.onResize,
     required this.onResizeHover,
     required this.selectedDate,
+    required this.onRefresh,
   });
 
   @override
@@ -118,6 +123,154 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
     print('Dragging the entry ended');
   }
 
+  void _showNotesDialog(BuildContext context) {
+    final TextEditingController _noteController = TextEditingController(
+      text: widget.entry.notes ?? '', // Pre-fill with existing notes
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Notes for ${widget.entry.site.name}',
+              style: GoogleFonts.montserrat()),
+          content: Container(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _noteController,
+                  decoration: InputDecoration(
+                    labelText: 'Notes',
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter notes here...',
+                  ),
+                  maxLines: 5,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel', style: GoogleFonts.roboto()),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (widget.entry.id != null) {
+                  await ScheduleService().updateScheduleEntryNotes(
+                    widget.entry.id!,
+                    _noteController.text.trim(),
+                  );
+                  widget.onRefresh(); // Refresh the schedule
+                  Navigator.pop(context);
+                } else {
+                  print('Error: ScheduleEntry ID is null');
+                }
+              },
+              child: Text('Save', style: GoogleFonts.roboto()),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSiteAddressDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Address for ${widget.entry.site.name}',
+              textAlign: TextAlign.center, style: GoogleFonts.montserrat()),
+          content: Container(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.entry.site.address,
+                  style: GoogleFonts.roboto(),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Close', style: GoogleFonts.roboto()),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Confirm Deletion', style: GoogleFonts.montserrat()),
+          content: Text(
+            'Are you sure you want to delete the schedule entry for ${widget.entry.site.name}? This action cannot be undone.',
+            style: GoogleFonts.roboto(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), // Cancel
+              child: Text('Cancel', style: GoogleFonts.roboto()),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (widget.entry.id != null) {
+                  await ScheduleService().deleteScheduleEntry(widget.entry.id!);
+                  widget.onRefresh(); // Refresh the schedule
+                  Navigator.pop(context); // Close confirmation dialog
+                } else {
+                  print('Error: ScheduleEntry ID is null');
+                }
+              },
+              child:
+                  Text('Delete', style: GoogleFonts.roboto(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _navigateToAddReport(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddSiteReport(
+          prefilledSite: widget.entry.site,
+          prefilledDate: widget.entry.startTime,
+          prefilledEndTime: widget.entry.endTime,
+        ),
+      ),
+    );
+  }
+
+  // Helper method to calculate and format the duration
+  String _formatDuration(DateTime startTime, DateTime endTime) {
+    final duration = widget.entry.endTime.difference(widget.entry.startTime);
+    final int hours = duration.inHours;
+    final int minutes = duration.inMinutes % 60;
+    String formattedDuration = '';
+    if (hours > 0) {
+      formattedDuration += '$hours hour${hours != 1 ? 's' : ''}';
+    }
+    if (minutes > 0) {
+      if (formattedDuration.isNotEmpty) formattedDuration += ' ';
+      formattedDuration += '$minutes min${minutes != 1 ? 's' : ''}';
+    }
+    return formattedDuration.isEmpty ? '0 mins' : formattedDuration;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -132,13 +285,28 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
               height: initialHeight,
               color: widget.truck.color.withOpacity(0.8),
               child: Center(
-                child: AutoSizeText(
-                  widget.entry.site.name,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AutoSizeText(
+                      widget.entry.site.name,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                    ),
+                    AutoSizeText(
+                      _formatDuration(
+                          widget.entry.startTime, widget.entry.endTime),
+                      style: GoogleFonts.montserrat(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -150,12 +318,26 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
             color: widget.truck.color.withOpacity(0.5),
             height: currentHeight,
             child: Center(
-              child: AutoSizeText(
-                widget.entry.site.name,
-                style: GoogleFonts.montserrat(
-                  fontSize: 14,
-                ),
-                maxLines: 1,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AutoSizeText(
+                    widget.entry.site.name,
+                    style: GoogleFonts.montserrat(
+                      fontSize: 14,
+                    ),
+                    maxLines: 1,
+                  ),
+                  AutoSizeText(
+                    _formatDuration(
+                        widget.entry.startTime, widget.entry.endTime),
+                    style: GoogleFonts.montserrat(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                  ),
+                ],
               ),
             ),
           ),
@@ -178,6 +360,126 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
                     Icons.drag_handle,
                     size: 16,
                     color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (!isMoving)
+          Positioned(
+            top: 4,
+            right: 64, // Reduced spacing for smaller buttons
+            child: Tooltip(
+              message: 'Add/Edit Notes',
+              child: Material(
+                color: Colors.white,
+                elevation: 1, // Reduced elevation for smaller appearance
+                shape: CircleBorder(),
+                child: Padding(
+                  padding: EdgeInsets.all(1), // Reduced padding around icon
+                  child: IconButton(
+                    icon: widget.entry.notes != null && widget.entry.notes != ""
+                        ? Iconify(
+                            Mdi.note_alert,
+                            size: 14, // Reduced icon size
+                            color: widget.entry.notes != null &&
+                                    widget.entry.notes != ""
+                                ? Colors.blue
+                                : Colors.black54,
+                          )
+                        : Iconify(
+                            Mdi.note_outline,
+                            size: 14, // Reduced icon size
+                            color: widget.entry.notes != null &&
+                                    widget.entry.notes != ""
+                                ? Colors.blue
+                                : Colors.black54,
+                          ),
+                    splashRadius: 16, // Reduced splash radius
+                    padding: EdgeInsets.zero, // Remove default padding
+                    constraints: BoxConstraints(), // Remove default constraints
+                    onPressed: () => _showNotesDialog(context),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (!isMoving)
+          Positioned(
+            top: 4,
+            right: 34, // Reduced spacing for smaller buttons
+            child: Tooltip(
+              message: 'View Site Address',
+              child: Material(
+                color: Colors.white,
+                elevation: 1,
+                shape: CircleBorder(),
+                child: Padding(
+                  padding: EdgeInsets.all(1),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.location_on,
+                      size: 14,
+                      color: Colors.black54,
+                    ),
+                    splashRadius: 16,
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                    onPressed: () => _showSiteAddressDialog(context),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (!isMoving)
+          Positioned(
+            top: 4,
+            right: 4, // Reduced spacing for smaller buttons
+            child: Tooltip(
+              message: 'Delete Schedule Entry',
+              child: Material(
+                color: Colors.white,
+                elevation: 1,
+                shape: CircleBorder(),
+                child: Padding(
+                  padding: EdgeInsets.all(1),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.delete,
+                      size: 14,
+                      color: Colors.red.shade400,
+                    ),
+                    splashRadius: 16,
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                    onPressed: () => _showDeleteConfirmationDialog(context),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (!isMoving)
+          Positioned(
+            top: 4,
+            left: 4,
+            child: Tooltip(
+              message: 'Add Site Report',
+              child: Material(
+                color: Colors.white,
+                elevation: 1,
+                shape: CircleBorder(),
+                child: Padding(
+                  padding: EdgeInsets.all(2),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.note_add,
+                      size: 14,
+                      color: Colors.green,
+                    ),
+                    splashRadius: 16,
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                    onPressed: () => _navigateToAddReport(context),
                   ),
                 ),
               ),
