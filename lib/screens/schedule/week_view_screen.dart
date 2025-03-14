@@ -12,36 +12,112 @@ class WeekViewScreen extends StatefulWidget {
 
 class _WeekViewScreenState extends State<WeekViewScreen> {
   final ScheduleService _service = ScheduleService();
-  late List<DateTime> weekDays;
-  Map<DateTime, List<ScheduleEntry>> weekSchedules = {};
+  late DateTime currentMonday; // Start of the current week
+  Map<DateTime, List<DateTime>> weekDates = {}; // Maps week start to its days
+  Map<DateTime, Map<DateTime, List<ScheduleEntry>>> weekSchedules =
+      {}; // Nested map for weeks and days
   List<Equipment> trucks = [];
+  static const double timeSlotHeight = 40.0;
+  static const int slotsPerDay = 20;
 
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
-    final monday = now.subtract(Duration(days: now.weekday - 1));
-    weekDays = List.generate(5, (i) => monday.add(Duration(days: i)));
+    currentMonday = now.subtract(
+        Duration(days: now.weekday - 1)); // Start of current week (Monday)
     _loadWeekData();
   }
 
   Future<void> _loadWeekData() async {
     trucks = await _service.fetchActiveTrucks();
-    for (var day in weekDays) {
-      weekSchedules[day] = await _service.fetchSchedules(day);
-    }
+
+    // Define the three weeks: previous, current, next
+    final previousMonday = currentMonday.subtract(Duration(days: 7));
+    final nextMonday = currentMonday.add(Duration(days: 7));
+
+    // Map each week's start date to its 5 days (Mon-Fri)
+    weekDates = {
+      previousMonday:
+          List.generate(5, (i) => previousMonday.add(Duration(days: i))),
+      currentMonday:
+          List.generate(5, (i) => currentMonday.add(Duration(days: i))),
+      nextMonday: List.generate(5, (i) => nextMonday.add(Duration(days: i))),
+    };
+
+    // Load schedules for all days in the three weeks
+    weekSchedules = {
+      previousMonday: {
+        for (var day in weekDates[previousMonday]!)
+          day: await _service.fetchSchedules(day)
+      },
+      currentMonday: {
+        for (var day in weekDates[currentMonday]!)
+          day: await _service.fetchSchedules(day)
+      },
+      nextMonday: {
+        for (var day in weekDates[nextMonday]!)
+          day: await _service.fetchSchedules(day)
+      },
+    };
+
     setState(() {});
+  }
+
+  void _navigateWeek(bool forward) {
+    setState(() {
+      currentMonday = forward
+          ? currentMonday.add(Duration(days: 7))
+          : currentMonday.subtract(Duration(days: 7));
+      _loadWeekData(); // Reload data for the new week range
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    const double timeSlotHeight = 40.0;
-    const int slotsPerDay = 20;
-
     return Scaffold(
-      appBar: AppBar(title: Text('Week View: Mon-Fri')),
+      appBar: AppBar(
+        title: Text('Week View: 3 Weeks'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            onPressed: () => _navigateWeek(false),
+          ),
+          IconButton(
+            icon: Icon(Icons.arrow_forward_ios),
+            onPressed: () => _navigateWeek(true),
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
-        child: SizedBox(
+        child: Column(
+          children: [
+            // Previous Week
+            _buildWeekSection(
+                currentMonday.subtract(Duration(days: 7)), 'Previous Week'),
+            // Current Week
+            _buildWeekSection(currentMonday, 'Current Week'),
+            // Next Week
+            _buildWeekSection(
+                currentMonday.add(Duration(days: 7)), 'Next Week'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeekSection(DateTime weekStart, String weekLabel) {
+    final weekDays = List.generate(5, (i) => weekStart.add(Duration(days: i)));
+    final schedulesForWeek = weekSchedules[weekStart] ?? {};
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(weekLabel,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        ),
+        SizedBox(
           height: timeSlotHeight * slotsPerDay + 40,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -62,8 +138,8 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
                                     width: 150,
                                     height: timeSlotHeight * slotsPerDay,
                                     child: Stack(
-                                      children: weekSchedules[day]
-                                              ?.where((entry) =>
+                                      children: (schedulesForWeek[day] ?? [])
+                                              .where((entry) =>
                                                   entry.truckId == truck.id)
                                               .map((entry) {
                                             final startMinutes =
@@ -104,7 +180,7 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

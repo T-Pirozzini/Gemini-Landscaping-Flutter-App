@@ -1,4 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:gemini_landscaping_app/models/schedule_model.dart';
@@ -121,6 +122,46 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
       isMoving = false;
     });
     print('Dragging the entry ended');
+  }
+
+  void _repeatNextWeek() async {
+    final scheduleService = ScheduleService();
+
+    // Calculate the date for the same day next week
+    final nextWeekDate = widget.entry.startTime.add(Duration(days: 7));
+    final newStartTime = DateTime(
+      nextWeekDate.year,
+      nextWeekDate.month,
+      nextWeekDate.day,
+      widget.entry.startTime.hour,
+      widget.entry.startTime.minute,
+    );
+    final newEndTime = DateTime(
+      nextWeekDate.year,
+      nextWeekDate.month,
+      nextWeekDate.day,
+      widget.entry.endTime.hour,
+      widget.entry.endTime.minute,
+    );
+
+    // Create a new independent entry
+    final newEntry = ScheduleEntry(
+      site: widget.entry.site,
+      startTime: newStartTime,
+      endTime: newEndTime,
+      truckId: widget.entry.truckId,
+      notes: widget.entry.notes,
+    );
+
+    // Add the new entry to Firestore
+    await scheduleService.addScheduleEntry(newEntry);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Entry repeated for next week!')),
+    );
+
+    // Refresh the schedule (though it only updates the current day)
+    widget.onRefresh();
   }
 
   void _showNotesDialog(BuildContext context) {
@@ -344,6 +385,175 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
         ),
         if (!isMoving)
           Positioned(
+            top: 4,
+            left: 4,
+            right: 4,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Calculate icon size based on available width
+                final availableWidth = constraints.maxWidth;
+                // Assume 5 buttons; allocate space evenly with some padding
+                final baseIconSize =
+                    (availableWidth / 5) / 2.5; // Adjust divider for padding
+                // Clamp icon size between 10 and 16 pixels for usability
+                final iconSize = baseIconSize.clamp(10.0, 16.0);
+                // Scale splash radius and padding proportionally
+                final splashRadius =
+                    iconSize * 1.2; // Slightly larger than icon
+                final padding =
+                    (iconSize / 14.0) * 1.0; // Scale padding based on default
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Tooltip(
+                      message: 'Add Site Report',
+                      child: Material(
+                        color: Colors.white,
+                        elevation: 1,
+                        shape: CircleBorder(),
+                        child: Padding(
+                          padding: EdgeInsets.all(padding),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.note_add,
+                              size: iconSize,
+                              color: Colors.green,
+                            ),
+                            splashRadius: splashRadius,
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                            onPressed: () => _navigateToAddReport(context),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Tooltip(
+                      message: 'Repeat Next Week',
+                      child: Material(
+                        color: Colors.white,
+                        elevation: 1,
+                        shape: CircleBorder(),
+                        child: Padding(
+                          padding: EdgeInsets.all(padding),
+                          child: IconButton(
+                            icon: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Icon(
+                                  Icons.repeat,
+                                  size: iconSize,
+                                  color: Colors.black54,
+                                ),
+                                Positioned(
+                                  top: 1,
+                                  right: 1,
+                                  child: Text(
+                                    '1',
+                                    style: TextStyle(
+                                      fontSize: iconSize / 2,
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            splashRadius: splashRadius,
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                            onPressed: _repeatNextWeek,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Tooltip(
+                      message: 'Add/Edit Notes',
+                      child: Material(
+                        color: Colors.white,
+                        elevation: 1,
+                        shape: CircleBorder(),
+                        child: Padding(
+                          padding: EdgeInsets.all(padding),
+                          child: IconButton(
+                            icon: widget.entry.notes != null &&
+                                    widget.entry.notes != ""
+                                ? Iconify(
+                                    Mdi.note_alert,
+                                    size: iconSize,
+                                    color: widget.entry.notes != null &&
+                                            widget.entry.notes != ""
+                                        ? Colors.blue
+                                        : Colors.black54,
+                                  )
+                                : Iconify(
+                                    Mdi.note_outline,
+                                    size: iconSize,
+                                    color: widget.entry.notes != null &&
+                                            widget.entry.notes != ""
+                                        ? Colors.blue
+                                        : Colors.black54,
+                                  ),
+                            splashRadius: splashRadius,
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                            onPressed: () => _showNotesDialog(context),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Tooltip(
+                      message: 'View Site Address',
+                      child: Material(
+                        color: Colors.white,
+                        elevation: 1,
+                        shape: CircleBorder(),
+                        child: Padding(
+                          padding: EdgeInsets.all(padding),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.location_on,
+                              size: iconSize,
+                              color: Colors.black54,
+                            ),
+                            splashRadius: splashRadius,
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                            onPressed: () => _showSiteAddressDialog(context),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Tooltip(
+                      message: 'Delete Schedule Entry',
+                      child: Material(
+                        color: Colors.white,
+                        elevation: 1,
+                        shape: CircleBorder(),
+                        child: Padding(
+                          padding: EdgeInsets.all(padding),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.delete,
+                              size: iconSize,
+                              color: Colors.red.shade400,
+                            ),
+                            splashRadius: splashRadius,
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                            onPressed: () =>
+                                _showDeleteConfirmationDialog(context),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        if (!isMoving)
+          Positioned(
             bottom: 0,
             left: 0,
             right: 0,
@@ -360,126 +570,6 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
                     Icons.drag_handle,
                     size: 16,
                     color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        if (!isMoving)
-          Positioned(
-            top: 4,
-            right: 64, // Reduced spacing for smaller buttons
-            child: Tooltip(
-              message: 'Add/Edit Notes',
-              child: Material(
-                color: Colors.white,
-                elevation: 1, // Reduced elevation for smaller appearance
-                shape: CircleBorder(),
-                child: Padding(
-                  padding: EdgeInsets.all(1), // Reduced padding around icon
-                  child: IconButton(
-                    icon: widget.entry.notes != null && widget.entry.notes != ""
-                        ? Iconify(
-                            Mdi.note_alert,
-                            size: 14, // Reduced icon size
-                            color: widget.entry.notes != null &&
-                                    widget.entry.notes != ""
-                                ? Colors.blue
-                                : Colors.black54,
-                          )
-                        : Iconify(
-                            Mdi.note_outline,
-                            size: 14, // Reduced icon size
-                            color: widget.entry.notes != null &&
-                                    widget.entry.notes != ""
-                                ? Colors.blue
-                                : Colors.black54,
-                          ),
-                    splashRadius: 16, // Reduced splash radius
-                    padding: EdgeInsets.zero, // Remove default padding
-                    constraints: BoxConstraints(), // Remove default constraints
-                    onPressed: () => _showNotesDialog(context),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        if (!isMoving)
-          Positioned(
-            top: 4,
-            right: 34, // Reduced spacing for smaller buttons
-            child: Tooltip(
-              message: 'View Site Address',
-              child: Material(
-                color: Colors.white,
-                elevation: 1,
-                shape: CircleBorder(),
-                child: Padding(
-                  padding: EdgeInsets.all(1),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.location_on,
-                      size: 14,
-                      color: Colors.black54,
-                    ),
-                    splashRadius: 16,
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
-                    onPressed: () => _showSiteAddressDialog(context),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        if (!isMoving)
-          Positioned(
-            top: 4,
-            right: 4, // Reduced spacing for smaller buttons
-            child: Tooltip(
-              message: 'Delete Schedule Entry',
-              child: Material(
-                color: Colors.white,
-                elevation: 1,
-                shape: CircleBorder(),
-                child: Padding(
-                  padding: EdgeInsets.all(1),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.delete,
-                      size: 14,
-                      color: Colors.red.shade400,
-                    ),
-                    splashRadius: 16,
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
-                    onPressed: () => _showDeleteConfirmationDialog(context),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        if (!isMoving)
-          Positioned(
-            top: 4,
-            left: 4,
-            child: Tooltip(
-              message: 'Add Site Report',
-              child: Material(
-                color: Colors.white,
-                elevation: 1,
-                shape: CircleBorder(),
-                child: Padding(
-                  padding: EdgeInsets.all(2),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.note_add,
-                      size: 14,
-                      color: Colors.green,
-                    ),
-                    splashRadius: 16,
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
-                    onPressed: () => _navigateToAddReport(context),
                   ),
                 ),
               ),

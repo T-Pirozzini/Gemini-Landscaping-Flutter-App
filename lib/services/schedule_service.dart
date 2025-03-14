@@ -50,20 +50,28 @@ class ScheduleService {
   Future<List<ScheduleEntry>> fetchSchedules(DateTime date) async {
     final startOfDay = DateTime(date.year, date.month, date.day);
     final endOfDay = startOfDay.add(Duration(days: 1));
+
+    // Fetch schedules for the given date
     final snapshot = await _firestore
         .collection('Schedules')
-        .where('date', isGreaterThanOrEqualTo: startOfDay.toIso8601String())
-        .where('date', isLessThan: endOfDay.toIso8601String())
+        .where('startTime',
+            isGreaterThanOrEqualTo: startOfDay.toIso8601String())
+        .where('startTime', isLessThan: endOfDay.toIso8601String())
         .get();
 
+    // Fetch all active sites to map siteId to SiteInfo
     final sites = await fetchActiveSites();
+    final siteMap = {for (var site in sites) site.id: site};
+
+    // Map each schedule entry, resolving the siteId to a SiteInfo object
     return snapshot.docs.map((doc) {
       final data = doc.data();
-      final site = sites.firstWhere(
-        (s) => s.id == data['siteId'],
-        orElse: () =>
-            throw Exception('Site not found for siteId: ${data['siteId']}'),
-      );
+      final siteId = data['siteId'] as String;
+      final site = siteMap[siteId];
+      if (site == null) {
+        throw Exception(
+            'Site with ID $siteId not found for schedule entry ${doc.id}');
+      }
       return ScheduleEntry.fromMap(doc.id, data, site);
     }).toList();
   }
