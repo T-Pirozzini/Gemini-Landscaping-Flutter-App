@@ -7,16 +7,17 @@ class Equipment {
   final String equipmentType;
   final String serialNumber;
   final Color color;
+  final bool active;
 
-  Equipment(
-      {
-      required this.id,
-        required this.name,
-      required this.year,
-      required this.equipmentType,
-      required this.serialNumber,
-      required this.color,
-      });
+  Equipment({
+    required this.id,
+    required this.name,
+    required this.year,
+    required this.equipmentType,
+    required this.serialNumber,
+    required this.color,
+    this.active = true,
+  });
 
   Map<String, dynamic> toMap() {
     return {
@@ -24,7 +25,8 @@ class Equipment {
       'year': year,
       'equipment': equipmentType,
       'serialNumber': serialNumber,
-      'color': color.value, // Store as integer
+      'color': color.value,
+      'active': active,
     };
   }
 
@@ -35,7 +37,22 @@ class Equipment {
       year: data['year'] as int,
       equipmentType: data['equipmentType'] as String,
       serialNumber: data['serialNumber'] as String,
-      color: Color(data['color'] as int? ?? Colors.blue.value), // Default to blue if missing
+      color: Color(data['color'] as int? ??
+          Colors.blue.value), // Default to blue if missing
+      active: data['active'] as bool? ?? true,
+    );
+  }
+
+  // Add copyWith method to create a new instance with updated values
+  Equipment copyWith({String? id, String? name, int? year, String? equipmentType, String? serialNumber, Color? color, bool? active}) {
+    return Equipment(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      year: year ?? this.year,
+      equipmentType: equipmentType ?? this.equipmentType,
+      serialNumber: serialNumber ?? this.serialNumber,
+      color: color ?? this.color,
+      active: active ?? this.active,
     );
   }
 }

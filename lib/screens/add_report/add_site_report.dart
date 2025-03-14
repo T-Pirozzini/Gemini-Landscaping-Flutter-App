@@ -16,7 +16,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class AddSiteReport extends ConsumerStatefulWidget {
-  const AddSiteReport({super.key});
+  final SiteInfo? prefilledSite; // Optional pre-filled site
+  final DateTime? prefilledDate; // Optional pre-filled start date
+  final DateTime? prefilledEndTime; // Optional pre-filled end time
+
+  const AddSiteReport(
+      {super.key,
+      this.prefilledSite,
+      this.prefilledDate,
+      this.prefilledEndTime});
 
   @override
   _AddSiteReportState createState() => _AddSiteReportState();
@@ -62,11 +70,27 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   @override
   void initState() {
     super.initState();
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('MMMM d, yyyy').format(now);
+    String formattedDate = widget.prefilledDate != null
+        ? DateFormat('MMMM d, yyyy').format(widget.prefilledDate!)
+        : DateFormat('MMMM d, yyyy').format(DateTime.now());
     dateController = TextEditingController(text: formattedDate);
 
-    addEmployeeTime();
+    // Pre-fill site if provided
+    if (widget.prefilledSite != null) {
+      selectedSite = widget.prefilledSite;
+      dropdownValue = widget.prefilledSite!.name;
+      address = widget.prefilledSite!.address;
+    }
+
+    // Pre-fill first employee time if start and end times are provided
+    if (widget.prefilledDate != null && widget.prefilledEndTime != null) {
+      addEmployeeTime(
+        timeOn: TimeOfDay.fromDateTime(widget.prefilledDate!),
+        timeOff: TimeOfDay.fromDateTime(widget.prefilledEndTime!),
+      );
+    } else {
+      addEmployeeTime();
+    }
   }
 
   // Service Type Component
@@ -86,20 +110,12 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   }
 
   // Employee Times Component
-  void addEmployeeTime() {
+  void addEmployeeTime({TimeOfDay? timeOn, TimeOfDay? timeOff}) {
     setState(() {
-      TimeOfDay timeOn = TimeOfDay.now();
-      TimeOfDay timeOff = TimeOfDay.now();
-
-      if (employeeTimes.isNotEmpty) {
-        timeOn = employeeTimes.last['timeOn'];
-        timeOff = employeeTimes.last['timeOff'];
-      }
-
       employeeTimes.add({
         'nameController': TextEditingController(),
-        'timeOn': timeOn,
-        'timeOff': timeOff,
+        'timeOn': timeOn ?? TimeOfDay.now(),
+        'timeOff': timeOff ?? TimeOfDay.now(),
       });
     });
   }
@@ -311,8 +327,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         _descriptionController.clear();
 
         // Navigate back to Home
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => Home()));
+        Navigator.pop(context);
       } else {
         print('Widget is no longer mounted, skipping reset and navigation');
       }
@@ -344,8 +359,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         leading: MaterialButton(
           onPressed: () {
-            Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (_) => Home()));
+            Navigator.pop(context);
           },
           child: Row(
             children: const [

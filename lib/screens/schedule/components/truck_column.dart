@@ -12,7 +12,8 @@ class TruckColumn extends StatelessWidget {
   final Function(ScheduleEntry, DateTime) onResize;
   final Function(int?) onResizeHover;
   final DateTime selectedDate;
-  final bool includeTruckTitle; // New parameter to include the truck title
+  final bool includeTruckTitle;
+  final VoidCallback onRefresh;
 
   const TruckColumn({
     required this.truck,
@@ -24,12 +25,13 @@ class TruckColumn extends StatelessWidget {
     required this.onResizeHover,
     required this.selectedDate,
     this.includeTruckTitle = false,
+    required this.onRefresh,
   });
 
   @override
   Widget build(BuildContext context) {
     const double timeSlotHeight = 40.0;
-    const int slotsPerDay = 20;
+    const int slotsPerDay = 22;
 
     return SizedBox(
       width: 150,
@@ -41,7 +43,10 @@ class TruckColumn extends StatelessWidget {
               width: double.infinity,
               color: truck.color.withOpacity(0.2),
               child: Center(
-                  child: Text(truck.name, style: TextStyle(fontSize: 12))),
+                  child: Text(truck.name,
+                      style: TextStyle(
+                        fontSize: 12,
+                      ))),
             ),
           Container(
             height: timeSlotHeight * slotsPerDay,
@@ -132,6 +137,7 @@ class TruckColumn extends StatelessWidget {
                       onResize: onResize,
                       onResizeHover: onResizeHover,
                       selectedDate: selectedDate,
+                      onRefresh: onRefresh,
                     ),
                   );
                 }),

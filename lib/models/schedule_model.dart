@@ -4,9 +4,9 @@ class ScheduleEntry {
   final SiteInfo site;
   final DateTime startTime;
   final DateTime endTime;
-  final String? notes;
+  final String? notes; // Already a single String
   final String? truckId;
-  final String? id; // Add ID for Firebase doc reference
+  final String? id;
 
   ScheduleEntry({
     required this.site,
