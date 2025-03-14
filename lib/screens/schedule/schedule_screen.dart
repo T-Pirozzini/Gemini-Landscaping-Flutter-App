@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
@@ -13,7 +14,6 @@ import 'package:iconify_flutter/icons/fontisto.dart';
 import 'package:iconify_flutter/icons/material_symbols.dart';
 import 'package:intl/intl.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/fa6_solid.dart';
 
 class ScheduleScreen extends StatefulWidget {
   @override
@@ -22,6 +22,7 @@ class ScheduleScreen extends StatefulWidget {
 
 class _ScheduleScreenState extends State<ScheduleScreen> {
   final ScheduleService _service = ScheduleService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   List<ScheduleEntry> schedule = [];
   List<SiteInfo> activeSites = [];
   List<Equipment> activeTrucks = [];
@@ -30,6 +31,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   int? _hoveredSlotIndex;
   final ScrollController _verticalScrollController = ScrollController();
   final ScrollController _horizontalScrollController = ScrollController();
+  String? userRole;
 
   // Controllers for the Add Site Dialog
   final _nameController = TextEditingController();
@@ -38,6 +40,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   @override
   void initState() {
     super.initState();
+    _loadUserRole();
     _loadData();
     // Ensure initial scroll position is at the top
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -52,6 +55,30 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     _nameController.dispose(); // Dispose controllers here
     _addressController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadUserRole() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+      if (snapshot.exists) {
+        setState(() {
+          userRole = snapshot.data()?['role'] as String? ?? 'user';
+        });
+      } else {
+        setState(() {
+          userRole = 'user'; // Default to user if not found
+        });
+        // Optionally create a new user document with default role
+        await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
+          'email': user.email,
+          'role': 'user',
+        });
+      }
+    }
   }
 
   Future<void> _loadData() async {
@@ -125,6 +152,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   void _showSitePicker(BuildContext context) {
+    if (userRole != 'admin') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Only admins can add schedule entries.')),
+      );
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) {
@@ -262,6 +295,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   void _showSitePickerForSlot(
       BuildContext context, Equipment truck, int slotIndex) {
+    if (userRole != 'admin') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Only admins can add schedule entries.')),
+      );
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) {
@@ -394,6 +433,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   void _showTruckManager(BuildContext context) {
+    if (userRole != 'admin') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Only admins can add trucks.')),
+      );
+      return;
+    }
+
     String truckName = '';
     int truckYear = DateTime.now().year;
     String serialNumber = '';
@@ -479,7 +525,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     child: Text('Cancel')),
                 TextButton(
                   onPressed: () async {
-                    if (truckName.isNotEmpty && serialNumber.isNotEmpty) {
+                    if (truckName.isNotEmpty) {
                       await _service.addTruck(
                           truckName, truckYear, serialNumber, truckColor,
                           isActive: isActive);
@@ -487,7 +533,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       Navigator.pop(context);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Please fill in all fields')),
+                        SnackBar(
+                            content: Text('Please fill in the Truck Name')),
                       );
                     }
                   },
@@ -502,6 +549,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   void _showTruckManagerDialog(BuildContext context) async {
+    if (userRole != 'admin') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Only admins can manage trucks.')),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) {
@@ -518,81 +572,201 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                     int index = entry.key;
                     Equipment truck = entry.value;
 
-                    return ListTile(
-                      leading: GestureDetector(
-                        onTap: () async {
-                          Color currentColor = localTrucks[index].color;
-                          Color? selectedColor =
-                              currentColor; // Track the selected color
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              // Color Picker
+                              GestureDetector(
+                                onTap: () async {
+                                  Color currentColor = localTrucks[index].color;
+                                  Color? selectedColor = currentColor;
 
-                          final picked = await showDialog<Color>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('Pick a Color',
-                                  style: GoogleFonts.roboto()),
-                              content: SingleChildScrollView(
-                                child: BlockPicker(
-                                  pickerColor: currentColor,
-                                  onColorChanged: (color) {
+                                  final picked = await showDialog<Color>(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text('Pick a Color',
+                                          style: GoogleFonts.roboto()),
+                                      content: SingleChildScrollView(
+                                        child: BlockPicker(
+                                          pickerColor: currentColor,
+                                          onColorChanged: (color) {
+                                            setDialogState(() {
+                                              localTrucks[index] =
+                                                  localTrucks[index]
+                                                      .copyWith(color: color);
+                                              selectedColor = color;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(
+                                              context, selectedColor),
+                                          child: Text('Select',
+                                              style: GoogleFonts.roboto()),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  if (picked != null &&
+                                      picked.value != currentColor.value) {
                                     setDialogState(() {
                                       localTrucks[index] = localTrucks[index]
-                                          .copyWith(color: color);
-                                      selectedColor =
-                                          color; // Update the selected color
+                                          .copyWith(color: picked);
                                     });
-                                  },
+                                    print(
+                                        'Attempting to update truck with id: ${localTrucks[index].id}, active: ${localTrucks[index].active}, color: ${picked.value.toRadixString(16).padLeft(8, '0')}');
+                                    await _service.updateTruck(
+                                        localTrucks[index].id,
+                                        localTrucks[index].active,
+                                        picked);
+                                    await _loadData();
+                                  } else {
+                                    print(
+                                        'No color change detected: picked = ${picked?.value.toRadixString(16).padLeft(8, '0')}, current = ${currentColor.value.toRadixString(16).padLeft(8, '0')}');
+                                    setDialogState(() {
+                                      localTrucks[index] = localTrucks[index]
+                                          .copyWith(color: currentColor);
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  width: 32,
+                                  height: 32,
+                                  margin: EdgeInsets.only(right: 16.0),
+                                  decoration: BoxDecoration(
+                                    color: localTrucks[index].color,
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.circular(4.0),
+                                  ),
                                 ),
                               ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context,
-                                      selectedColor), // Return the selected color
-                                  child: Text('Select',
-                                      style: GoogleFonts.roboto()),
-                                ),
-                              ],
-                            ),
-                          );
+                              // Truck Name (as text, clickable to edit)
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    TextEditingController nameController =
+                                        TextEditingController(
+                                            text: localTrucks[index].name);
+                                    String? newName = await showDialog<String>(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: Text('Edit Truck Name',
+                                            style: GoogleFonts.roboto()),
+                                        content: TextField(
+                                          controller: nameController,
+                                          decoration: InputDecoration(
+                                            hintText: 'Enter new truck name',
+                                            border: OutlineInputBorder(),
+                                          ),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: Text('Cancel',
+                                                style: GoogleFonts.roboto()),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.pop(
+                                                context, nameController.text),
+                                            child: Text('Save',
+                                                style: GoogleFonts.roboto()),
+                                          ),
+                                        ],
+                                      ),
+                                    );
 
-                          if (picked != null &&
-                              picked.value != currentColor.value) {
-                            setDialogState(() {
-                              localTrucks[index] =
-                                  localTrucks[index].copyWith(color: picked);
-                            });
-                            print(
-                                'Attempting to update truck with id: ${localTrucks[index].id}, active: ${localTrucks[index].active}, color: ${picked.value.toRadixString(16).padLeft(8, '0')}');
-                            await _service.updateTruck(localTrucks[index].id,
-                                localTrucks[index].active, picked);
-                            await _loadData();
-                          } else {
-                            print(
-                                'No color change detected: picked = ${picked?.value.toRadixString(16).padLeft(8, '0')}, current = ${currentColor.value.toRadixString(16).padLeft(8, '0')}');
-                            // Revert the dialog UI if no update
-                            setDialogState(() {
-                              localTrucks[index] = localTrucks[index]
-                                  .copyWith(color: currentColor);
-                            });
-                          }
-                        },
-                        child: Container(
-                          width: 24,
-                          height: 24,
-                          color: localTrucks[index].color,
-                        ),
-                      ),
-                      title: Text(truck.name, style: GoogleFonts.roboto()),
-                      trailing: Switch(
-                        value: localTrucks[index].active,
-                        onChanged: (value) async {
-                          setDialogState(() {
-                            localTrucks[index] =
-                                localTrucks[index].copyWith(active: value);
-                          });
-                          await _service.updateTruck(localTrucks[index].id,
-                              value, localTrucks[index].color);
-                          await _loadData();
-                        },
+                                    if (newName != null &&
+                                        newName.isNotEmpty &&
+                                        newName != localTrucks[index].name) {
+                                      setDialogState(() {
+                                        localTrucks[index] = localTrucks[index]
+                                            .copyWith(name: newName);
+                                      });
+                                      await _service.updateTruckName(
+                                          localTrucks[index].id, newName);
+                                      await _loadData();
+                                    } else if (newName != null &&
+                                        newName.isEmpty) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Truck name cannot be empty')),
+                                      );
+                                    }
+                                  },
+                                  child: Text(
+                                    localTrucks[index].name,
+                                    style: GoogleFonts.roboto(fontSize: 16),
+                                  ),
+                                ),
+                              ),
+                              // Active Switch
+                              Switch(
+                                value: localTrucks[index].active,
+                                onChanged: (value) async {
+                                  setDialogState(() {
+                                    localTrucks[index] = localTrucks[index]
+                                        .copyWith(active: value);
+                                  });
+                                  await _service.updateTruck(
+                                      localTrucks[index].id,
+                                      value,
+                                      localTrucks[index].color);
+                                  await _loadData();
+                                },
+                              ),
+                              // Delete Button
+                              IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () async {
+                                  bool? confirmDelete = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text('Delete Truck',
+                                          style: GoogleFonts.roboto()),
+                                      content: Text(
+                                          'Are you sure you want to delete ${localTrucks[index].name}?',
+                                          style: GoogleFonts.roboto()),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
+                                          child: Text('Cancel',
+                                              style: GoogleFonts.roboto()),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          child: Text('Delete',
+                                              style: GoogleFonts.roboto()),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  if (confirmDelete == true) {
+                                    await _service
+                                        .deleteTruck(localTrucks[index].id);
+                                    setDialogState(() {
+                                      localTrucks.removeAt(index);
+                                    });
+                                    await _loadData();
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                          Divider(),
+                        ],
                       ),
                     );
                   }).toList(),
@@ -772,39 +946,40 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ],
         ),
         actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Iconify(
-                      Fontisto.truck,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                    Positioned(
-                      top: -8,
-                      right: -8,
-                      child: Container(
-                        padding: EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade800,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.add,
-                          size: 14,
-                          color: Colors.white,
+          if (userRole == 'admin') // Hide Add Truck button for non-admins
+            Stack(
+              children: [
+                IconButton(
+                  icon: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Iconify(
+                        Fontisto.truck,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      Positioned(
+                        top: -8,
+                        right: -8,
+                        child: Container(
+                          padding: EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade800,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.add,
+                            size: 14,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  onPressed: () => _showTruckManager(context),
                 ),
-                onPressed: () => _showTruckManager(context),
-              ),
-            ],
-          ),
+              ],
+            ),
           IconButton(
             icon: Icon(Icons.calendar_view_week),
             onPressed: () => Navigator.push(
@@ -850,6 +1025,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                           selectedDate: selectedDate,
                           includeTruckTitle: true,
                           onRefresh: _loadData,
+                          userRole: userRole,
                         ))
                     .toList(),
               ),
@@ -860,71 +1036,74 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          FloatingActionButton(
-            backgroundColor: const Color.fromARGB(255, 59, 82, 73),
-            onPressed: () => _showSitePicker(context),
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: [
-                Iconify(
-                  MaterialSymbols.today_outline,
-                  size: 28,
-                  color: Colors.white,
-                ),
-                Positioned(
-                  top: -8,
-                  right: -8,
-                  child: Container(
-                    padding: EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade800,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.add_circle,
-                      size: 14,
-                      color: Colors.white,
+          if (userRole == 'admin') // Hide Add Schedule Entry FAB for non-admins
+            FloatingActionButton(
+              backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+              onPressed: () => _showSitePicker(context),
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  Iconify(
+                    MaterialSymbols.today_outline,
+                    size: 28,
+                    color: Colors.white,
+                  ),
+                  Positioned(
+                    top: -8,
+                    right: -8,
+                    child: Container(
+                      padding: EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade800,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.add_circle,
+                        size: 14,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
+              heroTag: 'addSite',
             ),
-            heroTag: 'addSite',
-          ),
-          SizedBox(height: 10), // Spacing between FABs
-          FloatingActionButton(
-            backgroundColor: const Color.fromARGB(255, 59, 82, 73),
-            onPressed: () => _showTruckManagerDialog(context),
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: [
-                Iconify(
-                  Fontisto.truck,
-                  size: 28,
-                  color: Colors.white,
-                ),
-                Positioned(
-                  top: -8,
-                  right: -8,
-                  child: Container(
-                    padding: EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade800,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.settings,
-                      size: 14,
-                      color: Colors.white,
+          if (userRole == 'admin') // Hide Truck Settings FAB for non-admins
+            SizedBox(height: 10),
+          if (userRole == 'admin')
+            FloatingActionButton(
+              backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+              onPressed: () => _showTruckManagerDialog(context),
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  Iconify(
+                    Fontisto.truck,
+                    size: 28,
+                    color: Colors.white,
+                  ),
+                  Positioned(
+                    top: -8,
+                    right: -8,
+                    child: Container(
+                      padding: EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade800,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.settings,
+                        size: 14,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
+              heroTag: 'manageTrucks',
             ),
-            heroTag: 'manageTrucks', // Unique heroTag to avoid conflicts
-          ),
           SizedBox(height: 10),
           FloatingActionButton(
             backgroundColor: const Color.fromARGB(255, 59, 82, 73),

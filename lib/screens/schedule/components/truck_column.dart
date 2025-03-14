@@ -14,6 +14,7 @@ class TruckColumn extends StatelessWidget {
   final DateTime selectedDate;
   final bool includeTruckTitle;
   final VoidCallback onRefresh;
+  final String? userRole;
 
   const TruckColumn({
     required this.truck,
@@ -26,6 +27,7 @@ class TruckColumn extends StatelessWidget {
     required this.selectedDate,
     this.includeTruckTitle = false,
     required this.onRefresh,
+    this.userRole,
   });
 
   @override
@@ -138,6 +140,7 @@ class TruckColumn extends StatelessWidget {
                       onResizeHover: onResizeHover,
                       selectedDate: selectedDate,
                       onRefresh: onRefresh,
+                      userRole: userRole,
                     ),
                   );
                 }),

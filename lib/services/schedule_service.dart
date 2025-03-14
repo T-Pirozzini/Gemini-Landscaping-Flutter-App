@@ -107,6 +107,28 @@ class ScheduleService {
     }
   }
 
+  Future<void> updateTruckName(String truckId, String newName) async {
+    try {
+      print('Updating truck name for ID $truckId to $newName');
+      await _firestore.collection('equipment').doc(truckId).update({'name': newName});
+      print('Truck name updated successfully for ID $truckId');
+    } catch (e) {
+      print('Error updating truck name for ID $truckId: $e');
+      throw Exception('Failed to update truck name: $e');
+    }
+  }
+
+  Future<void> deleteTruck(String truckId) async {
+    try {
+      print('Deleting truck with ID $truckId');
+      await _firestore.collection('equipment').doc(truckId).delete();
+      print('Truck with ID $truckId deleted successfully');
+    } catch (e) {
+      print('Error deleting truck with ID $truckId: $e');
+      throw Exception('Failed to delete truck: $e');
+    }
+  }
+
   Future<void> addScheduleEntry(ScheduleEntry entry) async {
     await _firestore.collection('Schedules').add(entry.toMap());
   }
@@ -117,6 +139,18 @@ class ScheduleService {
           .collection('Schedules')
           .doc(entry.id)
           .update(entry.toMap());
+    }
+  }
+
+  Future<void> updateScheduleEntryStatus(String scheduleEntryId, String status) async {
+    try {
+      await _firestore.collection('Schedules').doc(scheduleEntryId).update({
+        'status': status,
+      });
+      print('Updated status for schedule entry $scheduleEntryId to $status');
+    } catch (e) {
+      print('Error updating status for schedule entry $scheduleEntryId: $e');
+      throw Exception('Failed to update status: $e');
     }
   }
 

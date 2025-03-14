@@ -1,5 +1,4 @@
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:gemini_landscaping_app/models/schedule_model.dart';
@@ -18,6 +17,7 @@ class DraggableScheduleEntry extends StatefulWidget {
   final Function(int?) onResizeHover;
   final DateTime selectedDate;
   final VoidCallback onRefresh;
+  final String? userRole;
 
   const DraggableScheduleEntry({
     required this.entry,
@@ -28,6 +28,7 @@ class DraggableScheduleEntry extends StatefulWidget {
     required this.onResizeHover,
     required this.selectedDate,
     required this.onRefresh,
+    this.userRole,
   });
 
   @override
@@ -65,11 +66,18 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
   }
 
   void _onVerticalDragStart(DragStartDetails details) {
+    if (widget.userRole != 'admin') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Only admins can adjust schedule entries.')),
+      );
+      return;
+    }
     dragOffset = 0.0;
     print('Drag started, initialHeight=$initialHeight');
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
+    if (widget.userRole != 'admin') return;
     dragOffset += details.delta.dy;
     print('Dragging: delta.dy=${details.delta.dy}, dragOffset=$dragOffset');
 
@@ -88,6 +96,7 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
+    if (widget.userRole != 'admin') return;
     print('Drag ended, new height: $currentHeight');
     final newDurationSlots = (currentHeight / 40.0).round();
     final newEndMinutes = (widget.startOffset + newDurationSlots) * 30 + 7 * 60;
@@ -111,6 +120,12 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
   }
 
   void _onDragStarted() {
+    if (widget.userRole != 'admin') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Only admins can move schedule entries.')),
+      );
+      return;
+    }
     setState(() {
       isMoving = true;
     });
@@ -118,6 +133,7 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
   }
 
   void _onDragEnd(DraggableDetails details) {
+    if (widget.userRole != 'admin') return;
     setState(() {
       isMoving = false;
     });
@@ -125,9 +141,13 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
   }
 
   void _repeatNextWeek() async {
+    if (widget.userRole != 'admin') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Only admins can repeat entries.')),
+      );
+      return;
+    }
     final scheduleService = ScheduleService();
-
-    // Calculate the date for the same day next week
     final nextWeekDate = widget.entry.startTime.add(Duration(days: 7));
     final newStartTime = DateTime(
       nextWeekDate.year,
@@ -144,23 +164,19 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
       widget.entry.endTime.minute,
     );
 
-    // Create a new independent entry
     final newEntry = ScheduleEntry(
       site: widget.entry.site,
       startTime: newStartTime,
       endTime: newEndTime,
       truckId: widget.entry.truckId,
       notes: widget.entry.notes,
+      status: widget.entry.status,
     );
 
-    // Add the new entry to Firestore
     await scheduleService.addScheduleEntry(newEntry);
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Entry repeated for next week!')),
     );
-
-    // Refresh the schedule (though it only updates the current day)
     widget.onRefresh();
   }
 
@@ -250,6 +266,12 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
   }
 
   void _showDeleteConfirmationDialog(BuildContext context) {
+    if (widget.userRole != 'admin') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Only admins can delete schedule entries.')),
+      );
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) {
@@ -293,7 +315,14 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
           prefilledEndTime: widget.entry.endTime,
         ),
       ),
-    );
+    ).then((_) async {
+      // After returning from AddSiteReport, check and update status
+      if (widget.entry.id != null) {
+        await ScheduleService()
+            .updateScheduleEntryStatus(widget.entry.id!, 'completed');
+        widget.onRefresh(); // Refresh to reflect the updated status
+      }
+    });
   }
 
   // Helper method to calculate and format the duration
@@ -314,11 +343,16 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
 
   @override
   Widget build(BuildContext context) {
+    Color baseColor = widget.truck.color;
+    Color displayColor = widget.entry.status == 'completed'
+        ? baseColor.withOpacity(0.2) // Lighter color for completed
+        : baseColor.withOpacity(0.6); // Default opacity for pending
+
     return Stack(
       fit: StackFit.expand,
       children: [
         Draggable<ScheduleEntry>(
-          data: widget.entry,
+          data: widget.userRole == 'admin' ? widget.entry : null,
           feedback: Material(
             elevation: 4,
             child: Container(
@@ -356,7 +390,7 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
           onDragStarted: _onDragStarted,
           onDragEnd: _onDragEnd,
           child: Container(
-            color: widget.truck.color.withOpacity(0.5),
+            color: displayColor,
             height: currentHeight,
             child: Center(
               child: Column(
@@ -390,18 +424,11 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
             right: 4,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                // Calculate icon size based on available width
                 final availableWidth = constraints.maxWidth;
-                // Assume 5 buttons; allocate space evenly with some padding
-                final baseIconSize =
-                    (availableWidth / 5) / 2.5; // Adjust divider for padding
-                // Clamp icon size between 10 and 16 pixels for usability
+                final baseIconSize = (availableWidth / 5) / 2.5;
                 final iconSize = baseIconSize.clamp(10.0, 16.0);
-                // Scale splash radius and padding proportionally
-                final splashRadius =
-                    iconSize * 1.2; // Slightly larger than icon
-                final padding =
-                    (iconSize / 14.0) * 1.0; // Scale padding based on default
+                final splashRadius = iconSize * 1.2;
+                final padding = (iconSize / 14.0) * 1.0;
 
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -428,45 +455,47 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
                         ),
                       ),
                     ),
-                    Tooltip(
-                      message: 'Repeat Next Week',
-                      child: Material(
-                        color: Colors.white,
-                        elevation: 1,
-                        shape: CircleBorder(),
-                        child: Padding(
-                          padding: EdgeInsets.all(padding),
-                          child: IconButton(
-                            icon: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Icon(
-                                  Icons.repeat,
-                                  size: iconSize,
-                                  color: Colors.black54,
-                                ),
-                                Positioned(
-                                  top: 1,
-                                  right: 1,
-                                  child: Text(
-                                    '1',
-                                    style: TextStyle(
-                                      fontSize: iconSize / 2,
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.bold,
+                    if (widget.userRole ==
+                        'admin') // Hide Repeat Next Week for non-admins
+                      Tooltip(
+                        message: 'Repeat Next Week',
+                        child: Material(
+                          color: Colors.white,
+                          elevation: 1,
+                          shape: CircleBorder(),
+                          child: Padding(
+                            padding: EdgeInsets.all(padding),
+                            child: IconButton(
+                              icon: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.repeat,
+                                    size: iconSize,
+                                    color: Colors.black54,
+                                  ),
+                                  Positioned(
+                                    top: 1,
+                                    right: 1,
+                                    child: Text(
+                                      '1',
+                                      style: TextStyle(
+                                        fontSize: iconSize / 2,
+                                        color: Colors.black54,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                              splashRadius: splashRadius,
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(),
+                              onPressed: _repeatNextWeek,
                             ),
-                            splashRadius: splashRadius,
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                            onPressed: _repeatNextWeek,
                           ),
                         ),
                       ),
-                    ),
                     Tooltip(
                       message: 'Add/Edit Notes',
                       child: Material(
@@ -481,18 +510,12 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
                                 ? Iconify(
                                     Mdi.note_alert,
                                     size: iconSize,
-                                    color: widget.entry.notes != null &&
-                                            widget.entry.notes != ""
-                                        ? Colors.blue
-                                        : Colors.black54,
+                                    color: Colors.blue,
                                   )
                                 : Iconify(
                                     Mdi.note_outline,
                                     size: iconSize,
-                                    color: widget.entry.notes != null &&
-                                            widget.entry.notes != ""
-                                        ? Colors.blue
-                                        : Colors.black54,
+                                    color: Colors.black54,
                                   ),
                             splashRadius: splashRadius,
                             padding: EdgeInsets.zero,
@@ -524,35 +547,37 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
                         ),
                       ),
                     ),
-                    Tooltip(
-                      message: 'Delete Schedule Entry',
-                      child: Material(
-                        color: Colors.white,
-                        elevation: 1,
-                        shape: CircleBorder(),
-                        child: Padding(
-                          padding: EdgeInsets.all(padding),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.delete,
-                              size: iconSize,
-                              color: Colors.red.shade400,
+                    if (widget.userRole ==
+                        'admin') // Hide Delete for non-admins
+                      Tooltip(
+                        message: 'Delete Schedule Entry',
+                        child: Material(
+                          color: Colors.white,
+                          elevation: 1,
+                          shape: CircleBorder(),
+                          child: Padding(
+                            padding: EdgeInsets.all(padding),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.delete,
+                                size: iconSize,
+                                color: Colors.red.shade400,
+                              ),
+                              splashRadius: splashRadius,
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(),
+                              onPressed: () =>
+                                  _showDeleteConfirmationDialog(context),
                             ),
-                            splashRadius: splashRadius,
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                            onPressed: () =>
-                                _showDeleteConfirmationDialog(context),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 );
               },
             ),
           ),
-        if (!isMoving)
+        if (!isMoving && widget.userRole == 'admin')
           Positioned(
             bottom: 0,
             left: 0,
