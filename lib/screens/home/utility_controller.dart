@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gemini_landscaping_app/screens/utility_screens/announcement_page.dart';
 import 'package:gemini_landscaping_app/screens/utility_screens/equipment_page.dart';
 import 'package:gemini_landscaping_app/screens/utility_screens/uploadPhotos.dart';
 
@@ -17,7 +18,7 @@ class UtilityControllerState extends State<UtilityController> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         backgroundColor: const Color(0xFFDFD3C3),
         appBar: AppBar(
@@ -28,6 +29,7 @@ class UtilityControllerState extends State<UtilityController> {
             unselectedLabelColor: Colors.grey.shade400,
             indicatorColor: Colors.white,
             tabs: [
+              Tab(text: 'Announcements'),
               Tab(text: 'Upload Photos'),
               Tab(text: 'Report Repairs'),
             ],
@@ -39,12 +41,14 @@ class UtilityControllerState extends State<UtilityController> {
                     "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
             ? TabBarView(
                 children: [
+                  AnnouncementPage(),
                   UploadPhotos(),
                   EquipmentPage(),
                 ],
               )
             : TabBarView(
                 children: [
+                  AnnouncementPage(),
                   UploadPhotos(),
                   EquipmentPage(),
                 ],

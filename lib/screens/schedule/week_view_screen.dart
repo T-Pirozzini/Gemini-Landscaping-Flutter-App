@@ -3,6 +3,7 @@ import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:gemini_landscaping_app/models/schedule_model.dart';
 import 'package:gemini_landscaping_app/services/schedule_service.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class WeekViewScreen extends StatefulWidget {
   @override
@@ -68,7 +69,15 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('3-Week Schedule: Mon-Fri'),
+        backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+        title: Text(
+          'Weekly View',
+          style: GoogleFonts.montserrat(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         actions: [
           // Truck selection dropdown
           if (activeTrucks.isNotEmpty)
@@ -86,12 +95,15 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
                 },
                 items: activeTrucks.map((Equipment truck) {
                   return DropdownMenuItem<Equipment>(
-                    value: truck,
-                    child: Text(
-                      truck.name, // Assuming Equipment has a 'name' property
-                      style: TextStyle(fontSize: 14),
-                    ),
-                  );
+                      value: truck,
+                      child: Text(
+                        truck.name,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: truck.color,
+                        ),
+                      ));
                 }).toList(),
               ),
             ),
@@ -136,11 +148,16 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4.0),
-          child: Text(
-            weekLabel,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        Container(
+          color: Colors.grey[300],
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Text(
+              weekLabel,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
           ),
         ),
         Row(
