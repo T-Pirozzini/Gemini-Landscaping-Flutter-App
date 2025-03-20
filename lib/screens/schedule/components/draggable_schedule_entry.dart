@@ -358,7 +358,10 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
             child: Container(
               width: 150,
               height: initialHeight,
-              color: widget.truck.color.withOpacity(0.8),
+              decoration: BoxDecoration(
+                color: widget.truck.color.withOpacity(0.8),
+                border: Border.all(color: Colors.white, width: 2),
+              ),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -390,8 +393,11 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
           onDragStarted: _onDragStarted,
           onDragEnd: _onDragEnd,
           child: Container(
-            color: displayColor,
             height: currentHeight,
+            decoration: BoxDecoration(
+              color: displayColor,
+              border: Border.all(color: Colors.white, width: 1),
+            ),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -419,164 +425,115 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
         ),
         if (!isMoving)
           Positioned(
-            top: 4,
-            left: 4,
-            right: 4,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final availableWidth = constraints.maxWidth;
-                final baseIconSize = (availableWidth / 5) / 2.5;
-                final iconSize = baseIconSize.clamp(10.0, 16.0);
-                final splashRadius = iconSize * 1.2;
-                final padding = (iconSize / 14.0) * 1.0;
-
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Tooltip(
-                      message: 'Add Site Report',
-                      child: Material(
-                        color: Colors.white,
-                        elevation: 1,
-                        shape: CircleBorder(),
-                        child: Padding(
-                          padding: EdgeInsets.all(padding),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.note_add,
-                              size: iconSize,
-                              color: Colors.green,
-                            ),
-                            splashRadius: splashRadius,
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                            onPressed: () => _navigateToAddReport(context),
-                          ),
-                        ),
-                      ),
+            top: 2,
+            left: 2, // Move to top-right corner for better balance
+            child: MenuAnchor(
+              builder: (context, controller, child) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.more_vert,
+                      color: Colors.black54,
+                      size: 18,
                     ),
-                    if (widget.userRole ==
-                        'admin') // Hide Repeat Next Week for non-admins
-                      Tooltip(
-                        message: 'Repeat Next Week',
-                        child: Material(
-                          color: Colors.white,
-                          elevation: 1,
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: EdgeInsets.all(padding),
-                            child: IconButton(
-                              icon: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.repeat,
-                                    size: iconSize,
-                                    color: Colors.black54,
-                                  ),
-                                  Positioned(
-                                    top: 1,
-                                    right: 1,
-                                    child: Text(
-                                      '1',
-                                      style: TextStyle(
-                                        fontSize: iconSize / 2,
-                                        color: Colors.black54,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              splashRadius: splashRadius,
-                              padding: EdgeInsets.zero,
-                              constraints: BoxConstraints(),
-                              onPressed: _repeatNextWeek,
-                            ),
-                          ),
-                        ),
-                      ),
-                    Tooltip(
-                      message: 'Add/Edit Notes',
-                      child: Material(
-                        color: Colors.white,
-                        elevation: 1,
-                        shape: CircleBorder(),
-                        child: Padding(
-                          padding: EdgeInsets.all(padding),
-                          child: IconButton(
-                            icon: widget.entry.notes != null &&
-                                    widget.entry.notes != ""
-                                ? Iconify(
-                                    Mdi.note_alert,
-                                    size: iconSize,
-                                    color: Colors.blue,
-                                  )
-                                : Iconify(
-                                    Mdi.note_outline,
-                                    size: iconSize,
-                                    color: Colors.black54,
-                                  ),
-                            splashRadius: splashRadius,
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                            onPressed: () => _showNotesDialog(context),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Tooltip(
-                      message: 'View Site Address',
-                      child: Material(
-                        color: Colors.white,
-                        elevation: 1,
-                        shape: CircleBorder(),
-                        child: Padding(
-                          padding: EdgeInsets.all(padding),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.location_on,
-                              size: iconSize,
-                              color: Colors.black54,
-                            ),
-                            splashRadius: splashRadius,
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                            onPressed: () => _showSiteAddressDialog(context),
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (widget.userRole ==
-                        'admin') // Hide Delete for non-admins
-                      Tooltip(
-                        message: 'Delete Schedule Entry',
-                        child: Material(
-                          color: Colors.white,
-                          elevation: 1,
-                          shape: CircleBorder(),
-                          child: Padding(
-                            padding: EdgeInsets.all(padding),
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.delete,
-                                size: iconSize,
-                                color: Colors.red.shade400,
-                              ),
-                              splashRadius: splashRadius,
-                              padding: EdgeInsets.zero,
-                              constraints: BoxConstraints(),
-                              onPressed: () =>
-                                  _showDeleteConfirmationDialog(context),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                  ),
                 );
               },
+              menuChildren: [
+                MenuItemButton(
+                  leadingIcon: Icon(Icons.note_add, color: Colors.green),
+                  child: Text('Add Site Report'),
+                  onPressed: () => _navigateToAddReport(context),
+                ),
+                if (widget.userRole == 'admin')
+                  MenuItemButton(
+                    leadingIcon: Icon(Icons.repeat, color: Colors.black54),
+                    child: Text('Repeat Next Week'),
+                    onPressed: _repeatNextWeek,
+                  ),
+                MenuItemButton(
+                  leadingIcon:
+                      widget.entry.notes != null && widget.entry.notes != ""
+                          ? Icon(Icons.note, color: Colors.pinkAccent)
+                          : Icon(Icons.note_outlined, color: Colors.black54),
+                  child: Text('Add/Edit Notes'),
+                  onPressed: () => _showNotesDialog(context),
+                ),
+                MenuItemButton(
+                  leadingIcon: Icon(Icons.location_on, color: Colors.black54),
+                  child: Text('View Site Address'),
+                  onPressed: () => _showSiteAddressDialog(context),
+                ),
+                if (widget.userRole == 'admin')
+                  MenuItemButton(
+                    leadingIcon: Icon(Icons.delete, color: Colors.red.shade400),
+                    child: Text('Delete Schedule Entry'),
+                    onPressed: () => _showDeleteConfirmationDialog(context),
+                  ),
+              ],
             ),
           ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final availableWidth = constraints.maxWidth;
+              final baseIconSize = (availableWidth / 5) / 2.5;
+              final iconSize = baseIconSize.clamp(10.0, 16.0);
+              final splashRadius = iconSize * 1.2;
+              final padding = (iconSize / 14.0) * 1.0;
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Tooltip(
+                    message: 'Add/Edit Notes',
+                    child: Material(
+                      color: Colors.white70,
+                      elevation: 1,
+                      shape: CircleBorder(),
+                      child: Padding(
+                        padding: EdgeInsets.all(padding),
+                        child: IconButton(
+                          icon: widget.entry.notes != null &&
+                                  widget.entry.notes != ""
+                              ? Iconify(
+                                  Mdi.note_alert,
+                                  size: iconSize,
+                                  color: Colors.pinkAccent,
+                                )
+                              : Iconify(
+                                  Mdi.note_outline,
+                                  size: iconSize,
+                                  color: Colors.black54,
+                                ),
+                          splashRadius: splashRadius,
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                          onPressed: () => _showNotesDialog(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
         if (!isMoving && widget.userRole == 'admin')
           Positioned(
             bottom: 0,
@@ -588,12 +545,12 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
               onVerticalDragUpdate: _onVerticalDragUpdate,
               onVerticalDragEnd: _onVerticalDragEnd,
               child: Container(
-                height: 20,
+                height: 15,
                 color: Colors.black.withOpacity(0.3),
                 child: Center(
                   child: Icon(
                     Icons.drag_handle,
-                    size: 16,
+                    size: 15,
                     color: Colors.white,
                   ),
                 ),

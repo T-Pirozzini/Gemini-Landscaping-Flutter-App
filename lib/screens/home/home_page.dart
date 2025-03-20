@@ -22,7 +22,7 @@ class _HomeState extends State<Home> {
   // bottom navigation bar
   int currentIndex = 0;
   final pages = [
-    TimeSheetController(),    
+    TimeSheetController(),
     ScheduleScreen(),
     UtilityController(),
     AdminController(),
@@ -41,11 +41,13 @@ class _HomeState extends State<Home> {
             Image.asset("assets/gemini-icon-transparent.png",
                 color: Colors.white, fit: BoxFit.contain, height: 50),
             SizedBox(width: 10),
-            Text('Gemini Landscaping',
-                style: GoogleFonts.pathwayGothicOne(
-                    fontSize: 38,
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.w500)),
+            FittedBox(
+              child: Text('Gemini Landscaping',
+                  style: GoogleFonts.pathwayGothicOne(
+                      fontSize: 38,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w500)),
+            ),
           ],
         ),
       ),
