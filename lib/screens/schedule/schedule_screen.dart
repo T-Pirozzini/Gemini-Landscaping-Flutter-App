@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:gemini_landscaping_app/models/schedule_model.dart';
 import 'package:gemini_landscaping_app/models/site_info.dart';
@@ -1033,109 +1034,42 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ),
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+      floatingActionButton: SpeedDial(
+        animatedIcon:
+            AnimatedIcons.menu_close, // Menu icon that animates to close
+        backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+        foregroundColor: Colors.white,
         children: [
-          if (userRole == 'admin') // Hide Add Schedule Entry FAB for non-admins
-            FloatingActionButton(
-              backgroundColor: const Color.fromARGB(255, 59, 82, 73),
-              onPressed: () => _showSitePicker(context),
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: [
-                  Iconify(
-                    MaterialSymbols.today_outline,
-                    size: 28,
-                    color: Colors.white,
-                  ),
-                  Positioned(
-                    top: -8,
-                    right: -8,
-                    child: Container(
-                      padding: EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade800,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.add_circle,
-                        size: 14,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              heroTag: 'addSite',
-            ),
-          if (userRole == 'admin') // Hide Truck Settings FAB for non-admins
-            SizedBox(height: 10),
           if (userRole == 'admin')
-            FloatingActionButton(
-              backgroundColor: const Color.fromARGB(255, 59, 82, 73),
-              onPressed: () => _showTruckManagerDialog(context),
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: [
-                  Iconify(
-                    Fontisto.truck,
-                    size: 28,
-                    color: Colors.white,
-                  ),
-                  Positioned(
-                    top: -8,
-                    right: -8,
-                    child: Container(
-                      padding: EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade800,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.settings,
-                        size: 14,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
+            SpeedDialChild(
+              child: Iconify(
+                MaterialSymbols.today_outline,
+                size: 24,
+                color: Colors.white,
               ),
-              heroTag: 'manageTrucks',
+              label: 'Add Schedule Entry',
+              backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+              foregroundColor: Colors.white,
+              onTap: () => _showSitePicker(context),
             ),
-          SizedBox(height: 10),
-          FloatingActionButton(
+          if (userRole == 'admin')
+            SpeedDialChild(
+              child: Iconify(
+                Fontisto.truck,
+                size: 24,
+                color: Colors.white,
+              ),
+              label: 'Truck Settings',
+              backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+              foregroundColor: Colors.white,
+              onTap: () => _showTruckManagerDialog(context),
+            ),
+          SpeedDialChild(
+            child: Icon(Icons.location_city, size: 24),
+            label: 'Add New Site',
             backgroundColor: const Color.fromARGB(255, 59, 82, 73),
-            onPressed: () => _showAddSiteDialog(context),
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: [
-                Icon(
-                  Icons.location_city,
-                  size: 28,
-                  color: Colors.white,
-                ),
-                Positioned(
-                  top: -8,
-                  right: -8,
-                  child: Container(
-                    padding: EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade800,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.add,
-                      size: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            heroTag: 'addNewSite',
+            foregroundColor: Colors.white,
+            onTap: () => _showAddSiteDialog(context),
           ),
         ],
       ),

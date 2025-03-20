@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class TimeColumn extends StatelessWidget {
   final int? hoveredSlotIndex;
-  final bool includeTimeTitle; // Parameter to include the "Time" title
+  final bool includeTimeTitle;
 
   const TimeColumn({
     required this.hoveredSlotIndex,
@@ -13,6 +13,16 @@ class TimeColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     const double timeSlotHeight = 40.0;
     const int slotsPerDay = 22;
+
+    // Get current time
+    final now = DateTime.now();
+    final currentHour = now.hour;
+    final currentMinute = now.minute;
+
+    // Calculate the current slot index (7:00 AM = slot 0)
+    final minutesSince7AM = (currentHour - 7) * 60 + currentMinute;
+    final currentSlotIndex =
+        (minutesSince7AM / 30).floor(); // 30-min increments
 
     return SizedBox(
       width: 60.0,
@@ -36,14 +46,19 @@ class TimeColumn extends StatelessWidget {
                 hour24 > 12 ? hour24 - 12 : (hour24 == 0 ? 12 : hour24);
             final period = hour24 >= 12 ? 'PM' : 'AM';
             final isHovered = hoveredSlotIndex == index;
+            final isCurrentTime = index == currentSlotIndex &&
+                now.day == DateTime.now().day; // Ensure same day
 
             return Container(
               height: timeSlotHeight,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: isHovered
-                    ? Colors.blue.withOpacity(0.2)
-                    : Colors.transparent,
+                color: isCurrentTime
+                    ? Colors.greenAccent
+                        .withOpacity(0.3) // Highlight current time
+                    : isHovered
+                        ? Colors.orangeAccent.withOpacity(0.2)
+                        : Colors.transparent,
                 border:
                     Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
               ),
