@@ -947,40 +947,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ],
         ),
         actions: [
-          if (userRole == 'admin') // Hide Add Truck button for non-admins
-            Stack(
-              children: [
-                IconButton(
-                  icon: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Iconify(
-                        Fontisto.truck,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                      Positioned(
-                        top: -8,
-                        right: -8,
-                        child: Container(
-                          padding: EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade800,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.add,
-                            size: 14,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  onPressed: () => _showTruckManager(context),
-                ),
-              ],
-            ),
           IconButton(
             icon: Icon(Icons.calendar_view_week),
             onPressed: () => Navigator.push(
@@ -1054,15 +1020,69 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             ),
           if (userRole == 'admin')
             SpeedDialChild(
-              child: Iconify(
-                Fontisto.truck,
-                size: 24,
-                color: Colors.white,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Iconify(
+                    Fontisto.truck,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  Positioned(
+                    top: -8,
+                    right: -8,
+                    child: Container(
+                      padding: EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade800,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.settings,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               label: 'Truck Settings',
               backgroundColor: const Color.fromARGB(255, 59, 82, 73),
               foregroundColor: Colors.white,
               onTap: () => _showTruckManagerDialog(context),
+            ),
+          if (userRole == 'admin')
+            SpeedDialChild(
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Iconify(
+                    Fontisto.truck,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  Positioned(
+                    top: -8,
+                    right: -8,
+                    child: Container(
+                      padding: EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade800,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.add,
+                        size: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              label: 'Add a Truck',
+              backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+              foregroundColor: Colors.white,
+              onTap: () => _showTruckManager(context),
             ),
           SpeedDialChild(
             child: Icon(Icons.location_city, size: 24),
