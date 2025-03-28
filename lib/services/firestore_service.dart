@@ -231,6 +231,7 @@ class FirestoreService extends ChangeNotifier {
         status: doc['status'],
         target: doc['target'].toDouble(),
         id: doc.id,
+        program: doc['program'] ?? true,
       );
     }).toList();
   }

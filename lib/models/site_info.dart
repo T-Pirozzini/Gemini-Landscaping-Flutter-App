@@ -6,6 +6,7 @@ class SiteInfo {
   final bool status;
   final double target;
   final String id;
+  final bool program;
 
   const SiteInfo({
     required this.address,
@@ -15,6 +16,7 @@ class SiteInfo {
     required this.status,
     required this.target,
     required this.id,
+    required this.program,
   });
 
   // Convert SiteInfo to a Map for Firestore
@@ -27,6 +29,7 @@ class SiteInfo {
       'status': status,
       'target': target,
       'id': id,
+      'program': program,
     };
   }
 
@@ -40,6 +43,7 @@ class SiteInfo {
       status: map['status'] ?? false,
       target: (map['target'] as num?)?.toDouble() ?? 0.0,
       id: id,
+      program: map['program'] ?? true,
     );
   }
 }

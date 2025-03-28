@@ -22,6 +22,7 @@ class ScheduleService {
         status: data['status'] as bool,
         target: (data['target'] as num).toDouble(),
         id: doc.id,
+        program: data['program'] as bool,
       );
     }).toList();
   }
