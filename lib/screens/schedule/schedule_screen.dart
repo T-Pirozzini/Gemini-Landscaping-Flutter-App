@@ -873,6 +873,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                       status: true, // Default to true
                       target: 0.0, // Default value
                       id: newDocRef.id, // Use the generated ID
+                      program: true, // Default to true
                     );
 
                     // Save to Firestore

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gemini_landscaping_app/providers/report_provider.dart';
 import 'package:gemini_landscaping_app/providers/site_list_provider.dart';
 import 'package:gemini_landscaping_app/screens/all_reports/report_files.dart';
+import 'package:gemini_landscaping_app/screens/site_time/edit_site_info_dialog.dart';
 import 'package:gemini_landscaping_app/screens/site_time/inactive_sites.dart';
 import 'package:gemini_landscaping_app/screens/site_time/number_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -107,6 +108,37 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
     }
   }
 
+  Future<void> _editSiteInfo(BuildContext context, String siteId) async {
+    // Fetch current site data
+    final siteDoc = await FirebaseFirestore.instance
+        .collection('SiteList')
+        .doc(siteId)
+        .get();
+
+    final currentName = siteDoc.data()?['name'] ?? '';
+    final currentAddress = siteDoc.data()?['address'] ?? '';
+    final currentProgram = siteDoc.data()?['program'] ?? true;
+
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EditSiteInfoDialog(
+          siteId: siteId,
+          currentName: currentName,
+          currentAddress: currentAddress,
+          currentProgram: currentProgram,
+        );
+      },
+    );
+
+    // Refresh data after dialog closes
+    ref.invalidate(siteListProvider);
+    ref.invalidate(
+        specificMonthSitereportProvider(ref.read(selectedMonthProvider)));
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -145,6 +177,12 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
         padding: const EdgeInsets.all(8.0),
         child: sitesAsyncValue.when(
           data: (siteList) {
+            final programSites =
+                siteList.where((site) => site.program == true).toList();            
+            siteList.forEach((site) {
+              print(
+                  'Site: ${site.name} | Program: ${site.program} | Status: ${site.status}');
+            });
             return reportsAsyncValue.when(
               data: (reportList) {
                 return GridView.builder(
@@ -154,9 +192,9 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
                     crossAxisSpacing: 10,
                     childAspectRatio: 1,
                   ),
-                  itemCount: siteList.length,
+                  itemCount: programSites.length,
                   itemBuilder: (context, index) {
-                    final site = siteList[index];
+                    final site = programSites[index];
                     final siteReports = reportList
                         .where((report) => report.siteName == site.name)
                         .toList();
@@ -338,6 +376,14 @@ class _SiteTimeState extends ConsumerState<SiteTime> {
                                     iconSize: 18,
                                     color: Colors.blueGrey,
                                     tooltip: "Set site to inactive",
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.edit),
+                                    onPressed: () =>
+                                        _editSiteInfo(context, site.id),
+                                    iconSize: 18,
+                                    color: Colors.blueGrey,
+                                    tooltip: "Edit Site Info",
                                   ),
                                 ],
                               ),
