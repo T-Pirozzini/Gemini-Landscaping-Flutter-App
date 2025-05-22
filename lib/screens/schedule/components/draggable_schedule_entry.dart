@@ -345,8 +345,8 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
   Widget build(BuildContext context) {
     Color baseColor = widget.truck.color;
     Color displayColor = widget.entry.status == 'completed'
-        ? baseColor.withOpacity(0.2) // Lighter color for completed
-        : baseColor.withOpacity(0.6); // Default opacity for pending
+        ? baseColor.withOpacity(0.4) // Lighter color for completed
+        : baseColor.withOpacity(0.8); // Default opacity for pending
 
     return Stack(
       fit: StackFit.expand,
@@ -359,32 +359,38 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
               width: 150,
               height: initialHeight,
               decoration: BoxDecoration(
-                color: widget.truck.color.withOpacity(0.8),
+                color: widget.truck.color.withOpacity(0.6),
                 border: Border.all(color: Colors.white, width: 2),
               ),
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AutoSizeText(
-                      widget.entry.site.name,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 14,
-                        color: Colors.white,
+                child: SizedBox(
+                  width: 140,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AutoSizeText(
+                        widget.entry.site.name,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                        minFontSize: 8,
                       ),
-                      maxLines: 1,
-                    ),
-                    AutoSizeText(
-                      _formatDuration(
-                          widget.entry.startTime, widget.entry.endTime),
-                      style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                      AutoSizeText(
+                        _formatDuration(
+                            widget.entry.startTime, widget.entry.endTime),
+                        style: GoogleFonts.montserrat(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
                       ),
-                      maxLines: 1,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -399,26 +405,33 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
               border: Border.all(color: Colors.white, width: 1),
             ),
             child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AutoSizeText(
-                    widget.entry.site.name,
-                    style: GoogleFonts.montserrat(
-                      fontSize: 14,
+              child: SizedBox(
+                width: 110,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AutoSizeText(
+                      widget.entry.site.name,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      minFontSize: 8,
                     ),
-                    maxLines: 1,
-                  ),
-                  AutoSizeText(
-                    _formatDuration(
-                        widget.entry.startTime, widget.entry.endTime),
-                    style: GoogleFonts.montserrat(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                    AutoSizeText(
+                      _formatDuration(
+                          widget.entry.startTime, widget.entry.endTime),
+                      style: GoogleFonts.montserrat(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
                     ),
-                    maxLines: 1,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
