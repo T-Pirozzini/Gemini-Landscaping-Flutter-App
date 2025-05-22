@@ -6,8 +6,10 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:gemini_landscaping_app/models/schedule_model.dart';
 import 'package:gemini_landscaping_app/models/site_info.dart';
+import 'package:gemini_landscaping_app/screens/schedule/components/add_site_dialog.dart';
 import 'package:gemini_landscaping_app/screens/schedule/components/time_column.dart';
 import 'package:gemini_landscaping_app/screens/schedule/components/truck_column.dart';
+import 'package:gemini_landscaping_app/screens/schedule/components/truck_manager_dialog.dart';
 import 'package:gemini_landscaping_app/screens/schedule/week_view_screen.dart';
 import 'package:gemini_landscaping_app/services/schedule_service.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -549,242 +551,17 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  void _showTruckManagerDialog(BuildContext context) async {
-    if (userRole != 'admin') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Only admins can manage trucks.')),
-      );
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        List<Equipment> localTrucks = List.from(allTrucks);
-
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Text('Manage Trucks', style: GoogleFonts.roboto()),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: localTrucks.asMap().entries.map((entry) {
-                    int index = entry.key;
-                    Equipment truck = entry.value;
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              // Color Picker
-                              GestureDetector(
-                                onTap: () async {
-                                  Color currentColor = localTrucks[index].color;
-                                  Color? selectedColor = currentColor;
-
-                                  final picked = await showDialog<Color>(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: Text('Pick a Color',
-                                          style: GoogleFonts.roboto()),
-                                      content: SingleChildScrollView(
-                                        child: BlockPicker(
-                                          pickerColor: currentColor,
-                                          onColorChanged: (color) {
-                                            setDialogState(() {
-                                              localTrucks[index] =
-                                                  localTrucks[index]
-                                                      .copyWith(color: color);
-                                              selectedColor = color;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(
-                                              context, selectedColor),
-                                          child: Text('Select',
-                                              style: GoogleFonts.roboto()),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-
-                                  if (picked != null &&
-                                      picked.value != currentColor.value) {
-                                    setDialogState(() {
-                                      localTrucks[index] = localTrucks[index]
-                                          .copyWith(color: picked);
-                                    });
-                                    print(
-                                        'Attempting to update truck with id: ${localTrucks[index].id}, active: ${localTrucks[index].active}, color: ${picked.value.toRadixString(16).padLeft(8, '0')}');
-                                    await _service.updateTruck(
-                                        localTrucks[index].id,
-                                        localTrucks[index].active,
-                                        picked);
-                                    await _loadData();
-                                  } else {
-                                    print(
-                                        'No color change detected: picked = ${picked?.value.toRadixString(16).padLeft(8, '0')}, current = ${currentColor.value.toRadixString(16).padLeft(8, '0')}');
-                                    setDialogState(() {
-                                      localTrucks[index] = localTrucks[index]
-                                          .copyWith(color: currentColor);
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  margin: EdgeInsets.only(right: 16.0),
-                                  decoration: BoxDecoration(
-                                    color: localTrucks[index].color,
-                                    border: Border.all(color: Colors.grey),
-                                    borderRadius: BorderRadius.circular(4.0),
-                                  ),
-                                ),
-                              ),
-                              // Truck Name (as text, clickable to edit)
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () async {
-                                    TextEditingController nameController =
-                                        TextEditingController(
-                                            text: localTrucks[index].name);
-                                    String? newName = await showDialog<String>(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: Text('Edit Truck Name',
-                                            style: GoogleFonts.roboto()),
-                                        content: TextField(
-                                          controller: nameController,
-                                          decoration: InputDecoration(
-                                            hintText: 'Enter new truck name',
-                                            border: OutlineInputBorder(),
-                                          ),
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Navigator.pop(context),
-                                            child: Text('Cancel',
-                                                style: GoogleFonts.roboto()),
-                                          ),
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(
-                                                context, nameController.text),
-                                            child: Text('Save',
-                                                style: GoogleFonts.roboto()),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-
-                                    if (newName != null &&
-                                        newName.isNotEmpty &&
-                                        newName != localTrucks[index].name) {
-                                      setDialogState(() {
-                                        localTrucks[index] = localTrucks[index]
-                                            .copyWith(name: newName);
-                                      });
-                                      await _service.updateTruckName(
-                                          localTrucks[index].id, newName);
-                                      await _loadData();
-                                    } else if (newName != null &&
-                                        newName.isEmpty) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                            content: Text(
-                                                'Truck name cannot be empty')),
-                                      );
-                                    }
-                                  },
-                                  child: Text(
-                                    localTrucks[index].name,
-                                    style: GoogleFonts.roboto(fontSize: 16),
-                                  ),
-                                ),
-                              ),
-                              // Active Switch
-                              Switch(
-                                value: localTrucks[index].active,
-                                onChanged: (value) async {
-                                  setDialogState(() {
-                                    localTrucks[index] = localTrucks[index]
-                                        .copyWith(active: value);
-                                  });
-                                  await _service.updateTruck(
-                                      localTrucks[index].id,
-                                      value,
-                                      localTrucks[index].color);
-                                  await _loadData();
-                                },
-                              ),
-                              // Delete Button
-                              IconButton(
-                                icon: Icon(Icons.delete, color: Colors.red),
-                                onPressed: () async {
-                                  bool? confirmDelete = await showDialog<bool>(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: Text('Delete Truck',
-                                          style: GoogleFonts.roboto()),
-                                      content: Text(
-                                          'Are you sure you want to delete ${localTrucks[index].name}?',
-                                          style: GoogleFonts.roboto()),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, false),
-                                          child: Text('Cancel',
-                                              style: GoogleFonts.roboto()),
-                                        ),
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context, true),
-                                          child: Text('Delete',
-                                              style: GoogleFonts.roboto()),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-
-                                  if (confirmDelete == true) {
-                                    await _service
-                                        .deleteTruck(localTrucks[index].id);
-                                    setDialogState(() {
-                                      localTrucks.removeAt(index);
-                                    });
-                                    await _loadData();
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                          Divider(),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Close', style: GoogleFonts.roboto()),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
+  void _showTruckManagerDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => TruckManagerDialog(
+      trucks: allTrucks,
+      service: _service,
+      onDataUpdated: _loadData,
+      userRole: userRole,
+    ),
+  );
+} 
 
   void _addScheduleEntry(
       SiteInfo site, DateTime start, DateTime end, Equipment? truck) async {
@@ -798,111 +575,16 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     await _loadData();
   }
 
-  void _showAddSiteDialog(BuildContext context) {
-    final _formKey = GlobalKey<FormState>(); // For form validation
-
+  void _showAddSiteDialog(BuildContext context) {   
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(
-            'Add New Site',
-            style: GoogleFonts.montserrat(),
-          ),
-          content: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Name field (mandatory)
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Site Name',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a site name';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 10),
-                  // Address field (optional)
-                  TextFormField(
-                    controller: _addressController,
-                    decoration: InputDecoration(
-                      labelText: 'Address (Optional)',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close dialog
-              },
-              child: Text('Cancel', style: GoogleFonts.roboto()),
-            ),
-            TextButton(
-              onPressed: () async {
-                // Validate the form
-                if (_formKey.currentState!.validate()) {
-                  try {
-                    // Create a reference to the SiteList collection
-                    final siteRef =
-                        FirebaseFirestore.instance.collection('SiteList');
-
-                    // Generate a new document ID
-                    final newDocRef = siteRef.doc(); // Auto-generate ID
-
-                    // Create a new SiteInfo instance with default values
-                    final newSite = SiteInfo(
-                      address: _addressController.text.trim().isEmpty
-                          ? ""
-                          : _addressController.text
-                              .trim(), // Default to "" if empty
-                      imageUrl: "", // Default value
-                      management: "", // Default value
-                      name: _nameController.text.trim(),
-                      status: true, // Default to true
-                      target: 0.0, // Default value
-                      id: newDocRef.id, // Use the generated ID
-                      program: true, // Default to true
-                    );
-
-                    // Save to Firestore
-                    await newDocRef.set(newSite.toMap());
-
-                    // Show success message
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Site added successfully!')),
-                    );
-
-                    // Clear controllers after successful save
-                    _nameController.clear();
-                    _addressController.clear();
-
-                    // Close the dialog
-                    Navigator.pop(context);
-                  } catch (e) {
-                    // Show error message
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to add site: $e')),
-                    );
-                  }
-                }
-              },
-              child: Text('Save', style: GoogleFonts.roboto()),
-            ),
-          ],
-        );
-      },
+      builder: (context) => AddSiteDialog(
+        nameController: _nameController,
+        addressController: _addressController,
+        onSuccess: () {
+          _loadData();
+        },
+      ),
     );
   }
 
