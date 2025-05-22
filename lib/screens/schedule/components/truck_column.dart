@@ -36,9 +36,9 @@ class TruckColumn extends StatelessWidget {
     const int slotsPerDay = 22;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: SizedBox(
-        width: 150,
+        width: 130,
         child: Column(
           children: [
             if (includeTruckTitle)

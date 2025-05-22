@@ -552,16 +552,16 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   void _showTruckManagerDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (context) => TruckManagerDialog(
-      trucks: allTrucks,
-      service: _service,
-      onDataUpdated: _loadData,
-      userRole: userRole,
-    ),
-  );
-} 
+    showDialog(
+      context: context,
+      builder: (context) => TruckManagerDialog(
+        trucks: allTrucks,
+        service: _service,
+        onDataUpdated: _loadData,
+        userRole: userRole,
+      ),
+    );
+  }
 
   void _addScheduleEntry(
       SiteInfo site, DateTime start, DateTime end, Equipment? truck) async {
@@ -575,7 +575,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     await _loadData();
   }
 
-  void _showAddSiteDialog(BuildContext context) {   
+  void _showAddSiteDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AddSiteDialog(
@@ -591,7 +591,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 59, 82, 73),
         title: Row(
@@ -643,43 +643,135 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         child: SingleChildScrollView(
           controller: _horizontalScrollController,
           scrollDirection: Axis.horizontal,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // TimeColumn with "Time" as the top slot
-              SizedBox(
-                width: 80,
-                child: TimeColumn(
-                  hoveredSlotIndex: _hoveredSlotIndex,
-                  includeTimeTitle: true, // Add "Time" as the top slot
+          child: IntrinsicWidth(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Horizontal scroll indicator
+                Container(
+                  height: 15,
+                  color: Colors.black,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Left arrow icon
+                      Icon(
+                        Icons.arrow_back_ios,
+                        color: Colors.white,
+                        size: 12,
+                      ),
+                      // Scroll text
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          'Scroll to view trucks',
+                          style: TextStyle(
+                            color: Colors.grey[200],
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                      // Right arrow icon
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.white,
+                        size: 12,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              // TruckColumns with integrated truck titles
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: activeTrucks
-                    .map((truck) => TruckColumn(
-                          truck: truck,
-                          schedule: schedule
-                              .where((entry) => entry.truckId == truck.id)
-                              .toList(),
-                          onHover: _updateHoveredSlotIndex,
-                          onDrop: (entry, slotTime) =>
-                              _updateScheduleEntry(entry, slotTime, truck.id),
-                          onTapSlot: (index) =>
-                              _showSitePickerForSlot(context, truck, index),
-                          onResize: (entry, newEndTime) =>
-                              _updateScheduleEntryWithNewEndTime(
-                                  entry, newEndTime, truck.id),
-                          onResizeHover: _updateHoveredSlotIndex,
-                          selectedDate: selectedDate,
-                          includeTruckTitle: true,
-                          onRefresh: _loadData,
-                          userRole: userRole,
-                        ))
-                    .toList(),
-              ),
-            ],
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        width: 15,
+                        color: Colors.black,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Up arrow icon
+                            Icon(
+                              Icons.expand_less,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+
+                            // Scroll text
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: RotatedBox(
+                                quarterTurns:
+                                    3, // Rotate text 90 degrees counterclockwise
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    'Scroll to view times',
+                                    style: TextStyle(
+                                      color: Colors.grey[200],
+                                      fontSize: 12,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Down arrow icon
+                            Icon(
+                              Icons.expand_more,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                          ],
+                        ),
+                      ),
+                      // TimeColumn with "Time" as the top slot
+                      SizedBox(
+                        width: 50,
+                        child: TimeColumn(
+                          hoveredSlotIndex: _hoveredSlotIndex,
+                          includeTimeTitle: true, // Add "Time" as the top slot
+                        ),
+                      ),
+                      // TruckColumns with integrated truck titles
+                      Row(
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: activeTrucks
+                                .map((truck) => TruckColumn(
+                                      truck: truck,
+                                      schedule: schedule
+                                          .where((entry) =>
+                                              entry.truckId == truck.id)
+                                          .toList(),
+                                      onHover: _updateHoveredSlotIndex,
+                                      onDrop: (entry, slotTime) =>
+                                          _updateScheduleEntry(
+                                              entry, slotTime, truck.id),
+                                      onTapSlot: (index) =>
+                                          _showSitePickerForSlot(
+                                              context, truck, index),
+                                      onResize: (entry, newEndTime) =>
+                                          _updateScheduleEntryWithNewEndTime(
+                                              entry, newEndTime, truck.id),
+                                      onResizeHover: _updateHoveredSlotIndex,
+                                      selectedDate: selectedDate,
+                                      includeTruckTitle: true,
+                                      onRefresh: _loadData,
+                                      userRole: userRole,
+                                    ))
+                                .toList(),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
