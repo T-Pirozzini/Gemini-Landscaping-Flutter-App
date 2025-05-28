@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-platform :ios, '13.0'
+platform :ios, '12.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -30,29 +30,26 @@ flutter_ios_podfile_setup
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
+  pod 'FirebaseFirestore'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-
-  # Explicitly add Firebase/CoreOnly pod if needed
-  # pod 'Firebase/CoreOnly'
-
-  target 'RunnerTests' do
-    inherit! :search_paths
-  end
 end
 
 # post_install do |installer|
 #   installer.pods_project.targets.each do |target|
 #     flutter_additional_ios_build_settings(target)
-
 #     target.build_configurations.each do |config|
-#       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+#       xcconfig_path = config.base_configuration_reference.real_path
+#       xcconfig = File.read(xcconfig_path)
+#       xcconfig_mod = xcconfig.gsub(/DT_TOOLCHAIN_DIR/, "TOOLCHAIN_DIR")
+#       File.open(xcconfig_path, "w") { |file| file << xcconfig_mod }
 #     end
 #   end
 # end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
     if target.name == 'BoringSSL-GRPC'
       target.source_build_phase.files.each do |file|
         if file.settings && file.settings['COMPILER_FLAGS']
@@ -60,9 +57,6 @@ post_install do |installer|
           flags.reject! { |flag| flag == '-GCC_WARN_INHIBIT_ALL_WARNINGS' }
           file.settings['COMPILER_FLAGS'] = flags.join(' ')
         end
-      end
-      target.build_configurations.each do |config|
-        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
       end
     end
   end
