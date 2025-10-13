@@ -7,6 +7,8 @@ import 'package:gemini_landscaping_app/screens/view_reports/edit_report.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:gemini_landscaping_app/models/site_report.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class ReportPreview extends StatefulWidget {
   final SiteReport report;
@@ -22,6 +24,7 @@ class _ReportPreviewState extends State<ReportPreview> {
   @override
   void initState() {
     super.initState();
+    tz.initializeTimeZones();
     report = widget.report;
   }
 
@@ -97,6 +100,7 @@ class _ReportPreviewState extends State<ReportPreview> {
   @override
   Widget build(BuildContext context) {
     final report = this.report;
+    final vancouver = tz.getLocation('America/Vancouver');
 
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
@@ -280,16 +284,16 @@ class _ReportPreviewState extends State<ReportPreview> {
                           Container(
                             alignment: Alignment.center,
                             child: Text(
-                              DateFormat('hh:mm a')
-                                  .format(employee.timeOn.toLocal()),
+                              DateFormat('hh:mm a').format(tz.TZDateTime.from(
+                                  employee.timeOn, vancouver)),
                               style: GoogleFonts.montserrat(fontSize: 14),
                             ),
                           ),
                           Container(
                             alignment: Alignment.center,
                             child: Text(
-                              DateFormat('hh:mm a')
-                                  .format(employee.timeOff.toLocal()),
+                              DateFormat('hh:mm a').format(tz.TZDateTime.from(
+                                  employee.timeOff, vancouver)),
                               style: GoogleFonts.montserrat(fontSize: 14),
                             ),
                           ),

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:gemini_landscaping_app/screens/view_reports/view_report_page.dart';
+import 'package:gemini_landscaping_app/screens/old_screens/view_report_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SiteFiles extends StatefulWidget {

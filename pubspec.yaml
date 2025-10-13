@@ -61,6 +61,7 @@ dependencies:
   iconify_flutter: ^0.0.7
   auto_size_text: ^3.0.0
   flutter_speed_dial: ^7.0.0
+  timezone: ^0.10.1
 
 dev_dependencies:
   flutter_test:

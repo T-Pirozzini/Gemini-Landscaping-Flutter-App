@@ -8,6 +8,8 @@ import 'package:gemini_landscaping_app/screens/view_reports/report_preview.dart'
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:floating_action_bubble/floating_action_bubble.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class RecentReports extends ConsumerStatefulWidget {
   @override
@@ -22,6 +24,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
   @override
   void initState() {
     super.initState();
+    tz.initializeTimeZones();
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 200),
@@ -42,6 +45,8 @@ class _RecentReportsState extends ConsumerState<RecentReports>
   @override
   Widget build(BuildContext context) {
     final reportsAsyncValue = ref.watch(allSiteReportsStreamProvider);
+
+    final vancouver = tz.getLocation('America/Vancouver');
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -177,12 +182,15 @@ class _RecentReportsState extends ConsumerState<RecentReports>
                 // Get the first employee's timeOn and timeOff
                 final firstEmployee =
                     report.employees.isNotEmpty ? report.employees.first : null;
+                // Convert DateTime to Vancouver time zone (Pacific Time) before formatting
                 final timeOn = firstEmployee != null
-                    ? DateFormat('hh:mm a').format(firstEmployee.timeOn)
+                    ? DateFormat('hh:mm a').format(
+                        tz.TZDateTime.from(firstEmployee.timeOn, vancouver))
                     : 'N/A';
                 final timeOff = firstEmployee != null
-                    ? DateFormat('hh:mm a').format(firstEmployee.timeOff)
-                    : 'N/A';
+                    ? DateFormat('hh:mm a').format(
+                        tz.TZDateTime.from(firstEmployee.timeOff, vancouver))
+                    : 'N/A';                
 
                 // Convert the total duration from minutes to hours and minutes
                 final int totalMinutes = report.totalCombinedDuration;

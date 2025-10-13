@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/screens/home/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'edit_report_page.dart';
+import '../view_reports/edit_report_page.dart';
 import '../print_save_report/pdf_page.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 // ignore: must_be_immutable
 class ViewReport extends StatefulWidget {
@@ -21,6 +23,11 @@ CollectionReference ref =
 class _ViewReportState extends State<ViewReport> {
   DocumentSnapshot docid;
   _ViewReportState({required this.docid});
+
+  initState() {
+    super.initState();
+    tz.initializeTimeZones();
+  }
 
   void deleteReport() {
     showDialog(
@@ -57,6 +64,8 @@ class _ViewReportState extends State<ViewReport> {
 
   @override
   Widget build(BuildContext context) {
+    final vancouver = tz.getLocation('America/Vancouver');
+
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
@@ -122,6 +131,7 @@ class _ViewReportState extends State<ViewReport> {
                         textStyle: TextStyle(letterSpacing: .5, fontSize: 14),
                       ),
                     ),
+                    Text("HI THERE!")
                   ],
                 ),
                 SizedBox(width: 20),

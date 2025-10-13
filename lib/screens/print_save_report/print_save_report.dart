@@ -5,6 +5,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:gemini_landscaping_app/models/site_report.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class PrintSaveReport extends StatefulWidget {
   final SiteReport report;
@@ -66,6 +67,8 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
         totalAmount += amountValue;
       }
     }
+
+    final vancouver = tz.getLocation('America/Vancouver');
 
     doc.addPage(
       pw.Page(
@@ -258,16 +261,16 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                         pw.Container(
                           alignment: pw.Alignment.center,
                           child: pw.Text(
-                            DateFormat('hh:mm a')
-                                .format(employee.timeOn.toLocal()),
+                            DateFormat('hh:mm a').format(
+                                tz.TZDateTime.from(employee.timeOn, vancouver)),
                             style: const pw.TextStyle(fontSize: 10),
                           ),
                         ),
                         pw.Container(
                           alignment: pw.Alignment.center,
                           child: pw.Text(
-                            DateFormat('hh:mm a')
-                                .format(employee.timeOff.toLocal()),
+                            DateFormat('hh:mm a').format(tz.TZDateTime.from(
+                                employee.timeOff, vancouver)),
                             style: const pw.TextStyle(fontSize: 10),
                           ),
                         ),
