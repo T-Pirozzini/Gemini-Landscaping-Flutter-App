@@ -25,6 +25,12 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
 
   @override
   Widget build(BuildContext context) {
+    // Parse the report date and reformat to "MMM d, yyyy"
+    final parsedDate = DateFormat('MMMM d, yyyy').parse(report.date);
+    final formattedDate = DateFormat('MMM d, yyyy').format(parsedDate);
+    // Create the filename: {site date} - {site name} (New)
+    final fileName = '$formattedDate - ${report.siteName} (New)';
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
@@ -41,6 +47,7 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
         maxPageWidth: 1000,
         canChangeOrientation: false,
         canDebug: false,
+        pdfFileName: '$fileName.pdf',
         build: (format) => generateDocument(
           format,
         ),

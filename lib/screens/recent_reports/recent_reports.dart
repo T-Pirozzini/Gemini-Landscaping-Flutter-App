@@ -70,8 +70,8 @@ class _RecentReportsState extends ConsumerState<RecentReports>
             return dateB.compareTo(dateA); // Sort most recent first
           });
 
-          // Get the most recent 50 reports
-          final limitedReports = reports.take(50).toList();
+          // Get the most recent 80 reports
+          final limitedReports = reports.take(80).toList();
 
           // Group the limited reports by date, then by submittedBy
           final groupedByDate = <DateTime, Map<String, List<SiteReport>>>{};
@@ -190,7 +190,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
                 final timeOff = firstEmployee != null
                     ? DateFormat('hh:mm a').format(
                         tz.TZDateTime.from(firstEmployee.timeOff, vancouver))
-                    : 'N/A';                
+                    : 'N/A';
 
                 // Convert the total duration from minutes to hours and minutes
                 final int totalMinutes = report.totalCombinedDuration;
