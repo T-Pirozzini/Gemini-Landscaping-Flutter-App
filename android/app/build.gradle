@@ -46,7 +46,7 @@ android {
         applicationId "com.tpiro.geminilandscapingapp"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
-        versionCode 19
+        versionCode 20
         versionName flutterVersionName
         multiDexEnabled true
     }    
