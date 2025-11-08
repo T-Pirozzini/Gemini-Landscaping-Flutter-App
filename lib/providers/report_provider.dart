@@ -1,6 +1,7 @@
 import 'package:gemini_landscaping_app/models/site_report.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:gemini_landscaping_app/services/firestore_service.dart';
+import 'package:gemini_landscaping_app/models/site_info.dart';
 
 // fetch site report data for current month
 final currentMonthSitereportProvider = FutureProvider<List<SiteReport>>((ref) async {
@@ -22,4 +23,9 @@ final allSiteReportsProvider = FutureProvider<List<SiteReport>>((ref) async {
 final allSiteReportsStreamProvider = StreamProvider<List<SiteReport>>((ref) {
   final firestoreService = FirestoreService();
   return firestoreService.fetchAllReportsStream();
+});
+
+final allSiteInfoProvider = FutureProvider<List<SiteInfo>>((ref) {
+  final firestoreService = FirestoreService();
+  return firestoreService.fetchAllSites();
 });
