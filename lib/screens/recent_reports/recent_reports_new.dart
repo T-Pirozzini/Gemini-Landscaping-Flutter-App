@@ -11,18 +11,23 @@ import 'package:gemini_landscaping_app/screens/winter_reports/addWinterReport.da
 import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
-// Utility for date formatting
+// --- Date Utils ---
 class DateUtils {
   static final vancouver = tz.getLocation('America/Vancouver');
   static String formatDate(DateTime date) =>
       DateFormat('MMMM d, yyyy').format(date);
-  static String formatTime(DateTime time) =>
-      DateFormat('hh:mm a').format(tz.TZDateTime.from(time, vancouver));
+  static String formatTime(DateTime time) => DateFormat('h:mm a')
+      .format(tz.TZDateTime.from(time, vancouver)); // Removed leading zeros
   static DateTime parseDate(String dateStr) =>
       DateFormat('MMMM d, yyyy').parse(dateStr);
+  static String formatDuration(int totalMinutes) {
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+    return '${hours}hrs ${minutes}mins';
+  }
 }
 
-// Widget for date header
+// --- Date Header ---
 class DateHeader extends StatelessWidget {
   final String date;
   const DateHeader({super.key, required this.date});
@@ -30,12 +35,19 @@ class DateHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey.shade800,
-      padding: const EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.grey.shade700, Colors.grey.shade600],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(
+          vertical: 6.0, horizontal: 12.0), // Reduced vertical padding
       child: Text(
         date,
         style: GoogleFonts.montserrat(
-          fontSize: 14,
+          fontSize: 13, // Smaller font
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
@@ -44,7 +56,7 @@ class DateHeader extends StatelessWidget {
   }
 }
 
-// Widget for employee header
+// --- Employee Header ---
 class EmployeeHeader extends StatelessWidget {
   final String name;
   const EmployeeHeader({super.key, required this.name});
@@ -52,106 +64,21 @@ class EmployeeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding:
+          const EdgeInsets.fromLTRB(12.0, 6.0, 12.0, 2.0), // Tighter padding
       child: Text(
         'Submitted by: $name',
-        style:
-            GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-// Widget for report card
-class ReportCard extends StatelessWidget {
-  final SiteReport report;
-  const ReportCard({super.key, required this.report});
-
-  @override
-  Widget build(BuildContext context) {
-    final firstEmployee =
-        report.employees.isNotEmpty ? report.employees.first : null;
-    final timeOn = firstEmployee != null
-        ? DateUtils.formatTime(firstEmployee.timeOn)
-        : 'N/A';
-    final timeOff = firstEmployee != null
-        ? DateUtils.formatTime(firstEmployee.timeOff)
-        : 'N/A';
-    final hours = report.totalCombinedDuration ~/ 60;
-    final minutes = report.totalCombinedDuration % 60;
-    final formattedDuration = '${hours}hrs ${minutes}mins';
-
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => ReportPreview(report: report)),
-      ),
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: BorderSide(
-            width: 2.0,
-            color: report.isRegularMaintenance ? Colors.green : Colors.blueGrey,
-          ),
-        ),
-        child: ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          leading: Icon(
-            report.isRegularMaintenance
-                ? Icons.grass
-                : Icons.add_circle_outline,
-            color: Colors.grey.shade700,
-          ),
-          title: Text(
-            report.siteName,
-            style: GoogleFonts.montserrat(
-                fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          subtitle: Row(
-            children: [
-              Text('ID: ${report.id.substring(0, 5)}'),
-              const SizedBox(width: 8),
-              Text(
-                report.filed ? 'filed' : 'in progress',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: report.filed
-                      ? Colors.green.shade200
-                      : Colors.blueGrey.shade200,
-                ),
-              ),
-              Icon(
-                report.filed ? Icons.task_alt_outlined : Icons.pending_outlined,
-                color: report.filed
-                    ? Colors.green.shade200
-                    : Colors.blueGrey.shade200,
-                size: 16,
-              ),
-            ],
-          ),
-          trailing: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (firstEmployee != null) ...[
-                Text('Employees: ${report.employees.length}',
-                    style: GoogleFonts.montserrat(fontSize: 12)),
-                Text('$timeOn - $timeOff',
-                    style: GoogleFonts.montserrat(fontSize: 12)),
-              ],
-              Text('Site Time: $formattedDuration',
-                  style: GoogleFonts.montserrat(fontSize: 12)),
-            ],
-          ),
+        style: GoogleFonts.montserrat(
+          fontSize: 11, // Smaller font
+          fontWeight: FontWeight.w600,
+          color: Colors.grey.shade800,
         ),
       ),
     );
   }
 }
 
+// --- RECENT REPORTS SCREEN ---
 class RecentReports extends ConsumerStatefulWidget {
   const RecentReports({super.key});
 
@@ -163,6 +90,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
     with SingleTickerProviderStateMixin {
   late Animation<double> _animation;
   late AnimationController _animationController;
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
   @override
   void initState() {
@@ -182,6 +110,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
     super.dispose();
   }
 
+  // --- Group Reports ---
   List<Map<String, dynamic>> _groupReports(List<SiteReport> reports) {
     reports.sort((a, b) =>
         DateUtils.parseDate(b.date).compareTo(DateUtils.parseDate(a.date)));
@@ -238,57 +167,64 @@ class _RecentReportsState extends ConsumerState<RecentReports>
     final reportsAsyncValue = ref.watch(allSiteReportsStreamProvider);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: Text(
-          "Recent Site Reports",
-          style: GoogleFonts.montserrat(
-              fontSize: 18, color: Colors.black, fontWeight: FontWeight.w500),
-        ),
+        title: Text("Recent Site Reports",
+            style: GoogleFonts.montserrat(
+                fontSize: 16,
+                color: Colors.black,
+                fontWeight: FontWeight.w500)),
         toolbarHeight: 25,
         backgroundColor: Colors.green.shade100,
         elevation: 0,
         centerTitle: true,
       ),
       body: RefreshIndicator(
-        onRefresh: () async => ref.refresh(allSiteReportsStreamProvider),
+        onRefresh: () async {
+          ref.refresh(allSiteReportsStreamProvider);
+        },
         child: reportsAsyncValue.when(
           data: (reports) {
             final reportsList = _groupReports(reports);
-            return ListView.builder(
-              itemCount: reportsList.length,
-              itemBuilder: (context, index) {
+            return AnimatedList(
+              key: _listKey,
+              initialItemCount: reportsList.length,
+              itemBuilder: (context, index, animation) {
                 final item = reportsList[index];
+                Widget child;
                 switch (item['type']) {
                   case 'date':
-                    return DateHeader(date: item['date']);
+                    child = DateHeader(date: item['date']);
+                    break;
                   case 'employee':
-                    return EmployeeHeader(name: item['name']);
-                  case 'divider':
-                    return const Divider(thickness: 2);
+                    child = EmployeeHeader(name: item['name']);
+                    break;
                   case 'report':
-                    return ReportCard(report: item['report']);
+                    child = MinimalReportTile(report: item['report']);
+                    break;
+                  case 'divider':
+                    child = Divider(
+                      thickness: 0.5,
+                      color: Colors.grey.shade300,
+                      indent: 12,
+                      endIndent: 12,
+                    );
+                    break;
                   default:
-                    return const SizedBox.shrink();
+                    child = const SizedBox.shrink();
                 }
+                return FadeTransition(
+                  opacity: animation,
+                  child: SizeTransition(
+                    sizeFactor: animation,
+                    child: child,
+                  ),
+                );
               },
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Error: $error',
-                    style: GoogleFonts.montserrat(fontSize: 16)),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => ref.refresh(allSiteReportsStreamProvider),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
+          error: (error, stack) => _ErrorWidget(error: error, ref: ref),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -326,6 +262,147 @@ class _RecentReportsState extends ConsumerState<RecentReports>
             },
           ),
         ],
+      ),
+    );
+  }
+}
+
+// --- ERROR WIDGET ---
+class _ErrorWidget extends StatelessWidget {
+  const _ErrorWidget({
+    required this.error,
+    required this.ref,
+  });
+
+  final Object error;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Error: $error', style: GoogleFonts.montserrat(fontSize: 16)),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              ref.refresh(allSiteReportsStreamProvider);
+            },
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// --- Modern Report Tile ---
+class MinimalReportTile extends StatelessWidget {
+  final SiteReport report;
+  const MinimalReportTile({super.key, required this.report});
+
+  @override
+  Widget build(BuildContext context) {
+    final firstEmployee =
+        report.employees.isNotEmpty ? report.employees.first : null;
+    final timeOn = firstEmployee != null
+        ? DateUtils.formatTime(firstEmployee.timeOn)
+        : 'N/A';
+    final timeOff = firstEmployee != null
+        ? DateUtils.formatTime(firstEmployee.timeOff)
+        : 'N/A';
+    final formattedDuration =
+        DateUtils.formatDuration(report.totalCombinedDuration);
+    final initial = report.submittedBy.split('@')[0][0].toUpperCase();
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ReportPreview(report: report)),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 1, horizontal: 6),
+        child: Card(
+          elevation: 1,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          color: Colors.white,
+          child: Stack(
+            children: [
+              ListTile(
+                dense: true,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                leading: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: report.isRegularMaintenance
+                      ? Colors.green[400]
+                      : Colors.blueGrey[400],
+                  child: Icon(
+                    report.isRegularMaintenance
+                        ? Icons.grass
+                        : Icons.add_circle_outline,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+                title: Text(
+                  report.siteName,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  'ID: ${report.id.substring(0, 5)}',
+                  style: GoogleFonts.montserrat(
+                      fontSize: 10, color: Colors.grey.shade600),
+                ),
+                trailing: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Employees: ${report.employees.length}',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 10, color: Colors.grey.shade800),
+                    ),
+                    Text(
+                      '$timeOn - $timeOff',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 10, color: Colors.grey.shade800),
+                    ),
+                    Text(
+                      formattedDuration,
+                      style: GoogleFonts.montserrat(
+                          fontSize: 10, color: Colors.grey.shade800),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 1,
+                right: 1,
+                child: Badge(
+                  backgroundColor:
+                      report.filed ? Colors.green[300] : Colors.blueGrey[300],
+                  label: Text(
+                    report.filed ? 'Filed' : 'Pending',
+                    style: GoogleFonts.montserrat(
+                        fontSize: 6, color: Colors.white),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
