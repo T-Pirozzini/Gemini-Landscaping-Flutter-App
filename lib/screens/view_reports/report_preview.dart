@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gemini_landscaping_app/providers/admin_provider.dart';
 import 'package:gemini_landscaping_app/screens/home/home_page.dart';
 import 'package:gemini_landscaping_app/screens/print_save_report/print_save_report.dart';
 import 'package:gemini_landscaping_app/screens/view_reports/edit_report.dart';
@@ -10,15 +11,15 @@ import 'package:gemini_landscaping_app/models/site_report.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-class ReportPreview extends StatefulWidget {
+class ReportPreview extends ConsumerStatefulWidget {
   final SiteReport report;
   ReportPreview({required this.report});
 
   @override
-  State<ReportPreview> createState() => _ReportPreviewState();
+  ConsumerState<ReportPreview> createState() => _ReportPreviewState();
 }
 
-class _ReportPreviewState extends State<ReportPreview> {
+class _ReportPreviewState extends ConsumerState<ReportPreview> {
   late SiteReport report;
 
   @override
@@ -28,7 +29,7 @@ class _ReportPreviewState extends State<ReportPreview> {
     report = widget.report;
   }
 
-  void deleteReport() {
+  void _deleteReport() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -65,7 +66,7 @@ class _ReportPreviewState extends State<ReportPreview> {
                   );
                 }
               },
-              child: Text('Delete'),
+              child: Text('Delete', style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -92,7 +93,59 @@ class _ReportPreviewState extends State<ReportPreview> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => PrintSaveReport(report: widget.report),
+        builder: (_) => PrintSaveReport(report: report),
+      ),
+    );
+  }
+
+  // Reusable section card
+  Widget _sectionCard({
+    required String title,
+    required IconData icon,
+    required Widget child,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: 18, color: Colors.grey.shade700),
+                SizedBox(width: 8),
+                Text(
+                  title,
+                  style: GoogleFonts.montserrat(
+                      fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(12),
+            child: child,
+          ),
+        ],
       ),
     );
   }
@@ -101,477 +154,514 @@ class _ReportPreviewState extends State<ReportPreview> {
   Widget build(BuildContext context) {
     final report = this.report;
     final vancouver = tz.getLocation('America/Vancouver');
+    final isAdmin = ref.watch(isAdminProvider);
+
+    final accentColor = report.isRegularMaintenance
+        ? Color.fromARGB(255, 31, 182, 77)
+        : Colors.blueGrey;
+
+    // Display-friendly submittedBy
+    final submitterName = report.submittedBy.contains('@')
+        ? report.submittedBy.split('@')[0]
+        : report.submittedBy;
+    final capitalizedName = submitterName.isNotEmpty
+        ? submitterName[0].toUpperCase() +
+            submitterName.substring(1).toLowerCase()
+        : 'Unknown';
+
+    // Format timestamp
+    final formattedTimestamp =
+        DateFormat('MMM d, yyyy \'at\' h:mm a').format(report.timestamp);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-        leading: MaterialButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: Row(
-            children: const [
-              Icon(Icons.arrow_circle_left_outlined,
-                  color: Colors.white, size: 18),
-              Text(
-                " Back",
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Color.fromARGB(255, 251, 251, 251),
-                ),
-              ),
-            ],
-          ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+          onPressed: () => Navigator.pop(context),
         ),
-        leadingWidth: 100,
         title: Image.asset("assets/gemini-icon-transparent.png",
             color: Colors.white, fit: BoxFit.contain, height: 50),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          padding: EdgeInsets.all(10),
-          margin: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.0),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.shade400,
-                offset: Offset(2.0, 2.0),
-                blurRadius: 5.0,
-                spreadRadius: 1.0,
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Text(
-                report.isRegularMaintenance
-                    ? 'REGULAR MAINTENANCE REPORT'
-                    : 'ADDITIONAL SERVICE REPORT',
-                style: report.isRegularMaintenance
-                    ? GoogleFonts.montserrat(
-                        textStyle: TextStyle(
-                          letterSpacing: .5,
-                          color: Colors.green,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    : GoogleFonts.montserrat(
-                        textStyle: TextStyle(
-                          letterSpacing: .5,
-                          color: Colors.blueGrey,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-              ),
-              SizedBox(
-                height: 100,
-                child: Image.asset(
-                  'assets/gemini_logo.jpg',
-                  fit: BoxFit.cover,
-                ),
-              ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(12),
+              child: Column(
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        report.date,
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                              letterSpacing: .5,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold),
-                        ),
+                  // Filed status banner
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: report.filed
+                          ? Colors.green.shade50
+                          : Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: report.filed
+                            ? Colors.green.shade300
+                            : Colors.orange.shade300,
                       ),
-                      Text(
-                        '#${report.id.substring(report.id.length - 5)}',
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(letterSpacing: .5, fontSize: 14),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          report.filed
+                              ? Icons.check_circle
+                              : Icons.pending_outlined,
+                          size: 16,
+                          color: report.filed
+                              ? Colors.green.shade700
+                              : Colors.orange.shade700,
                         ),
-                      ),
-                    ],
+                        SizedBox(width: 8),
+                        Text(
+                          report.filed ? 'Filed' : 'Pending Review',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: report.filed
+                                ? Colors.green.shade700
+                                : Colors.orange.shade700,
+                          ),
+                        ),
+                        Spacer(),
+                        Text(
+                          report.isRegularMaintenance
+                              ? 'Regular Maintenance'
+                              : 'Additional Service',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: accentColor,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  SizedBox(width: 20),
-                  Expanded(
+                  SizedBox(height: 10),
+
+                  // Site info card
+                  _sectionCard(
+                    title: 'Site Information',
+                    icon: Icons.location_on_outlined,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           report.siteName.toUpperCase(),
                           style: GoogleFonts.montserrat(
-                            textStyle: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                        Text(
-                          report.address,
-                          style: GoogleFonts.montserrat(
-                            textStyle: TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 15),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                ),
-                child: Table(
-                  border: TableBorder.all(
-                    color: Colors.black,
-                  ),
-                  children: [
-                    TableRow(
-                        decoration: BoxDecoration(
-                          color: report.isRegularMaintenance
-                              ? Color.fromARGB(255, 31, 182, 77)
-                              : Colors.blueGrey,
-                        ),
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(2),
-                            alignment: Alignment.center,
-                            child: Text(
-                              'Name',
-                              style: GoogleFonts.montserrat(
-                                  fontSize: 16, color: Colors.white),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(2),
-                            alignment: Alignment.center,
-                            child: Text('On',
-                                style: GoogleFonts.montserrat(
-                                    fontSize: 16, color: Colors.white)),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(2),
-                            alignment: Alignment.center,
-                            child: Text('Off',
-                                style: GoogleFonts.montserrat(
-                                    fontSize: 16, color: Colors.white)),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(2),
-                            alignment: Alignment.center,
-                            child: Text('Site Time',
-                                style: GoogleFonts.montserrat(
-                                    fontSize: 16, color: Colors.white)),
-                          ),
-                        ]),
-                    ...report.employees.map((employee) {
-                      return TableRow(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            child: Text(
-                              employee.name,
-                              style: GoogleFonts.montserrat(fontSize: 14),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.center,
-                            child: Text(
-                              DateFormat('hh:mm a').format(tz.TZDateTime.from(
-                                  employee.timeOn, vancouver)),
-                              style: GoogleFonts.montserrat(fontSize: 14),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.center,
-                            child: Text(
-                              DateFormat('hh:mm a').format(tz.TZDateTime.from(
-                                  employee.timeOff, vancouver)),
-                              style: GoogleFonts.montserrat(fontSize: 14),
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.center,
-                            child: Text(
-                              "${(employee.duration / 60).toStringAsFixed(1)} hrs",
-                              style: GoogleFonts.montserrat(fontSize: 14),
-                            ),
-                          ),
-                        ],
-                      );
-                    }).toList(),
-                    TableRow(
-                      children: [
-                        Container(),
-                        Container(),
-                        Container(
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Total",
+                        SizedBox(height: 2),
+                        Text(report.address,
                             style: GoogleFonts.montserrat(
-                              fontSize: 18,
+                                fontSize: 14, color: Colors.grey.shade700)),
+                        SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Text(report.date,
+                                style: GoogleFonts.montserrat(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500)),
+                            Spacer(),
+                            Text(
+                              '#${report.id.substring(report.id.length - 5)}',
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 12, color: Colors.grey.shade500),
                             ),
-                          ),
-                        ),
-                        Container(
-                          alignment: Alignment.center,
-                          child: Text(
-                            "${(report.totalCombinedDuration / 60).toStringAsFixed(1)} hrs",
-                            style: GoogleFonts.montserrat(fontSize: 18),
-                          ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 10),
-              Divider(
-                thickness: 2,
-                color: report.isRegularMaintenance
-                    ? Colors.green
-                    : Colors.blueGrey,
-              ),
-              Container(
-                padding: EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  border: Border.all(width: 1),
-                ),
-                child: Text('Services Provided',
-                    style: GoogleFonts.montserrat(
-                        fontSize: 16, fontWeight: FontWeight.bold)),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: report.services.isEmpty ||
-                        report.services.values.every((items) => items.isEmpty)
-                    ? [Text('No services were specified')]
-                    : report.services.entries
-                        .where((entry) => entry.value.isNotEmpty)
-                        .map((entry) {
-                        final serviceKey = entry.key;
-                        final serviceItems = entry.value;
+                  ),
 
-                        return Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Divider(),
-                              Text(
-                                serviceKey.toUpperCase(),
-                                style: GoogleFonts.montserrat(
-                                    fontSize: 16, fontWeight: FontWeight.w600),
-                              ),
-                              Wrap(
-                                spacing: 8.0,
-                                runSpacing: 4.0,
-                                children: serviceItems.map<Widget>((item) {
-                                  return Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.check_circle,
-                                          color: Colors.green, size: 16),
-                                      SizedBox(width: 4),
-                                      Text(item,
-                                          style: TextStyle(fontSize: 14)),
-                                    ],
-                                  );
-                                }).toList(),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-              ),
-              SizedBox(height: 10),
-              Divider(
-                thickness: 2,
-                color: report.isRegularMaintenance
-                    ? Colors.green
-                    : Colors.blueGrey,
-              ),
-              Container(
-                padding: EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  border: Border.all(width: 1),
-                ),
-                child: Text('Materials/Disposal',
-                    style: GoogleFonts.montserrat(
-                        fontSize: 16, fontWeight: FontWeight.bold)),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: report.materials.isEmpty
-                    ? [Text('No materials supplied or installed.')]
-                    : report.materials.map((material) {
-                        return Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Divider(),
-                              Text(
-                                'Description: ${material.description}',
-                                style: GoogleFonts.montserrat(fontSize: 14),
-                              ),
-                              Text(
-                                'Vendor: ${material.vendor}',
-                                style: GoogleFonts.montserrat(fontSize: 14),
-                              ),
-                              Text(
-                                'Cost: \$${material.cost}',
-                                style: GoogleFonts.montserrat(fontSize: 14),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-              ),
-              SizedBox(height: 10),
-              Divider(
-                thickness: 2,
-                color: report.isRegularMaintenance
-                    ? Colors.green
-                    : Colors.blueGrey,
-              ),
-              Container(
-                padding: EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  border: Border.all(width: 1),
-                ),
-                child: Text('Description of Services',
-                    style: GoogleFonts.montserrat(
-                        fontSize: 16, fontWeight: FontWeight.bold)),
-              ),
-              report.description.isEmpty
-                  ? Text('No description provided')
-                  : Text(report.description),
-              SizedBox(height: 10),
-              Divider(
-                thickness: 2,
-                color: report.isRegularMaintenance
-                    ? Colors.green
-                    : Colors.blueGrey,
-              ),
-              Text("Submitted By: ${report.submittedBy}"),
-              SizedBox(height: 4),
-              Text(report.timestamp.toString(),
-                  style: TextStyle(fontStyle: FontStyle.italic)),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: FirebaseAuth.instance.currentUser?.uid ==
-                                  "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
-                              FirebaseAuth.instance.currentUser?.uid ==
-                                  "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
-                          ? Color.fromARGB(255, 20, 177, 54)
-                          : Colors.grey[400],
-                    ),
-                    child: MaterialButton(
-                      onPressed: (FirebaseAuth.instance.currentUser?.uid ==
-                                  "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
-                              FirebaseAuth.instance.currentUser?.uid ==
-                                  "4Qpgb3aORKhUVXjgT2SNh6zgCWE3")
-                          ? () async {
-                              _navigateToPrintSaveReport();
-                              try {
-                                await FirebaseFirestore.instance
-                                    .collection('SiteReports')
-                                    .doc(report.id)
-                                    .set(
-                                  {'filed': true},
-                                  SetOptions(merge: true),
-                                );
-                              } catch (error) {
-                                print('Error updating document: $error');
-                              }
-                            }
-                          : null,
-                      child: Text(
-                        "GENERATE PDF",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                      ),
-                      elevation: 0,
-                      color: report.filed
-                          ? Colors.green.shade200
-                          : Color.fromARGB(255, 20, 177, 54),
-                    ),
-                  ),
-                  SizedBox(width: 15),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: FirebaseAuth.instance.currentUser?.uid ==
-                                  "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
-                              FirebaseAuth.instance.currentUser?.uid ==
-                                  "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
-                          ? Color.fromARGB(255, 20, 177, 54)
-                          : Colors.grey[400],
-                    ),
-                    child: MaterialButton(
-                      onPressed: FirebaseAuth.instance.currentUser?.uid ==
-                                  "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
-                              FirebaseAuth.instance.currentUser?.uid ==
-                                  "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
-                          ? _navigateToEditReport
-                          : null,
-                      child: const Text(
-                        "EDIT REPORT",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 251, 251, 251),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  FirebaseAuth.instance.currentUser?.uid ==
-                              "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
-                          FirebaseAuth.instance.currentUser?.uid ==
-                              "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
-                      ? Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[600],
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: MaterialButton(
-                            onPressed: deleteReport,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: const [
-                                Icon(Icons.delete, color: Colors.white),
-                                SizedBox(width: 5),
-                                Text("Delete",
-                                    style: TextStyle(color: Colors.white)),
+                  // Employees card
+                  _sectionCard(
+                    title: 'Team & Time',
+                    icon: Icons.people_outline,
+                    child: Column(
+                      children: [
+                        Table(
+                          border: TableBorder.all(color: Colors.grey.shade300),
+                          children: [
+                            TableRow(
+                              decoration: BoxDecoration(color: accentColor),
+                              children: [
+                                _tableHeader('Name'),
+                                _tableHeader('On'),
+                                _tableHeader('Off'),
+                                _tableHeader('Hours'),
                               ],
                             ),
+                            ...report.employees.map((employee) {
+                              return TableRow(
+                                children: [
+                                  _tableCell(employee.name),
+                                  _tableCell(DateFormat('h:mm a').format(
+                                      tz.TZDateTime.from(
+                                          employee.timeOn, vancouver))),
+                                  _tableCell(DateFormat('h:mm a').format(
+                                      tz.TZDateTime.from(
+                                          employee.timeOff, vancouver))),
+                                  _tableCell(
+                                      '${(employee.duration / 60).toStringAsFixed(1)}'),
+                                ],
+                              );
+                            }).toList(),
+                            TableRow(
+                              decoration:
+                                  BoxDecoration(color: Colors.grey.shade50),
+                              children: [
+                                _tableCell(''),
+                                _tableCell(''),
+                                Container(
+                                  alignment: Alignment.centerRight,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 4),
+                                  child: Text('Total:',
+                                      style: GoogleFonts.montserrat(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                                Container(
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.symmetric(vertical: 4),
+                                  child: Text(
+                                    '${(report.totalCombinedDuration / 60).toStringAsFixed(1)} hrs',
+                                    style: GoogleFonts.montserrat(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Services card
+                  _sectionCard(
+                    title: 'Services Provided',
+                    icon: Icons.checklist,
+                    child: report.services.isEmpty ||
+                            report.services.values
+                                .every((items) => items.isEmpty)
+                        ? Text('No services were specified',
+                            style: GoogleFonts.montserrat(
+                                fontSize: 13, color: Colors.grey))
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: report.services.entries
+                                .where((entry) => entry.value.isNotEmpty)
+                                .map((entry) {
+                              return Padding(
+                                padding: EdgeInsets.only(bottom: 8),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      entry.key.toUpperCase(),
+                                      style: GoogleFonts.montserrat(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.grey.shade700),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Wrap(
+                                      spacing: 6,
+                                      runSpacing: 4,
+                                      children:
+                                          entry.value.map<Widget>((item) {
+                                        return Chip(
+                                          label: Text(item,
+                                              style: GoogleFonts.montserrat(
+                                                  fontSize: 11)),
+                                          backgroundColor:
+                                              accentColor.withAlpha(25),
+                                          side: BorderSide(
+                                              color:
+                                                  accentColor.withAlpha(80)),
+                                          visualDensity: VisualDensity.compact,
+                                          materialTapTargetSize:
+                                              MaterialTapTargetSize
+                                                  .shrinkWrap,
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 4, vertical: 0),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        )
-                      : const SizedBox.shrink(),
+                  ),
+
+                  // Materials card
+                  if (report.materials.isNotEmpty)
+                    _sectionCard(
+                      title: 'Materials',
+                      icon: Icons.inventory_2_outlined,
+                      child: Column(
+                        children: [
+                          ...report.materials.map((material) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 6),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: Text(material.description,
+                                        style: GoogleFonts.montserrat(
+                                            fontSize: 13)),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(material.vendor,
+                                        style: GoogleFonts.montserrat(
+                                            fontSize: 12,
+                                            color: Colors.grey.shade600)),
+                                  ),
+                                  Text('\$${material.cost}',
+                                      style: GoogleFonts.montserrat(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500)),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text('Total: ',
+                                  style: GoogleFonts.montserrat(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600)),
+                              Text(
+                                '\$${report.materials.fold<double>(0.0, (sum, m) => sum + (double.tryParse(m.cost) ?? 0.0)).toStringAsFixed(2)}',
+                                style: GoogleFonts.montserrat(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Disposal card
+                  if (report.disposal != null &&
+                      report.disposal!.hasDisposal)
+                    _sectionCard(
+                      title: 'Disposal',
+                      icon: Icons.delete_outline,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text('Location: ',
+                                  style: GoogleFonts.montserrat(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500)),
+                              Text(report.disposal!.location,
+                                  style:
+                                      GoogleFonts.montserrat(fontSize: 13)),
+                            ],
+                          ),
+                          SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Text('Cost: ',
+                                  style: GoogleFonts.montserrat(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500)),
+                              Text('\$${report.disposal!.cost}',
+                                  style:
+                                      GoogleFonts.montserrat(fontSize: 13)),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Shift Notes card
+                  if (report.noteTags.isNotEmpty ||
+                      report.description.isNotEmpty)
+                    _sectionCard(
+                      title: 'Shift Notes',
+                      icon: Icons.notes,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (report.noteTags.isNotEmpty)
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: report.noteTags
+                                  .map((tag) => Chip(
+                                        label: Text(tag,
+                                            style: GoogleFonts.montserrat(
+                                                fontSize: 11)),
+                                        backgroundColor: Colors.green[50],
+                                        visualDensity: VisualDensity.compact,
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 4, vertical: 0),
+                                      ))
+                                  .toList(),
+                            ),
+                          if (report.description.isNotEmpty) ...[
+                            if (report.noteTags.isNotEmpty) SizedBox(height: 8),
+                            Text(report.description,
+                                style: GoogleFonts.montserrat(fontSize: 13)),
+                          ],
+                        ],
+                      ),
+                    ),
+
+                  // Submitted by
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Column(
+                      children: [
+                        Text('Submitted by: $capitalizedName',
+                            style: GoogleFonts.montserrat(
+                                fontSize: 12, color: Colors.grey.shade600)),
+                        SizedBox(height: 2),
+                        Text(formattedTimestamp,
+                            style: GoogleFonts.montserrat(
+                                fontSize: 11,
+                                color: Colors.grey.shade500,
+                                fontStyle: FontStyle.italic)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 80), // Space for bottom bar
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+
+          // Bottom action bar
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade300,
+                  blurRadius: 6,
+                  offset: Offset(0, -2),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              top: false,
+              child: Row(
+                children: [
+                  if (isAdmin) ...[
+                    // Delete button
+                    IconButton(
+                      onPressed: _deleteReport,
+                      icon: Icon(Icons.delete_outline, color: Colors.red[400]),
+                      tooltip: 'Delete',
+                    ),
+                    SizedBox(width: 8),
+                    // Edit button
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _navigateToEditReport,
+                        icon: Icon(Icons.edit_outlined, size: 18),
+                        label: Text('Edit',
+                            style: GoogleFonts.montserrat(fontSize: 13)),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Color.fromARGB(255, 31, 182, 77),
+                          side: BorderSide(
+                              color: Color.fromARGB(255, 31, 182, 77)),
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    // Generate PDF button
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          _navigateToPrintSaveReport();
+                          try {
+                            await FirebaseFirestore.instance
+                                .collection('SiteReports')
+                                .doc(report.id)
+                                .set(
+                              {'filed': true},
+                              SetOptions(merge: true),
+                            );
+                          } catch (error) {
+                            print('Error updating document: $error');
+                          }
+                        },
+                        icon: Icon(Icons.picture_as_pdf, size: 18),
+                        label: Text('Generate PDF',
+                            style: GoogleFonts.montserrat(fontSize: 13)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 31, 182, 77),
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    // Non-admin: view PDF only
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _navigateToPrintSaveReport,
+                        icon: Icon(Icons.picture_as_pdf, size: 18),
+                        label: Text('View PDF',
+                            style: GoogleFonts.montserrat(fontSize: 13)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 31, 182, 77),
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _tableHeader(String text) {
+    return Container(
+      alignment: Alignment.center,
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: Text(text,
+          style: GoogleFonts.montserrat(
+              fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+    );
+  }
+
+  Widget _tableCell(String text) {
+    return Container(
+      alignment: Alignment.center,
+      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+      child:
+          Text(text, style: GoogleFonts.montserrat(fontSize: 12)),
     );
   }
 }

@@ -1,21 +1,21 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gemini_landscaping_app/providers/admin_provider.dart';
 import 'package:gemini_landscaping_app/screens/utility_screens/restricted_page.dart';
 import 'package:gemini_landscaping_app/screens/site_time/site_time.dart';
 
-class AdminController extends StatefulWidget {
+class AdminController extends ConsumerStatefulWidget {
   const AdminController({super.key});
 
   @override
-  State<AdminController> createState() => AdminControllerState();
+  ConsumerState<AdminController> createState() => AdminControllerState();
 }
 
-class AdminControllerState extends State<AdminController> {
-  String userRole = '';
-  final currentUser = FirebaseAuth.instance.currentUser!;
-
+class AdminControllerState extends ConsumerState<AdminController> {
   @override
   Widget build(BuildContext context) {
+    final isAdmin = ref.watch(isAdminProvider);
+
     return DefaultTabController(
       length: 1,
       child: Scaffold(
@@ -29,29 +29,14 @@ class AdminControllerState extends State<AdminController> {
             indicatorColor: Colors.white,
             tabs: [
               Tab(text: 'Site Time'),
-              // Tab(text: 'Recent (old)'),
-              // Tab(text: 'All (old)'),
             ],
           ),
         ),
-        body: FirebaseAuth.instance.currentUser?.uid ==
-                    "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
-                FirebaseAuth.instance.currentUser?.uid ==
-                    "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
-            ? TabBarView(
-                children: [
-                  SiteTime(),
-                  // RecentReportsPage(),
-                  // SiteFolders(),
-                ],
-              )
-            : TabBarView(
-                children: [
-                  RestrictedPage(),
-                  // RestrictedPage(),
-                  // RestrictedPage(),
-                ],
-              ),
+        body: TabBarView(
+          children: [
+            isAdmin ? SiteTime() : RestrictedPage(),
+          ],
+        ),
       ),
     );
   }

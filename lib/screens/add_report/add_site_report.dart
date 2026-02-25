@@ -6,49 +6,57 @@ import 'package:gemini_landscaping_app/models/site_info.dart';
 import 'package:gemini_landscaping_app/providers/site_list_provider.dart';
 import 'package:gemini_landscaping_app/screens/add_report/add_new_site.dart';
 import 'package:gemini_landscaping_app/screens/add_report/date_picker.dart';
+import 'package:gemini_landscaping_app/screens/add_report/disposal_section.dart';
 import 'package:gemini_landscaping_app/screens/add_report/employee_times.dart';
 import 'package:gemini_landscaping_app/screens/add_report/material.dart';
+import 'package:gemini_landscaping_app/screens/add_report/notes_section.dart';
 import 'package:gemini_landscaping_app/screens/add_report/service_list.dart';
 import 'package:gemini_landscaping_app/screens/add_report/service_type.dart';
 import 'package:gemini_landscaping_app/screens/add_report/site_picker.dart';
-import 'package:gemini_landscaping_app/screens/home/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class AddSiteReport extends ConsumerStatefulWidget {
-  final SiteInfo? prefilledSite; // Optional pre-filled site
-  final DateTime? prefilledDate; // Optional pre-filled start date
-  final DateTime? prefilledEndTime; // Optional pre-filled end time
+  final SiteInfo? prefilledSite;
+  final DateTime? prefilledDate;
+  final DateTime? prefilledEndTime;
 
-  const AddSiteReport(
-      {super.key,
-      this.prefilledSite,
-      this.prefilledDate,
-      this.prefilledEndTime});
+  const AddSiteReport({
+    super.key,
+    this.prefilledSite,
+    this.prefilledDate,
+    this.prefilledEndTime,
+  });
 
   @override
   _AddSiteReportState createState() => _AddSiteReportState();
 }
 
 class _AddSiteReportState extends ConsumerState<AddSiteReport> {
-  // service type component
+  // Section keys for floating nav
+  final _siteKey = GlobalKey();
+  final _employeesKey = GlobalKey();
+  final _servicesKey = GlobalKey();
+  final _disposalKey = GlobalKey();
+  final _materialsKey = GlobalKey();
+  final _notesKey = GlobalKey();
+  final _scrollController = ScrollController();
+
+  // Service type
   bool isRegularMaintenance = true;
 
-  // date picker component
+  // Date picker
   TextEditingController dateController = TextEditingController();
 
-  // site picker component
+  // Site picker
   String? dropdownValue;
   SiteInfo? selectedSite;
   String address = '';
 
-  // employee times component
+  // Employee times — now uses selectedName instead of nameController
   List<Map<String, dynamic>> employeeTimes = [];
 
-  // description component
-  TextEditingController _descriptionController = TextEditingController();
-
-  // service list component
+  // Services
   List<String> garbage = ['grassed areas', 'garden beds', 'walkways'];
   List<String> _selectedGarbage = [];
   List<String> debris = ['grassed areas', 'garden beds', 'tree wells'];
@@ -62,10 +70,21 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   List<String> blow = ['parking curbs', 'drain basins', 'walkways'];
   List<String> _selectedBlow = [];
 
-  // material component
+  // Disposal
+  bool _hasDisposal = false;
+  final _disposalLocationController = TextEditingController();
+  final _disposalCostController = TextEditingController();
+
+  // Materials
   List<Map<String, dynamic>> materials = [];
+  bool _showMaterials = false;
+
+  // Notes
+  List<String> _selectedNoteTags = [];
+  final _notesController = TextEditingController();
 
   final currentUser = FirebaseAuth.instance.currentUser!;
+  final reportRef = FirebaseFirestore.instance.collection('SiteReports');
 
   @override
   void initState() {
@@ -75,14 +94,12 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         : DateFormat('MMMM d, yyyy').format(DateTime.now());
     dateController = TextEditingController(text: formattedDate);
 
-    // Pre-fill site if provided
     if (widget.prefilledSite != null) {
       selectedSite = widget.prefilledSite;
       dropdownValue = widget.prefilledSite!.name;
       address = widget.prefilledSite!.address;
     }
 
-    // Pre-fill first employee time if start and end times are provided
     if (widget.prefilledDate != null && widget.prefilledEndTime != null) {
       addEmployeeTime(
         timeOn: TimeOfDay.fromDateTime(widget.prefilledDate!),
@@ -93,14 +110,12 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     }
   }
 
-  // Service Type Component
+  // --- Service Type ---
   void handleServiceTypeChange(bool isRegular) {
-    setState(() {
-      isRegularMaintenance = isRegular;
-    });
+    setState(() => isRegularMaintenance = isRegular);
   }
 
-  // Site Picker Component
+  // --- Site Picker ---
   void onSiteChanged(SiteInfo? site) {
     setState(() {
       selectedSite = site;
@@ -109,73 +124,34 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     });
   }
 
-  // Employee Times Component
+  // --- Employee Times ---
   void addEmployeeTime({TimeOfDay? timeOn, TimeOfDay? timeOff}) {
     setState(() {
       employeeTimes.add({
-        'nameController': TextEditingController(),
+        'selectedName': null as String?,
         'timeOn': timeOn ?? TimeOfDay.now(),
         'timeOff': timeOff ?? TimeOfDay.now(),
       });
     });
   }
 
+  void updateEmployeeName(int index, String? name) {
+    setState(() => employeeTimes[index]['selectedName'] = name);
+  }
+
   void updateTimeOn(int index, TimeOfDay time) {
-    setState(() {
-      employeeTimes[index]['timeOn'] = time;
-    });
+    setState(() => employeeTimes[index]['timeOn'] = time);
   }
 
   void updateTimeOff(int index, TimeOfDay time) {
-    setState(() {
-      employeeTimes[index]['timeOff'] = time;
-    });
+    setState(() => employeeTimes[index]['timeOff'] = time);
   }
 
   void deleteEmployeeTime(int index) {
-    setState(() {
-      employeeTimes.removeAt(index);
-    });
+    setState(() => employeeTimes.removeAt(index));
   }
 
-  // Service List Component
-  void onGarbageSelectionChanged(List<String> selectedGarbage) {
-    setState(() {
-      _selectedGarbage = selectedGarbage;
-    });
-  }
-
-  void onDebrisSelectionChanged(List<String> selectedDebris) {
-    setState(() {
-      _selectedDebris = selectedDebris;
-    });
-  }
-
-  void onLawnSelectionChanged(List<String> selectedLawn) {
-    setState(() {
-      _selectedLawn = selectedLawn;
-    });
-  }
-
-  void onGardenSelectionChanged(List<String> selectedGarden) {
-    setState(() {
-      _selectedGarden = selectedGarden;
-    });
-  }
-
-  void onTreeSelectionChanged(List<String> selectedTree) {
-    setState(() {
-      _selectedTree = selectedTree;
-    });
-  }
-
-  void onBlowSelectionChanged(List<String> selectedBlow) {
-    setState(() {
-      _selectedBlow = selectedBlow;
-    });
-  }
-
-  // Material Component
+  // --- Materials ---
   void addMaterial() {
     setState(() {
       materials.add({
@@ -189,9 +165,11 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   void deleteMaterial(int index) {
     setState(() {
       materials.removeAt(index);
+      if (materials.isEmpty) _showMaterials = false;
     });
   }
 
+  // --- Helpers ---
   Timestamp convertDateAndTimeToTimestamp(DateTime date, TimeOfDay time) {
     final DateTime dateTime =
         DateTime(date.year, date.month, date.day, time.hour, time.minute);
@@ -204,26 +182,33 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         now.year, now.month, now.day, startTime.hour, startTime.minute);
     final DateTime endDateTime =
         DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
-
     return endDateTime.difference(startDateTime);
   }
 
-  final reportRef = FirebaseFirestore.instance.collection('SiteReports');
+  void _scrollToSection(GlobalKey key) {
+    final context = key.currentContext;
+    if (context != null) {
+      Scrollable.ensureVisible(
+        context,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
-  // form validation
+  // --- Validation ---
   bool _validateForm() {
     if (dropdownValue == null || dropdownValue!.isEmpty) {
       _showErrorDialog('Please select a site.');
       return false;
     }
-
     for (var employee in employeeTimes) {
-      if (employee['nameController'].text.isEmpty) {
-        _showErrorDialog('Please enter an employee name.');
+      if (employee['selectedName'] == null ||
+          (employee['selectedName'] as String).isEmpty) {
+        _showErrorDialog('Please select an employee name.');
         return false;
       }
     }
-
     return true;
   }
 
@@ -236,9 +221,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
           content: Text(message),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: Text('OK'),
             ),
           ],
@@ -247,10 +230,9 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     );
   }
 
+  // --- Submit ---
   void _submitForm() async {
-    if (!_validateForm()) {
-      return; // Exit if the form is not valid
-    }
+    if (!_validateForm()) return;
 
     Map<String, dynamic> employeeTimesMap = {};
     Duration totalCombinedDuration = Duration();
@@ -259,7 +241,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         DateFormat('MMMM d, yyyy').parse(dateController.text);
 
     for (var employee in employeeTimes) {
-      String name = employee['nameController'].text;
+      String name = employee['selectedName'] ?? '';
       TimeOfDay? timeOn = employee['timeOn'];
       TimeOfDay? timeOff = employee['timeOff'];
 
@@ -301,48 +283,32 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
             "cost": material['costController'].text,
           };
         }).toList(),
-        "description": _descriptionController.text,
+        "disposal": {
+          "hasDisposal": _hasDisposal,
+          "location": _disposalLocationController.text,
+          "cost": _disposalCostController.text,
+        },
+        "noteTags": _selectedNoteTags,
+        "description": _notesController.text,
         "submittedBy": currentUser.email,
         "filed": false,
       });
 
-      print('Report added successfully');
-
       if (mounted) {
-        print('Widget is still mounted, proceeding with reset and navigation');
-
-        // Reset all the form fields
-        dateController.clear();
-        dropdownValue = null;
-        selectedSite = null;
-        address = '';
-        employeeTimes.clear();
-        _selectedGarbage = [];
-        _selectedDebris = [];
-        _selectedLawn = [];
-        _selectedGarden = [];
-        _selectedTree = [];
-        _selectedBlow = [];
-        materials.clear();
-        _descriptionController.clear();
-
-        // Navigate back to Home
         Navigator.pop(context);
-      } else {
-        print('Widget is no longer mounted, skipping reset and navigation');
       }
     } catch (e) {
-      print('Error adding report: $e');
       _showErrorDialog('Failed to add report, please try again.');
     }
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     dateController.dispose();
-    employeeTimes.forEach((employee) {
-      employee['nameController'].dispose();
-    });
+    _disposalLocationController.dispose();
+    _disposalCostController.dispose();
+    _notesController.dispose();
     materials.forEach((material) {
       material['vendorController'].dispose();
       material['materialController'].dispose();
@@ -351,16 +317,83 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     super.dispose();
   }
 
+  // --- Section Header ---
+  Widget _sectionHeader(String title, GlobalKey key) {
+    return Container(
+      key: key,
+      width: double.infinity,
+      padding: EdgeInsets.all(8),
+      margin: EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(color: Colors.green[100]),
+      child: Text(
+        title,
+        style: GoogleFonts.montserrat(
+            fontSize: 14, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+
+  // --- Floating Nav ---
+  Widget _buildFloatingNav() {
+    return Positioned(
+      bottom: 16,
+      left: 16,
+      right: 16,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Color.fromARGB(255, 59, 82, 73),
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _navIcon(Icons.location_on, 'Site', _siteKey),
+            _navIcon(Icons.people, 'Team', _employeesKey),
+            _navIcon(Icons.grass, 'Svc', _servicesKey),
+            _navIcon(Icons.local_shipping, 'Dump', _disposalKey),
+            _navIcon(Icons.inventory, 'Mat', _materialsKey),
+            _navIcon(Icons.note, 'Notes', _notesKey),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _navIcon(IconData icon, String label, GlobalKey key) {
+    return GestureDetector(
+      onTap: () => _scrollToSection(key),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: Colors.white, size: 22),
+            Text(
+              label,
+              style: GoogleFonts.montserrat(
+                  color: Colors.white70, fontSize: 10),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // final sitesAsyncValue = ref.watch(siteListProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 31, 182, 77),
         leading: MaterialButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
           child: Row(
             children: const [
               Icon(Icons.arrow_circle_left_outlined,
@@ -391,222 +424,237 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                     color: Color.fromARGB(255, 251, 251, 251),
                   ),
                 ),
-                Icon(
-                  Icons.send,
-                  color: Colors.white,
-                  size: 18,
-                ),
+                Icon(Icons.send, color: Colors.white, size: 18),
               ],
             ),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ServiceTypeComponent(
-                isInitialRegularMaintenance: isRegularMaintenance,
-                onServiceTypeChanged: handleServiceTypeChange,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            controller: _scrollController,
+            padding: EdgeInsets.only(bottom: 80),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  DatePickerComponent(dateController: dateController),
-                  AddNewSiteComponent(
-                    currentUser: currentUser,
-                    onSiteAdded: () {
-                      // ignore: unused_result
-                      ref.refresh(siteListProvider);
-                    },
+                  // Service Type Toggle
+                  ServiceTypeComponent(
+                    isInitialRegularMaintenance: isRegularMaintenance,
+                    onServiceTypeChanged: handleServiceTypeChange,
                   ),
-                ],
-              ),
-              SitePickerComponent(
-                dropdownValue: dropdownValue,
-                selectedSite: selectedSite,
-                onSiteChanged: onSiteChanged,
-              ),
-              Divider(
-                color: Colors.grey,
-                thickness: 1,
-              ),
-              Container(
-                padding: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.green[100],
-                ),
-                child: Text('Add Employees & Times:',
-                    style: GoogleFonts.montserrat(fontSize: 14)),
-              ),
-              SizedBox(height: 5),
-              ...employeeTimes.asMap().entries.map((entry) {
-                int index = entry.key;
-                Map<String, dynamic> staffMember = entry.value;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: EmployeeTimesComponent(
-                    nameController: staffMember['nameController'],
-                    initialTimeOn: staffMember['timeOn'],
-                    initialTimeOff: staffMember['timeOff'],
-                    onTimeOnChanged: (time) => updateTimeOn(index, time),
-                    onTimeOffChanged: (time) => updateTimeOff(index, time),
-                    onDelete: () => deleteEmployeeTime(index),
-                  ),
-                );
-              }).toList(),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 59, 82, 73),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  textStyle: GoogleFonts.montserrat(fontSize: 14),
-                ),
-                onPressed: addEmployeeTime,
-                child: const Text('Add Another Employee Time'),
-              ),
-              Divider(
-                color: Colors.grey,
-                thickness: 1,
-              ),
-              Container(
-                padding: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.green[100],
-                ),
-                child: Text('Select Services Provided:',
-                    style: GoogleFonts.montserrat(fontSize: 14)),
-              ),
-              ServiceToggleComponent(
-                title: 'Pick Up Loose Garbage:',
-                services: garbage,
-                selectedServices: _selectedGarbage,
-                onSelectionChanged: onGarbageSelectionChanged,
-              ),
-              ServiceToggleComponent(
-                title: 'Rake Yard Debris:',
-                services: debris,
-                selectedServices: _selectedDebris,
-                onSelectionChanged: onDebrisSelectionChanged,
-              ),
-              ServiceToggleComponent(
-                title: 'Lawn Care:',
-                services: lawn,
-                selectedServices: _selectedLawn,
-                onSelectionChanged: onLawnSelectionChanged,
-              ),
-              ServiceToggleComponent(
-                title: 'Gardens:',
-                services: garden,
-                selectedServices: _selectedGarden,
-                onSelectionChanged: onGardenSelectionChanged,
-              ),
-              ServiceToggleComponent(
-                title: 'Trees (Pruning/Hedging):',
-                services: tree,
-                selectedServices: _selectedTree,
-                onSelectionChanged: onTreeSelectionChanged,
-              ),
-              ServiceToggleComponent(
-                title: 'Blow Dust/Debris:',
-                services: blow,
-                selectedServices: _selectedBlow,
-                onSelectionChanged: onBlowSelectionChanged,
-              ),
-              Divider(
-                color: Colors.grey,
-                thickness: 1,
-              ),
-              Container(
-                padding: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.green[100],
-                ),
-                child: Text('Add Materials or Disposal:',
-                    style: GoogleFonts.montserrat(fontSize: 14)),
-              ),
-              SizedBox(height: 5),
-              ...materials.asMap().entries.map((entry) {
-                int index = entry.key;
-                Map<String, dynamic> material = entry.value;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
+
+                  // ===== SITE & DATE =====
+                  _sectionHeader('Site & Date', _siteKey),
+                  SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: MaterialComponent(
-                          vendorController: material['vendorController'],
-                          materialController: material['materialController'],
-                          costController: material['costController'],
-                        ),
-                      ),
-                      SizedBox(
-                        width: 20,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.grey,
-                            size: 24,
-                          ),
-                          onPressed: () => deleteMaterial(index),
-                        ),
+                      DatePickerComponent(dateController: dateController),
+                      AddNewSiteComponent(
+                        currentUser: currentUser,
+                        onSiteAdded: () {
+                          // ignore: unused_result
+                          ref.refresh(siteListProvider);
+                        },
                       ),
                     ],
                   ),
-                );
-              }).toList(),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 59, 82, 73),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  SitePickerComponent(
+                    dropdownValue: dropdownValue,
+                    selectedSite: selectedSite,
+                    onSiteChanged: onSiteChanged,
                   ),
-                  textStyle: GoogleFonts.montserrat(fontSize: 14),
-                ),
-                onPressed: addMaterial,
-                child: const Text('Add Material or Disposal'),
-              ),
-              Divider(
-                color: Colors.grey,
-                thickness: 1,
-              ),
-              Container(
-                padding: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.green[100],
-                ),
-                child: Text('Service Details:',
-                    style: GoogleFonts.montserrat(fontSize: 14)),
-              ),
-              const SizedBox(height: 5),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                height: 150,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: TextField(
-                    controller: _descriptionController,
-                    maxLines: null,
-                    keyboardType: TextInputType.multiline,
-                    decoration: InputDecoration(
-                      hintText: 'Add a description of services provided . . .',
-                      border: InputBorder.none,
+
+                  // ===== EMPLOYEES & TIMES =====
+                  _sectionHeader('Employees & Times', _employeesKey),
+                  SizedBox(height: 5),
+                  ...employeeTimes.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    Map<String, dynamic> staffMember = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: EmployeeTimesComponent(
+                        selectedName: staffMember['selectedName'],
+                        initialTimeOn: staffMember['timeOn'],
+                        initialTimeOff: staffMember['timeOff'],
+                        onNameChanged: (name) =>
+                            updateEmployeeName(index, name),
+                        onTimeOnChanged: (time) =>
+                            updateTimeOn(index, time),
+                        onTimeOffChanged: (time) =>
+                            updateTimeOff(index, time),
+                        onDelete: () => deleteEmployeeTime(index),
+                      ),
+                    );
+                  }),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          const Color.fromARGB(255, 59, 82, 73),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      textStyle: GoogleFonts.montserrat(fontSize: 14),
                     ),
+                    onPressed: addEmployeeTime,
+                    child: const Text('Add Another Employee'),
                   ),
-                ),
+
+                  // ===== SERVICES =====
+                  _sectionHeader('Services', _servicesKey),
+                  ServiceChipGroup(
+                    title: 'Pick Up Loose Garbage:',
+                    icon: Icons.delete_outline,
+                    services: garbage,
+                    selectedServices: _selectedGarbage,
+                    onSelectionChanged: (v) =>
+                        setState(() => _selectedGarbage = v),
+                  ),
+                  ServiceChipGroup(
+                    title: 'Rake Yard Debris:',
+                    icon: Icons.eco,
+                    services: debris,
+                    selectedServices: _selectedDebris,
+                    onSelectionChanged: (v) =>
+                        setState(() => _selectedDebris = v),
+                  ),
+                  ServiceChipGroup(
+                    title: 'Lawn Care:',
+                    icon: Icons.grass,
+                    services: lawn,
+                    selectedServices: _selectedLawn,
+                    onSelectionChanged: (v) =>
+                        setState(() => _selectedLawn = v),
+                  ),
+                  ServiceChipGroup(
+                    title: 'Gardens:',
+                    icon: Icons.yard,
+                    services: garden,
+                    selectedServices: _selectedGarden,
+                    onSelectionChanged: (v) =>
+                        setState(() => _selectedGarden = v),
+                  ),
+                  ServiceChipGroup(
+                    title: 'Trees (Pruning/Hedging):',
+                    icon: Icons.park,
+                    services: tree,
+                    selectedServices: _selectedTree,
+                    onSelectionChanged: (v) =>
+                        setState(() => _selectedTree = v),
+                  ),
+                  ServiceChipGroup(
+                    title: 'Blow Dust/Debris:',
+                    icon: Icons.air,
+                    services: blow,
+                    selectedServices: _selectedBlow,
+                    onSelectionChanged: (v) =>
+                        setState(() => _selectedBlow = v),
+                  ),
+
+                  // ===== DISPOSAL =====
+                  _sectionHeader('Disposal', _disposalKey),
+                  DisposalSection(
+                    hasDisposal: _hasDisposal,
+                    onDisposalChanged: (v) =>
+                        setState(() => _hasDisposal = v),
+                    locationController: _disposalLocationController,
+                    costController: _disposalCostController,
+                  ),
+
+                  // ===== MATERIALS =====
+                  _sectionHeader('Materials', _materialsKey),
+                  SizedBox(height: 5),
+                  if (!_showMaterials && materials.isEmpty)
+                    Center(
+                      child: ElevatedButton.icon(
+                        icon: Icon(Icons.add),
+                        label: Text('Add Materials'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              const Color.fromARGB(255, 59, 82, 73),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          textStyle: GoogleFonts.montserrat(fontSize: 14),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _showMaterials = true;
+                            addMaterial();
+                          });
+                        },
+                      ),
+                    ),
+                  if (_showMaterials || materials.isNotEmpty) ...[
+                    ...materials.asMap().entries.map((entry) {
+                      int index = entry.key;
+                      Map<String, dynamic> material = entry.value;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: MaterialComponent(
+                                vendorController:
+                                    material['vendorController'],
+                                materialController:
+                                    material['materialController'],
+                                costController:
+                                    material['costController'],
+                              ),
+                            ),
+                            SizedBox(
+                              width: 20,
+                              child: IconButton(
+                                padding: EdgeInsets.zero,
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.grey,
+                                  size: 24,
+                                ),
+                                onPressed: () => deleteMaterial(index),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color.fromARGB(255, 59, 82, 73),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        textStyle: GoogleFonts.montserrat(fontSize: 14),
+                      ),
+                      onPressed: addMaterial,
+                      child: const Text('Add Another Material'),
+                    ),
+                  ],
+
+                  // ===== SHIFT NOTES =====
+                  _sectionHeader('Shift Notes', _notesKey),
+                  SizedBox(height: 5),
+                  NotesSection(
+                    selectedTags: _selectedNoteTags,
+                    onTagsChanged: (tags) =>
+                        setState(() => _selectedNoteTags = tags),
+                    notesController: _notesController,
+                  ),
+                  SizedBox(height: 20),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+          _buildFloatingNav(),
+        ],
       ),
     );
   }

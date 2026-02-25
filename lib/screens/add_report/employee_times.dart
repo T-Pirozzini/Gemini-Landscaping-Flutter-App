@@ -1,29 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gemini_landscaping_app/models/app_user.dart';
+import 'package:gemini_landscaping_app/providers/user_provider.dart';
 
-class EmployeeTimesComponent extends StatefulWidget {
-  final TextEditingController nameController;
+class EmployeeTimesComponent extends ConsumerStatefulWidget {
+  final String? selectedName;
   final TimeOfDay initialTimeOn;
   final TimeOfDay initialTimeOff;
+  final ValueChanged<String?> onNameChanged;
   final ValueChanged<TimeOfDay> onTimeOnChanged;
   final ValueChanged<TimeOfDay> onTimeOffChanged;
   final VoidCallback onDelete;
 
   const EmployeeTimesComponent({
     super.key,
-    required this.nameController,
+    required this.selectedName,
     required this.initialTimeOn,
     required this.initialTimeOff,
+    required this.onNameChanged,
     required this.onTimeOnChanged,
     required this.onTimeOffChanged,
     required this.onDelete,
   });
 
   @override
-  State<EmployeeTimesComponent> createState() => _EmployeeTimesComponentState();
+  ConsumerState<EmployeeTimesComponent> createState() =>
+      _EmployeeTimesComponentState();
 }
 
-class _EmployeeTimesComponentState extends State<EmployeeTimesComponent> {
+class _EmployeeTimesComponentState
+    extends ConsumerState<EmployeeTimesComponent> {
   late TimeOfDay timeOn;
   late TimeOfDay timeOff;
 
@@ -34,27 +41,65 @@ class _EmployeeTimesComponentState extends State<EmployeeTimesComponent> {
     timeOff = widget.initialTimeOff;
   }
 
+  void _showEmployeePicker(List<AppUser> users) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: users.length,
+          itemBuilder: (_, i) => ListTile(
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            title: Text(
+              users[i].username,
+              style: GoogleFonts.montserrat(fontSize: 16),
+            ),
+            trailing: users[i].username == widget.selectedName
+                ? Icon(Icons.check, color: Colors.green)
+                : null,
+            onTap: () {
+              widget.onNameChanged(users[i].username);
+              Navigator.pop(context);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final usersAsync = ref.watch(activeUsersProvider);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // Employee name selector
         Expanded(
-          child: TextField(
-            controller: widget.nameController,
-            style: GoogleFonts.montserrat(fontSize: 14),
-            maxLines: null,
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-              hintText: 'Name',
-              border: OutlineInputBorder(),
-              contentPadding:
-                  EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+          child: GestureDetector(
+            onTap: () {
+              usersAsync.whenData((users) => _showEmployeePicker(users));
+            },
+            child: InputDecorator(
+              decoration: InputDecoration(
+                hintText: 'Select Employee',
+                border: OutlineInputBorder(),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                suffixIcon: Icon(Icons.arrow_drop_down, size: 20),
+              ),
+              child: Text(
+                widget.selectedName ?? '',
+                style: GoogleFonts.montserrat(fontSize: 14),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
         ),
         const SizedBox(width: 10),
+        // Time ON
         Column(
           children: [
             const Text("ON", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -92,6 +137,7 @@ class _EmployeeTimesComponentState extends State<EmployeeTimesComponent> {
           ],
         ),
         const SizedBox(width: 10),
+        // Time OFF
         Column(
           children: [
             const Text("OFF", style: TextStyle(fontWeight: FontWeight.bold)),

@@ -20,6 +20,13 @@ final allSiteReportsProvider = FutureProvider<List<SiteReport>>((ref) async {
   return firestoreService.fetchAllReports();
 });
 
+// Recent reports with server-side limit (for Recent tab)
+final recentSiteReportsStreamProvider = StreamProvider<List<SiteReport>>((ref) {
+  final firestoreService = FirestoreService();
+  return firestoreService.fetchRecentReportsStream(limit: 80);
+});
+
+// All reports unlimited (for admin All Reports tab)
 final allSiteReportsStreamProvider = StreamProvider<List<SiteReport>>((ref) {
   final firestoreService = FirestoreService();
   return firestoreService.fetchAllReportsStream();

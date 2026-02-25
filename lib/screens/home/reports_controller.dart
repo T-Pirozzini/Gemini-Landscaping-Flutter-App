@@ -1,23 +1,24 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gemini_landscaping_app/providers/admin_provider.dart';
 import 'package:gemini_landscaping_app/screens/all_reports/report_folders.dart';
 import 'package:gemini_landscaping_app/screens/recent_reports/recent_reports_new.dart';
 import 'package:gemini_landscaping_app/screens/winter_reports/recent_winter_reports_page.dart';
 import 'package:gemini_landscaping_app/screens/utility_screens/restricted_page.dart';
 
-class TimeSheetController extends StatefulWidget {
+class TimeSheetController extends ConsumerStatefulWidget {
   const TimeSheetController({super.key});
 
   @override
-  State<TimeSheetController> createState() => _TimeSheetControllerState();
+  ConsumerState<TimeSheetController> createState() =>
+      _TimeSheetControllerState();
 }
 
-class _TimeSheetControllerState extends State<TimeSheetController> {
-  String userRole = '';
-  final currentUser = FirebaseAuth.instance.currentUser!;
-
+class _TimeSheetControllerState extends ConsumerState<TimeSheetController> {
   @override
   Widget build(BuildContext context) {
+    final isAdmin = ref.watch(isAdminProvider);
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -36,24 +37,13 @@ class _TimeSheetControllerState extends State<TimeSheetController> {
             ],
           ),
         ),
-        body: FirebaseAuth.instance.currentUser?.uid ==
-                    "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
-                FirebaseAuth.instance.currentUser?.uid ==
-                    "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
-            ? TabBarView(
-                children: [
-                  RecentReports(),
-                  ReportFolders(),
-                  RecentWinterReportsPage(),
-                ],
-              )
-            : TabBarView(
-                children: [
-                  RecentReports(),
-                  RestrictedPage(),
-                  RecentWinterReportsPage(),
-                ],
-              ),
+        body: TabBarView(
+          children: [
+            RecentReports(),
+            isAdmin ? ReportFolders() : RestrictedPage(),
+            RecentWinterReportsPage(),
+          ],
+        ),
       ),
     );
   }

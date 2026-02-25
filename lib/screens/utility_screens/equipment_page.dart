@@ -1,21 +1,22 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
+import 'package:gemini_landscaping_app/providers/admin_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-class EquipmentPage extends StatefulWidget {
+class EquipmentPage extends ConsumerStatefulWidget {
   const EquipmentPage({super.key});
 
   @override
-  State<EquipmentPage> createState() => _EquipmentPageState();
+  ConsumerState<EquipmentPage> createState() => _EquipmentPageState();
 }
 
 // Add this enum for priority options
 enum Priority { low, medium, high }
 
-class _EquipmentPageState extends State<EquipmentPage> {
+class _EquipmentPageState extends ConsumerState<EquipmentPage> {
   String priority = 'low';
   String dropdownValue = 'Truck';
 
@@ -220,18 +221,13 @@ class _EquipmentPageState extends State<EquipmentPage> {
                                     color: Colors.grey,
                                     iconSize: 18,
                                     onPressed: () {
-                                      if (FirebaseAuth
-                                                  .instance.currentUser?.uid ==
-                                              "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
-                                          FirebaseAuth
-                                                  .instance.currentUser?.uid ==
-                                              "4Qpgb3aORKhUVXjgT2SNh6zgCWE3") {
+                                      final isAdmin =
+                                          ref.read(isAdminProvider);
+                                      if (isAdmin) {
                                         _deleteEquipment(
                                             context,
                                             equipment.name,
-                                            document.id,
-                                            FirebaseAuth
-                                                .instance.currentUser!.uid);
+                                            document.id);
                                       } else {
                                         showDialog(
                                           context: context,
@@ -763,8 +759,8 @@ class _EquipmentPageState extends State<EquipmentPage> {
     );
   }
 
-  void _deleteEquipment(BuildContext context, String equipmentName,
-      String documentId, String userId) {
+  void _deleteEquipment(
+      BuildContext context, String equipmentName, String documentId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -779,19 +775,16 @@ class _EquipmentPageState extends State<EquipmentPage> {
               },
               child: Text('Cancel'),
             ),
-            if (userId == "5wwYztIxTifV0EQk3N7dfXsY0jm1" ||
-                userId == "4Qpgb3aORKhUVXjgT2SNh6zgCWE3")
-              ElevatedButton(
-                onPressed: () async {
-                  // Delete the equipment from Firestore
-                  await FirebaseFirestore.instance
-                      .collection('equipment')
-                      .doc(documentId)
-                      .delete();
-                  Navigator.of(context).pop();
-                },
-                child: Text('Delete'),
-              ),
+            ElevatedButton(
+              onPressed: () async {
+                await FirebaseFirestore.instance
+                    .collection('equipment')
+                    .doc(documentId)
+                    .delete();
+                Navigator.of(context).pop();
+              },
+              child: Text('Delete'),
+            ),
           ],
         );
       },

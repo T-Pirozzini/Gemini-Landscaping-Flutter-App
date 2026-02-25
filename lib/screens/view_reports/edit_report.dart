@@ -19,6 +19,10 @@ class _EditReportState extends State<EditReport> {
   late List<Map<String, TextEditingController>> _employeeTimes;
   late List<Map<String, TextEditingController>> _materials;
   late String serviceType;
+  late bool _hasDisposal;
+  late TextEditingController _disposalLocationController;
+  late TextEditingController _disposalCostController;
+  late List<String> _selectedNoteTags;
 
   @override
   void initState() {
@@ -46,6 +50,12 @@ class _EditReportState extends State<EditReport> {
               'costController': TextEditingController(text: material.cost),
             })
         .toList();
+    _hasDisposal = widget.report.disposal?.hasDisposal ?? false;
+    _disposalLocationController =
+        TextEditingController(text: widget.report.disposal?.location ?? '');
+    _disposalCostController =
+        TextEditingController(text: widget.report.disposal?.cost ?? '');
+    _selectedNoteTags = List<String>.from(widget.report.noteTags);
   }
 
   void _updateReport() async {
@@ -104,6 +114,12 @@ class _EditReportState extends State<EditReport> {
             };
           }).toList(),
           "description": _descriptionController.text,
+          "disposal": {
+            "hasDisposal": _hasDisposal,
+            "location": _disposalLocationController.text,
+            "cost": _disposalCostController.text,
+          },
+          "noteTags": _selectedNoteTags,
           "submittedBy": widget.report.submittedBy,
           "filed": widget.report.filed,
         });
@@ -212,6 +228,8 @@ class _EditReportState extends State<EditReport> {
   void dispose() {
     _dateController.dispose();
     _descriptionController.dispose();
+    _disposalLocationController.dispose();
+    _disposalCostController.dispose();
     _employeeTimes.forEach((employee) {
       employee['nameController']!.dispose();
       employee['timeOnController']!.dispose();
@@ -515,12 +533,85 @@ class _EditReportState extends State<EditReport> {
                 ),
                 SizedBox(height: 10),
                 Divider(),
-                Text('Description', style: TextStyle(fontSize: 18)),
+                Text('Disposal', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 8),
+                SwitchListTile(
+                  title: Text('Disposal Run'),
+                  subtitle: Text('Did you do a dump run?'),
+                  value: _hasDisposal,
+                  thumbColor: WidgetStateProperty.resolveWith((states) =>
+                      states.contains(WidgetState.selected)
+                          ? Colors.green
+                          : null),
+                  trackColor: WidgetStateProperty.resolveWith((states) =>
+                      states.contains(WidgetState.selected)
+                          ? Colors.green[200]
+                          : null),
+                  contentPadding: EdgeInsets.zero,
+                  onChanged: (v) => setState(() => _hasDisposal = v),
+                ),
+                if (_hasDisposal) ...[
+                  SizedBox(height: 8),
+                  TextFormField(
+                    controller: _disposalLocationController,
+                    decoration: InputDecoration(
+                      labelText: 'Dump Location',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  TextFormField(
+                    controller: _disposalCostController,
+                    keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      labelText: 'Disposal Cost (\$)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+                SizedBox(height: 10),
+                Divider(),
+                Text('Shift Notes', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 8),
+                Text('Quick Tags:', style: TextStyle(fontSize: 14)),
+                SizedBox(height: 4),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    'Focused on specific area',
+                    'Ran out of time',
+                    'Resident feedback',
+                    'Equipment issue',
+                    'Extra work needed next visit',
+                    'Weather delay',
+                    'Irrigation issue',
+                  ].map((tag) {
+                    final isSelected = _selectedNoteTags.contains(tag);
+                    return FilterChip(
+                      label: Text(tag, style: TextStyle(fontSize: 11)),
+                      selected: isSelected,
+                      selectedColor: Colors.green[200],
+                      checkmarkColor: Colors.green[800],
+                      backgroundColor: Colors.grey[100],
+                      onSelected: (selected) {
+                        setState(() {
+                          selected
+                              ? _selectedNoteTags.add(tag)
+                              : _selectedNoteTags.remove(tag);
+                        });
+                      },
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    );
+                  }).toList(),
+                ),
                 SizedBox(height: 8),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: 'Description',
+                    labelText: 'Additional Notes',
                     border: OutlineInputBorder(),
                   ),
                   maxLines: null,
