@@ -6,33 +6,38 @@ import 'package:gemini_landscaping_app/models/site_report.dart';
 class FirestoreService extends ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Shared helper to parse a Firestore document into a SiteReport
+  // Shared helper to parse a Firestore document into a SiteReport.
+  // Handles both v1 (legacy flat) and v2 (dual-phase) formats.
+  // Tolerant of missing fields to support drafts.
   SiteReport _parseReport(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
-    final employeeTimes = data['employeeTimes'] as Map<String, dynamic>;
-    final employees = employeeTimes.entries.map((entry) {
+    final version = data['version'] as int? ?? 1;
+    final status = data['status'] as String? ?? 'submitted';
+    final draftOwnerId = data['draftOwnerId'] as String?;
+
+    // Parse flat employee times (present in both v1 and v2)
+    final employeeTimesData =
+        data['employeeTimes'] as Map<String, dynamic>? ?? {};
+    final employees = employeeTimesData.entries.map((entry) {
       final employeeData = entry.value as Map<String, dynamic>;
       return EmployeeTime(
         name: entry.key,
         timeOn: (employeeData['timeOn'] as Timestamp).toDate(),
         timeOff: (employeeData['timeOff'] as Timestamp).toDate(),
-        duration: employeeData['duration'],
+        duration: employeeData['duration'] as int,
       );
     }).toList();
 
-    final services = data['services'] as Map<String, dynamic>;
+    // Parse flat services
+    final servicesData = data['services'] as Map<String, dynamic>? ?? {};
     final mappedServices =
-        services.map((key, value) => MapEntry(key, List<String>.from(value)));
+        servicesData.map((key, value) => MapEntry(key, List<String>.from(value)));
 
-    final materialsList = data['materials'] as List<dynamic>;
+    // Parse materials
+    final materialsList = data['materials'] as List<dynamic>? ?? [];
     final materials = materialsList.map((material) {
-      final materialData = material as Map<String, dynamic>;
-      return MaterialList(
-        cost: materialData['cost'],
-        description: materialData['description'],
-        vendor: materialData['vendor'],
-      );
+      return MaterialList.fromMap(material as Map<String, dynamic>);
     }).toList();
 
     final disposalData = data.containsKey('disposal')
@@ -43,22 +48,46 @@ class FirestoreService extends ChangeNotifier {
         ? List<String>.from(data['noteTags'])
         : <String>[];
 
+    final siteInfo = data['siteInfo'] as Map<String, dynamic>? ?? {};
+
+    // Parse v2 phase data if present
+    ReportPhase? regularPhase;
+    ReportPhase? additionalPhase;
+    if (version >= 2) {
+      if (data.containsKey('regularPhase') && data['regularPhase'] != null) {
+        regularPhase =
+            ReportPhase.fromMap(data['regularPhase'] as Map<String, dynamic>);
+      }
+      if (data.containsKey('additionalPhase') &&
+          data['additionalPhase'] != null) {
+        additionalPhase = ReportPhase.fromMap(
+            data['additionalPhase'] as Map<String, dynamic>);
+      }
+    }
+
     return SiteReport(
       id: doc.id,
-      siteName: data['siteInfo']['siteName'],
-      totalCombinedDuration: data['totalCombinedDuration'],
-      date: data['siteInfo']['date'],
+      version: version,
+      status: status,
+      draftOwnerId: draftOwnerId,
+      siteName: siteInfo['siteName'] ?? '',
+      totalCombinedDuration: data['totalCombinedDuration'] ?? 0,
+      date: siteInfo['date'] ?? '',
       employees: employees,
       filed: data['filed'] ?? false,
-      address: data['siteInfo']['address'],
+      address: siteInfo['address'] ?? '',
       services: mappedServices,
       materials: materials,
-      description: data['description'],
+      description: data['description'] ?? '',
       noteTags: noteTags,
-      submittedBy: data['submittedBy'],
-      timestamp: (data['timestamp'] as Timestamp).toDate(),
-      isRegularMaintenance: data['isRegularMaintenance'],
+      submittedBy: data['submittedBy'] ?? '',
+      timestamp: data['timestamp'] != null
+          ? (data['timestamp'] as Timestamp).toDate()
+          : DateTime.now(),
+      isRegularMaintenance: data['isRegularMaintenance'] ?? true,
       disposal: disposalData,
+      regularPhase: regularPhase,
+      additionalPhase: additionalPhase,
     );
   }
 
@@ -115,6 +144,51 @@ class FirestoreService extends ChangeNotifier {
         .get();
 
     return snapshot.docs.map(_parseReport).toList();
+  }
+
+  // --- Draft methods ---
+
+  /// Save or update a draft report. Returns the document ID.
+  Future<String> saveDraft(Map<String, dynamic> data) async {
+    final collection = _db.collection('SiteReports');
+    final docId = data.remove('id') as String?;
+
+    data['status'] = 'draft';
+    data['version'] = 2;
+    data['timestamp'] = Timestamp.fromDate(DateTime.now());
+
+    if (docId != null && docId.isNotEmpty) {
+      await collection.doc(docId).set(data);
+      return docId;
+    } else {
+      final docRef = await collection.add(data);
+      return docRef.id;
+    }
+  }
+
+  /// Mark a draft as submitted.
+  Future<void> submitReport(String docId) async {
+    await _db.collection('SiteReports').doc(docId).update({
+      'status': 'submitted',
+      'timestamp': Timestamp.fromDate(DateTime.now()),
+    });
+  }
+
+  /// Delete a draft document.
+  Future<void> deleteDraft(String docId) async {
+    await _db.collection('SiteReports').doc(docId).delete();
+  }
+
+  /// Stream all drafts (visible to all employees).
+  Stream<List<SiteReport>> fetchDraftsStream() {
+    return _db
+        .collection('SiteReports')
+        .where('status', isEqualTo: 'draft')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map(_parseReport).toList();
+    });
   }
 
   Future<List<SiteInfo>> fetchAllSites() async {

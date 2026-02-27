@@ -150,10 +150,116 @@ class _ReportPreviewState extends ConsumerState<ReportPreview> {
     );
   }
 
+  Widget _buildEmployeesTable(
+      List<EmployeeTime> employees, int totalDuration, Color accentColor) {
+    final vancouver = tz.getLocation('America/Vancouver');
+    return Column(
+      children: [
+        Table(
+          border: TableBorder.all(color: Colors.grey.shade300),
+          children: [
+            TableRow(
+              decoration: BoxDecoration(color: accentColor),
+              children: [
+                _tableHeader('Name'),
+                _tableHeader('On'),
+                _tableHeader('Off'),
+                _tableHeader('Hours'),
+              ],
+            ),
+            ...employees.map((employee) {
+              return TableRow(
+                children: [
+                  _tableCell(employee.name),
+                  _tableCell(DateFormat('h:mm a')
+                      .format(tz.TZDateTime.from(employee.timeOn, vancouver))),
+                  _tableCell(DateFormat('h:mm a')
+                      .format(tz.TZDateTime.from(employee.timeOff, vancouver))),
+                  _tableCell(
+                      '${(employee.duration / 60).toStringAsFixed(1)}'),
+                ],
+              );
+            }).toList(),
+            TableRow(
+              decoration: BoxDecoration(color: Colors.grey.shade50),
+              children: [
+                _tableCell(''),
+                _tableCell(''),
+                Container(
+                  alignment: Alignment.centerRight,
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  child: Text('Total:',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 12, fontWeight: FontWeight.bold)),
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(vertical: 4),
+                  child: Text(
+                    '${(totalDuration / 60).toStringAsFixed(1)} hrs',
+                    style: GoogleFonts.montserrat(
+                        fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildServicesContent(
+      Map<String, List<String>> services, Color accentColor) {
+    if (services.isEmpty ||
+        services.values.every((items) => items.isEmpty)) {
+      return Text('No services were specified',
+          style: GoogleFonts.montserrat(fontSize: 13, color: Colors.grey));
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: services.entries
+          .where((entry) => entry.value.isNotEmpty)
+          .map((entry) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                entry.key.toUpperCase(),
+                style: GoogleFonts.montserrat(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700),
+              ),
+              SizedBox(height: 4),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: entry.value.map<Widget>((item) {
+                  return Chip(
+                    label: Text(item,
+                        style: GoogleFonts.montserrat(fontSize: 11)),
+                    backgroundColor: accentColor.withAlpha(25),
+                    side: BorderSide(color: accentColor.withAlpha(80)),
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final report = this.report;
-    final vancouver = tz.getLocation('America/Vancouver');
     final isAdmin = ref.watch(isAdminProvider);
 
     final accentColor = report.isRegularMaintenance
@@ -231,9 +337,11 @@ class _ReportPreviewState extends ConsumerState<ReportPreview> {
                         ),
                         Spacer(),
                         Text(
-                          report.isRegularMaintenance
-                              ? 'Regular Maintenance'
-                              : 'Additional Service',
+                          report.hasBothPhases
+                              ? 'Regular + Additional'
+                              : report.isRegularMaintenance
+                                  ? 'Regular Maintenance'
+                                  : 'Additional Service',
                           style: GoogleFonts.montserrat(
                             fontSize: 11,
                             fontWeight: FontWeight.w500,
@@ -280,129 +388,61 @@ class _ReportPreviewState extends ConsumerState<ReportPreview> {
                     ),
                   ),
 
-                  // Employees card
-                  _sectionCard(
-                    title: 'Team & Time',
-                    icon: Icons.people_outline,
-                    child: Column(
-                      children: [
-                        Table(
-                          border: TableBorder.all(color: Colors.grey.shade300),
-                          children: [
-                            TableRow(
-                              decoration: BoxDecoration(color: accentColor),
-                              children: [
-                                _tableHeader('Name'),
-                                _tableHeader('On'),
-                                _tableHeader('Off'),
-                                _tableHeader('Hours'),
-                              ],
-                            ),
-                            ...report.employees.map((employee) {
-                              return TableRow(
-                                children: [
-                                  _tableCell(employee.name),
-                                  _tableCell(DateFormat('h:mm a').format(
-                                      tz.TZDateTime.from(
-                                          employee.timeOn, vancouver))),
-                                  _tableCell(DateFormat('h:mm a').format(
-                                      tz.TZDateTime.from(
-                                          employee.timeOff, vancouver))),
-                                  _tableCell(
-                                      '${(employee.duration / 60).toStringAsFixed(1)}'),
-                                ],
-                              );
-                            }).toList(),
-                            TableRow(
-                              decoration:
-                                  BoxDecoration(color: Colors.grey.shade50),
-                              children: [
-                                _tableCell(''),
-                                _tableCell(''),
-                                Container(
-                                  alignment: Alignment.centerRight,
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 4),
-                                  child: Text('Total:',
-                                      style: GoogleFonts.montserrat(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                                Container(
-                                  alignment: Alignment.center,
-                                  padding: EdgeInsets.symmetric(vertical: 4),
-                                  child: Text(
-                                    '${(report.totalCombinedDuration / 60).toStringAsFixed(1)} hrs',
-                                    style: GoogleFonts.montserrat(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
+                  // Team & Time + Services (phase-aware)
+                  if (report.hasBothPhases) ...[
+                    _sectionCard(
+                      title: 'Regular Maintenance — Team & Time',
+                      icon: Icons.people_outline,
+                      child: _buildEmployeesTable(
+                        report.regularPhase!.employees,
+                        report.regularPhase!.totalDuration,
+                        Color.fromARGB(255, 31, 182, 77),
+                      ),
                     ),
-                  ),
-
-                  // Services card
-                  _sectionCard(
-                    title: 'Services Provided',
-                    icon: Icons.checklist,
-                    child: report.services.isEmpty ||
-                            report.services.values
-                                .every((items) => items.isEmpty)
-                        ? Text('No services were specified',
-                            style: GoogleFonts.montserrat(
-                                fontSize: 13, color: Colors.grey))
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: report.services.entries
-                                .where((entry) => entry.value.isNotEmpty)
-                                .map((entry) {
-                              return Padding(
-                                padding: EdgeInsets.only(bottom: 8),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      entry.key.toUpperCase(),
-                                      style: GoogleFonts.montserrat(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.grey.shade700),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Wrap(
-                                      spacing: 6,
-                                      runSpacing: 4,
-                                      children:
-                                          entry.value.map<Widget>((item) {
-                                        return Chip(
-                                          label: Text(item,
-                                              style: GoogleFonts.montserrat(
-                                                  fontSize: 11)),
-                                          backgroundColor:
-                                              accentColor.withAlpha(25),
-                                          side: BorderSide(
-                                              color:
-                                                  accentColor.withAlpha(80)),
-                                          visualDensity: VisualDensity.compact,
-                                          materialTapTargetSize:
-                                              MaterialTapTargetSize
-                                                  .shrinkWrap,
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 4, vertical: 0),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                  ),
+                    _sectionCard(
+                      title: 'Regular Maintenance — Services',
+                      icon: Icons.checklist,
+                      child: _buildServicesContent(
+                        report.regularPhase!.services,
+                        Color.fromARGB(255, 31, 182, 77),
+                      ),
+                    ),
+                    _sectionCard(
+                      title: 'Additional Services — Team & Time',
+                      icon: Icons.people_outline,
+                      child: _buildEmployeesTable(
+                        report.additionalPhase!.employees,
+                        report.additionalPhase!.totalDuration,
+                        Colors.blueGrey,
+                      ),
+                    ),
+                    _sectionCard(
+                      title: 'Additional Services — Services',
+                      icon: Icons.checklist,
+                      child: _buildServicesContent(
+                        report.additionalPhase!.services,
+                        Colors.blueGrey,
+                      ),
+                    ),
+                  ] else ...[
+                    _sectionCard(
+                      title: 'Team & Time',
+                      icon: Icons.people_outline,
+                      child: _buildEmployeesTable(
+                        report.employees,
+                        report.totalCombinedDuration,
+                        accentColor,
+                      ),
+                    ),
+                    _sectionCard(
+                      title: 'Services Provided',
+                      icon: Icons.checklist,
+                      child: _buildServicesContent(
+                        report.services,
+                        accentColor,
+                      ),
+                    ),
+                  ],
 
                   // Materials card
                   if (report.materials.isNotEmpty)

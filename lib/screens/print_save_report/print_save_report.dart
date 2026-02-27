@@ -126,9 +126,11 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                         ),
                         pw.SizedBox(height: 2),
                         pw.Text(
-                          report.isRegularMaintenance
-                              ? 'Regular Maintenance'
-                              : 'Additional Service',
+                          report.hasBothPhases
+                              ? 'Regular Maintenance + Additional Services'
+                              : report.isRegularMaintenance
+                                  ? 'Regular Maintenance'
+                                  : 'Additional Service',
                           style: pw.TextStyle(
                             fontSize: 10,
                             color: accentColor,
@@ -172,116 +174,142 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
               ),
               pw.SizedBox(height: 10),
 
-              // --- EMPLOYEES TABLE ---
-              pw.Text('TEAM & TIME',
-                  style: pw.TextStyle(
-                      fontSize: 11, fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: 4),
-              pw.Table(
-                border: pw.TableBorder.all(color: PdfColors.grey300),
-                children: [
-                  pw.TableRow(
-                    decoration: pw.BoxDecoration(color: accentColor),
-                    children: [
-                      _pdfTableHeader('NAME'),
-                      _pdfTableHeader('ON'),
-                      _pdfTableHeader('OFF'),
-                      _pdfTableHeader('HOURS'),
-                    ],
-                  ),
-                  ...report.employees.asMap().entries.map((entry) {
-                    final i = entry.key;
-                    final employee = entry.value;
-                    final rowColor =
-                        i % 2 == 1 ? lightAccent : PdfColors.white;
-                    return pw.TableRow(
-                      decoration: pw.BoxDecoration(color: rowColor),
+              // --- TEAM & TIME + SERVICES (phase-aware) ---
+              if (report.hasBothPhases) ...[
+                _pdfPhaseSection(
+                  title: 'REGULAR MAINTENANCE',
+                  employees: report.regularPhase!.employees,
+                  totalDuration: report.regularPhase!.totalDuration,
+                  services: report.regularPhase!.services,
+                  accentColor: PdfColor(0.12, 0.71, 0.30),
+                  lightAccent: PdfColor(0.12, 0.71, 0.30, 0.08),
+                  vancouver: vancouver,
+                ),
+                pw.SizedBox(height: 4),
+                _pdfPhaseSection(
+                  title: 'ADDITIONAL SERVICES',
+                  employees: report.additionalPhase!.employees,
+                  totalDuration: report.additionalPhase!.totalDuration,
+                  services: report.additionalPhase!.services,
+                  accentColor: PdfColor(0.38, 0.49, 0.55),
+                  lightAccent: PdfColor(0.38, 0.49, 0.55, 0.08),
+                  vancouver: vancouver,
+                ),
+                pw.SizedBox(height: 6),
+                pw.Container(height: 1, color: PdfColors.grey300),
+                pw.SizedBox(height: 6),
+              ] else ...[
+                pw.Text('TEAM & TIME',
+                    style: pw.TextStyle(
+                        fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 4),
+                pw.Table(
+                  border: pw.TableBorder.all(color: PdfColors.grey300),
+                  children: [
+                    pw.TableRow(
+                      decoration: pw.BoxDecoration(color: accentColor),
                       children: [
-                        _pdfTableCell(employee.name),
-                        _pdfTableCell(DateFormat('h:mm a').format(
-                            tz.TZDateTime.from(employee.timeOn, vancouver))),
-                        _pdfTableCell(DateFormat('h:mm a').format(
-                            tz.TZDateTime.from(employee.timeOff, vancouver))),
-                        _pdfTableCell(
-                            '${(employee.duration / 60).toStringAsFixed(1)} hrs'),
+                        _pdfTableHeader('NAME'),
+                        _pdfTableHeader('ON'),
+                        _pdfTableHeader('OFF'),
+                        _pdfTableHeader('HOURS'),
                       ],
-                    );
-                  }).toList(),
-                  pw.TableRow(
-                    decoration: pw.BoxDecoration(color: PdfColors.grey100),
-                    children: [
-                      pw.Container(),
-                      pw.Container(),
-                      pw.Container(
-                        alignment: pw.Alignment.centerRight,
-                        padding: const pw.EdgeInsets.symmetric(
-                            horizontal: 4, vertical: 3),
-                        child: pw.Text('Total:',
-                            style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold,
-                                fontSize: 10)),
-                      ),
-                      pw.Container(
-                        alignment: pw.Alignment.center,
-                        padding: const pw.EdgeInsets.symmetric(vertical: 3),
-                        child: pw.Text(
-                            '${(report.totalCombinedDuration / 60).toStringAsFixed(1)} hrs',
-                            style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold,
-                                fontSize: 10)),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 10),
-
-              // --- SERVICES ---
-              pw.Text('SERVICES PROVIDED',
-                  style: pw.TextStyle(
-                      fontSize: 11, fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: 4),
-              ...report.services.entries
-                  .where((e) => e.value.isNotEmpty)
-                  .map((entry) {
-                return pw.Padding(
-                  padding: const pw.EdgeInsets.only(bottom: 3),
-                  child: pw.Row(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.SizedBox(
-                        width: 80,
-                        child: pw.Text('${entry.key}:',
-                            style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold,
-                                fontSize: 9)),
-                      ),
-                      pw.Expanded(
-                        child: pw.Wrap(
-                          spacing: 4,
-                          runSpacing: 2,
-                          children: entry.value.map((item) {
-                            return pw.Container(
-                              padding: const pw.EdgeInsets.symmetric(
-                                  horizontal: 4, vertical: 1),
-                              decoration: pw.BoxDecoration(
-                                border: pw.Border.all(color: PdfColors.grey400),
-                                borderRadius:
-                                    pw.BorderRadius.circular(3),
-                              ),
-                              child: pw.Text(item,
-                                  style: const pw.TextStyle(fontSize: 8)),
-                            );
-                          }).toList(),
+                    ),
+                    ...report.employees.asMap().entries.map((entry) {
+                      final i = entry.key;
+                      final employee = entry.value;
+                      final rowColor =
+                          i % 2 == 1 ? lightAccent : PdfColors.white;
+                      return pw.TableRow(
+                        decoration: pw.BoxDecoration(color: rowColor),
+                        children: [
+                          _pdfTableCell(employee.name),
+                          _pdfTableCell(DateFormat('h:mm a').format(
+                              tz.TZDateTime.from(employee.timeOn, vancouver))),
+                          _pdfTableCell(DateFormat('h:mm a').format(
+                              tz.TZDateTime.from(employee.timeOff, vancouver))),
+                          _pdfTableCell(
+                              '${(employee.duration / 60).toStringAsFixed(1)} hrs'),
+                        ],
+                      );
+                    }).toList(),
+                    pw.TableRow(
+                      decoration: pw.BoxDecoration(color: PdfColors.grey100),
+                      children: [
+                        pw.Container(),
+                        pw.Container(),
+                        pw.Container(
+                          alignment: pw.Alignment.centerRight,
+                          padding: const pw.EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 3),
+                          child: pw.Text('Total:',
+                              style: pw.TextStyle(
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 10)),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-              pw.SizedBox(height: 6),
-              pw.Container(height: 1, color: PdfColors.grey300),
-              pw.SizedBox(height: 6),
+                        pw.Container(
+                          alignment: pw.Alignment.center,
+                          padding:
+                              const pw.EdgeInsets.symmetric(vertical: 3),
+                          child: pw.Text(
+                              '${(report.totalCombinedDuration / 60).toStringAsFixed(1)} hrs',
+                              style: pw.TextStyle(
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 10)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                pw.SizedBox(height: 10),
+                pw.Text('SERVICES PROVIDED',
+                    style: pw.TextStyle(
+                        fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 4),
+                ...report.services.entries
+                    .where((e) => e.value.isNotEmpty)
+                    .map((entry) {
+                  return pw.Padding(
+                    padding: const pw.EdgeInsets.only(bottom: 3),
+                    child: pw.Row(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.SizedBox(
+                          width: 110,
+                          child: pw.Text('${entry.key}:',
+                              style: pw.TextStyle(
+                                  fontWeight: pw.FontWeight.bold,
+                                  fontSize: 9)),
+                        ),
+                        pw.Expanded(
+                          child: pw.Wrap(
+                            spacing: 4,
+                            runSpacing: 2,
+                            children: entry.value.map((item) {
+                              return pw.Container(
+                                padding: const pw.EdgeInsets.symmetric(
+                                    horizontal: 4, vertical: 1),
+                                decoration: pw.BoxDecoration(
+                                  border: pw.Border.all(
+                                      color: PdfColors.grey400),
+                                  borderRadius:
+                                      pw.BorderRadius.circular(3),
+                                ),
+                                child: pw.Text(item,
+                                    style:
+                                        const pw.TextStyle(fontSize: 8)),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                pw.SizedBox(height: 6),
+                pw.Container(height: 1, color: PdfColors.grey300),
+                pw.SizedBox(height: 6),
+              ],
 
               // --- DISPOSAL ---
               if (report.disposal != null &&
@@ -428,6 +456,130 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
     );
 
     return doc.save();
+  }
+
+  pw.Widget _pdfPhaseSection({
+    required String title,
+    required List<EmployeeTime> employees,
+    required int totalDuration,
+    required Map<String, List<String>> services,
+    required PdfColor accentColor,
+    required PdfColor lightAccent,
+    required tz.Location vancouver,
+  }) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.symmetric(vertical: 3, horizontal: 6),
+          decoration: pw.BoxDecoration(color: accentColor),
+          child: pw.Text(title,
+              style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.white)),
+        ),
+        pw.SizedBox(height: 4),
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.grey300),
+          children: [
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: accentColor),
+              children: [
+                _pdfTableHeader('NAME'),
+                _pdfTableHeader('ON'),
+                _pdfTableHeader('OFF'),
+                _pdfTableHeader('HOURS'),
+              ],
+            ),
+            ...employees.asMap().entries.map((entry) {
+              final i = entry.key;
+              final employee = entry.value;
+              final rowColor = i % 2 == 1 ? lightAccent : PdfColors.white;
+              return pw.TableRow(
+                decoration: pw.BoxDecoration(color: rowColor),
+                children: [
+                  _pdfTableCell(employee.name),
+                  _pdfTableCell(DateFormat('h:mm a')
+                      .format(tz.TZDateTime.from(employee.timeOn, vancouver))),
+                  _pdfTableCell(DateFormat('h:mm a')
+                      .format(tz.TZDateTime.from(employee.timeOff, vancouver))),
+                  _pdfTableCell(
+                      '${(employee.duration / 60).toStringAsFixed(1)} hrs'),
+                ],
+              );
+            }).toList(),
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: PdfColors.grey100),
+              children: [
+                pw.Container(),
+                pw.Container(),
+                pw.Container(
+                  alignment: pw.Alignment.centerRight,
+                  padding: const pw.EdgeInsets.symmetric(
+                      horizontal: 4, vertical: 3),
+                  child: pw.Text('Total:',
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                ),
+                pw.Container(
+                  alignment: pw.Alignment.center,
+                  padding: const pw.EdgeInsets.symmetric(vertical: 3),
+                  child: pw.Text(
+                      '${(totalDuration / 60).toStringAsFixed(1)} hrs',
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                ),
+              ],
+            ),
+          ],
+        ),
+        pw.SizedBox(height: 4),
+        pw.Text('Services',
+            style: pw.TextStyle(
+                fontSize: 10, fontWeight: pw.FontWeight.bold)),
+        pw.SizedBox(height: 3),
+        ...services.entries
+            .where((e) => e.value.isNotEmpty)
+            .map((entry) {
+          return pw.Padding(
+            padding: const pw.EdgeInsets.only(bottom: 3),
+            child: pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.SizedBox(
+                  width: 110,
+                  child: pw.Text('${entry.key}:',
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 9)),
+                ),
+                pw.Expanded(
+                  child: pw.Wrap(
+                    spacing: 4,
+                    runSpacing: 2,
+                    children: entry.value.map((item) {
+                      return pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(
+                            horizontal: 4, vertical: 1),
+                        decoration: pw.BoxDecoration(
+                          border:
+                              pw.Border.all(color: PdfColors.grey400),
+                          borderRadius: pw.BorderRadius.circular(3),
+                        ),
+                        child: pw.Text(item,
+                            style: const pw.TextStyle(fontSize: 8)),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+        pw.SizedBox(height: 4),
+      ],
+    );
   }
 
   pw.Widget _pdfTableHeader(String text) {

@@ -41,152 +41,241 @@ class _EmployeeTimesComponentState
     timeOff = widget.initialTimeOff;
   }
 
+  String _formatTime(TimeOfDay t) =>
+      '${t.hour}:${t.minute.toString().padLeft(2, '0')}';
+
   void _showEmployeePicker(List<AppUser> users) {
     showModalBottomSheet(
       context: context,
-      builder: (_) => SafeArea(
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: users.length,
-          itemBuilder: (_, i) => ListTile(
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            title: Text(
-              users[i].username,
-              style: GoogleFonts.montserrat(fontSize: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Row(
+                children: [
+                  Text('Select Employee',
+                      style: GoogleFonts.montserrat(
+                          fontSize: 14, fontWeight: FontWeight.w600)),
+                  Spacer(),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(sheetContext),
+                    child: Icon(Icons.close, size: 20, color: Colors.grey[500]),
+                  ),
+                ],
+              ),
             ),
-            trailing: users[i].username == widget.selectedName
-                ? Icon(Icons.check, color: Colors.green)
-                : null,
-            onTap: () {
-              widget.onNameChanged(users[i].username);
-              Navigator.pop(context);
-            },
-          ),
+            Divider(height: 1),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: users.length + 1,
+                itemBuilder: (_, i) {
+                  if (i == users.length) {
+                    return ListTile(
+                      dense: true,
+                      leading: Icon(Icons.edit, size: 18, color: Colors.grey[500]),
+                      title: Text('Enter manually',
+                          style: GoogleFonts.montserrat(
+                              fontSize: 13, color: Colors.grey[600])),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        _showManualNameEntry();
+                      },
+                    );
+                  }
+                  final isSelected = users[i].username == widget.selectedName;
+                  return ListTile(
+                    dense: true,
+                    title: Text(
+                      users[i].username,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 13,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.w400,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(Icons.check, color: Colors.green, size: 18)
+                        : null,
+                    onTap: () {
+                      widget.onNameChanged(users[i].username);
+                      Navigator.pop(sheetContext);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
+  void _showManualNameEntry() {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Enter Employee Name',
+            style: GoogleFonts.montserrat(
+                fontSize: 14, fontWeight: FontWeight.w600)),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: GoogleFonts.montserrat(fontSize: 13),
+          textCapitalization: TextCapitalization.words,
+          decoration: InputDecoration(
+            hintText: 'Full name',
+            hintStyle: GoogleFonts.montserrat(fontSize: 13),
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+            border:
+                OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.green, width: 2),
+            ),
+          ),
+          onSubmitted: (value) {
+            if (value.trim().isNotEmpty) {
+              widget.onNameChanged(value.trim());
+              Navigator.pop(dialogContext);
+            }
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('Cancel', style: GoogleFonts.montserrat(fontSize: 12)),
+          ),
+          TextButton(
+            onPressed: () {
+              if (controller.text.trim().isNotEmpty) {
+                widget.onNameChanged(controller.text.trim());
+                Navigator.pop(dialogContext);
+              }
+            },
+            child: Text('Add',
+                style: GoogleFonts.montserrat(
+                    fontSize: 12, color: Colors.green[700])),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickTime(bool isTimeOn) async {
+    final initial = isTimeOn ? timeOn : timeOff;
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+    );
+    if (picked != null) {
+      setState(() {
+        if (isTimeOn) {
+          timeOn = picked;
+          widget.onTimeOnChanged(picked);
+        } else {
+          timeOff = picked;
+          widget.onTimeOffChanged(picked);
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final usersAsync = ref.watch(activeUsersProvider);
+    final hasName = widget.selectedName != null && widget.selectedName!.isNotEmpty;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Employee name selector
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              usersAsync.whenData((users) => _showEmployeePicker(users));
-            },
-            child: InputDecorator(
-              decoration: InputDecoration(
-                hintText: 'Select Employee',
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-                suffixIcon: Icon(Icons.arrow_drop_down, size: 20),
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey[200]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          // Name — tappable
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                usersAsync.whenData((users) => _showEmployeePicker(users));
+              },
+              child: Row(
+                children: [
+                  Icon(Icons.person_outline,
+                      size: 16,
+                      color: hasName ? Colors.green[700] : Colors.grey[400]),
+                  SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      hasName ? widget.selectedName! : 'Select employee',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 12,
+                        fontWeight: hasName ? FontWeight.w500 : FontWeight.w400,
+                        color: hasName ? Colors.black87 : Colors.grey[500],
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Times — compact tappable chips
+          GestureDetector(
+            onTap: () => _pickTime(true),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                widget.selectedName ?? '',
-                style: GoogleFonts.montserrat(fontSize: 14),
-                overflow: TextOverflow.ellipsis,
+                _formatTime(timeOn),
+                style: GoogleFonts.montserrat(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.green[800]),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 10),
-        // Time ON
-        Column(
-          children: [
-            const Text("ON", style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(
-              width: 100,
-              height: 30,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.access_time_outlined, size: 16),
-                label: Text(
-                  '${timeOn.hour}:${timeOn.minute.toString().padLeft(2, '0')}',
-                  style: GoogleFonts.montserrat(fontSize: 14),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  textStyle: GoogleFonts.montserrat(fontSize: 14),
-                ),
-                onPressed: () async {
-                  TimeOfDay? newTimeOn = await showTimePicker(
-                    context: context,
-                    initialTime: timeOn,
-                  );
-                  if (newTimeOn != null) {
-                    setState(() {
-                      timeOn = newTimeOn;
-                      widget.onTimeOnChanged(newTimeOn);
-                    });
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(width: 10),
-        // Time OFF
-        Column(
-          children: [
-            const Text("OFF", style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(
-              width: 100,
-              height: 30,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.access_time_outlined, size: 16),
-                label: Text(
-                  '${timeOff.hour}:${timeOff.minute.toString().padLeft(2, '0')}',
-                  style: GoogleFonts.montserrat(fontSize: 14),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 31, 182, 77),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  textStyle: GoogleFonts.montserrat(fontSize: 14),
-                ),
-                onPressed: () async {
-                  TimeOfDay? newTimeOff = await showTimePicker(
-                    context: context,
-                    initialTime: timeOff,
-                  );
-                  if (newTimeOff != null) {
-                    setState(() {
-                      timeOff = newTimeOff;
-                      widget.onTimeOffChanged(newTimeOff);
-                    });
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
-        SizedBox(
-          width: 20,
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            icon: const Icon(
-              Icons.delete,
-              color: Colors.grey,
-              size: 24,
-            ),
-            onPressed: widget.onDelete,
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 3),
+            child: Icon(Icons.arrow_forward, size: 10, color: Colors.grey[400]),
           ),
-        ),
-      ],
+          GestureDetector(
+            onTap: () => _pickTime(false),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.red[50],
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                _formatTime(timeOff),
+                style: GoogleFonts.montserrat(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.red[800]),
+              ),
+            ),
+          ),
+          // Delete
+          SizedBox(width: 4),
+          GestureDetector(
+            onTap: widget.onDelete,
+            child: Icon(Icons.close, size: 16, color: Colors.grey[400]),
+          ),
+        ],
+      ),
     );
   }
 }

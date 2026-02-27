@@ -37,19 +37,22 @@ String _displayName(String submittedBy) {
 }
 
 // --- Filter options ---
-enum ReportFilter { all, regular, additional, pending, filed }
+enum ReportFilter { all, regular, additional, pending, filed, draft }
 
 // --- Date Header ---
 class DateHeader extends StatelessWidget {
   final String date;
-  const DateHeader({super.key, required this.date});
+  final bool isDraftHeader;
+  const DateHeader({super.key, required this.date, this.isDraftHeader = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.grey.shade700, Colors.grey.shade600],
+          colors: isDraftHeader
+              ? [Colors.amber.shade700, Colors.amber.shade600]
+              : [Colors.grey.shade700, Colors.grey.shade600],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -138,16 +141,21 @@ class _RecentReportsState extends ConsumerState<RecentReports>
     // Apply filter chips
     switch (_activeFilter) {
       case ReportFilter.regular:
-        filtered = filtered.where((r) => r.isRegularMaintenance).toList();
+        filtered =
+            filtered.where((r) => !r.isDraft && r.isRegularMaintenance).toList();
         break;
       case ReportFilter.additional:
-        filtered = filtered.where((r) => !r.isRegularMaintenance).toList();
+        filtered =
+            filtered.where((r) => !r.isDraft && !r.isRegularMaintenance).toList();
         break;
       case ReportFilter.pending:
-        filtered = filtered.where((r) => !r.filed).toList();
+        filtered = filtered.where((r) => !r.isDraft && !r.filed).toList();
         break;
       case ReportFilter.filed:
-        filtered = filtered.where((r) => r.filed).toList();
+        filtered = filtered.where((r) => !r.isDraft && r.filed).toList();
+        break;
+      case ReportFilter.draft:
+        filtered = filtered.where((r) => r.isDraft).toList();
         break;
       case ReportFilter.all:
         break;
@@ -158,11 +166,21 @@ class _RecentReportsState extends ConsumerState<RecentReports>
 
   // --- Group Reports ---
   List<Map<String, dynamic>> _groupReports(List<SiteReport> reports) {
-    reports.sort((a, b) =>
-        DateUtils.parseDate(b.date).compareTo(DateUtils.parseDate(a.date)));
-    final groupedByDate = <DateTime, Map<String, List<SiteReport>>>{};
+    // Separate drafts from submitted reports
+    final drafts = reports.where((r) => r.isDraft).toList();
+    final submitted = reports.where((r) => !r.isDraft).toList();
 
-    for (var report in reports) {
+    submitted.sort((a, b) {
+      try {
+        return DateUtils.parseDate(b.date)
+            .compareTo(DateUtils.parseDate(a.date));
+      } catch (_) {
+        return 0;
+      }
+    });
+
+    final groupedByDate = <DateTime, Map<String, List<SiteReport>>>{};
+    for (var report in submitted) {
       final reportDate = DateUtils.parseDate(report.date);
       if (!groupedByDate.containsKey(reportDate)) {
         groupedByDate[reportDate] = {};
@@ -177,6 +195,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
     groupedByDate.forEach((date, reportsByEmployee) {
       reportsByEmployee.forEach((employee, employeeReports) {
         employeeReports.sort((a, b) {
+          if (a.employees.isEmpty || b.employees.isEmpty) return 0;
           final latestTimeOffA = a.employees
               .map((e) => e.timeOff)
               .reduce((a, b) => a.isAfter(b) ? a : b);
@@ -189,6 +208,17 @@ class _RecentReportsState extends ConsumerState<RecentReports>
     });
 
     final reportsList = <Map<String, dynamic>>[];
+
+    // Drafts section at top
+    if (drafts.isNotEmpty) {
+      reportsList.add({"date": "Drafts", "type": "date", "isDraftHeader": true});
+      for (var draft in drafts) {
+        reportsList.add({"report": draft, "type": "report"});
+      }
+      reportsList.add({"divider": true, "type": "divider"});
+    }
+
+    // Grouped submitted reports
     groupedByDate.forEach((date, reportsByEmployee) {
       final formattedDate = DateUtils.formatDate(date);
       reportsList.add({"date": formattedDate, "type": "date"});
@@ -270,6 +300,7 @@ class _RecentReportsState extends ConsumerState<RecentReports>
                   ReportFilter.additional: 'Additional',
                   ReportFilter.pending: 'Pending',
                   ReportFilter.filed: 'Filed',
+                  ReportFilter.draft: 'Draft',
                 }[filter]!;
                 return Padding(
                   padding: const EdgeInsets.only(right: 6),
@@ -316,7 +347,10 @@ class _RecentReportsState extends ConsumerState<RecentReports>
                       final item = reportsList[index];
                       switch (item['type']) {
                         case 'date':
-                          return DateHeader(date: item['date']);
+                          return DateHeader(
+                            date: item['date'],
+                            isDraftHeader: item['isDraftHeader'] == true,
+                          );
                         case 'employee':
                           return EmployeeHeader(name: item['name']);
                         case 'report':
@@ -354,15 +388,35 @@ class _RecentReportsState extends ConsumerState<RecentReports>
         iconData: Icons.post_add_outlined,
         items: [
           Bubble(
-            title: "Site Report",
+            title: "Maintenance Program",
             iconColor: Colors.white,
-            bubbleColor: const Color.fromARGB(255, 59, 82, 73),
+            bubbleColor: const Color.fromARGB(255, 31, 182, 77),
             icon: Icons.note_add_outlined,
             titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
             onPress: () {
               _animationController.reverse();
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const AddSiteReport()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const AddSiteReport(
+                        isRegularMaintenance: true)),
+              );
+            },
+          ),
+          Bubble(
+            title: "Additional Service",
+            iconColor: Colors.white,
+            bubbleColor: const Color.fromARGB(255, 97, 125, 140),
+            icon: Icons.assignment_add,
+            titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
+            onPress: () {
+              _animationController.reverse();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const AddSiteReport(
+                        isRegularMaintenance: false)),
+              );
             },
           ),
           Bubble(
@@ -443,16 +497,26 @@ class MinimalReportTile extends StatelessWidget {
     final employeeNames =
         report.employees.map((e) => e.name.split(' ')[0]).join(', ');
 
-    final accentColor = report.isRegularMaintenance
-        ? Color.fromARGB(255, 31, 182, 77)
-        : Colors.blueGrey;
+    final accentColor = report.isDraft
+        ? Colors.amber.shade700
+        : report.isRegularMaintenance
+            ? Color.fromARGB(255, 31, 182, 77)
+            : Colors.blueGrey;
 
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => ReportPreview(report: report)),
-        );
+        if (report.isDraft) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => AddSiteReport(draftReport: report)),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => ReportPreview(report: report)),
+          );
+        }
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
@@ -488,10 +552,15 @@ class MinimalReportTile extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                report.siteName,
+                                report.siteName.isNotEmpty
+                                    ? report.siteName
+                                    : 'Untitled Report',
                                 style: GoogleFonts.montserrat(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
+                                  fontStyle: report.siteName.isEmpty
+                                      ? FontStyle.italic
+                                      : FontStyle.normal,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -501,30 +570,54 @@ class MinimalReportTile extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: report.filed
-                                    ? Colors.green[50]
-                                    : Colors.orange[50],
+                                color: report.isDraft
+                                    ? Colors.amber[50]
+                                    : report.filed
+                                        ? Colors.green[50]
+                                        : Colors.orange[50],
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: report.filed
-                                      ? Colors.green[300]!
-                                      : Colors.orange[300]!,
+                                  color: report.isDraft
+                                      ? Colors.amber[600]!
+                                      : report.filed
+                                          ? Colors.green[300]!
+                                          : Colors.orange[300]!,
                                 ),
                               ),
                               child: Text(
-                                report.filed ? 'Filed' : 'Pending',
+                                report.isDraft
+                                    ? 'DRAFT'
+                                    : report.filed
+                                        ? 'Filed'
+                                        : 'Pending',
                                 style: GoogleFonts.montserrat(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600,
-                                  color: report.filed
-                                      ? Colors.green[700]
-                                      : Colors.orange[700],
+                                  color: report.isDraft
+                                      ? Colors.amber[800]
+                                      : report.filed
+                                          ? Colors.green[700]
+                                          : Colors.orange[700],
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 4),
+                        SizedBox(height: 2),
+                        // Report type label
+                        Text(
+                          report.isRegularMaintenance
+                              ? 'Maintenance Program'
+                              : 'Additional Service',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: report.isRegularMaintenance
+                                ? Color.fromARGB(255, 31, 182, 77)
+                                : Color.fromARGB(255, 97, 125, 140),
+                          ),
+                        ),
+                        SizedBox(height: 2),
                         // Time + employees
                         Row(
                           children: [
