@@ -27,7 +27,7 @@ class UtilityControllerState extends State<UtilityController> {
             tabs: [
               Tab(text: 'Announcements'),
               Tab(text: 'Upload Photos'),
-              Tab(text: 'Report Repairs'),
+              Tab(text: 'Equipment'),
             ],
           ),
         ),

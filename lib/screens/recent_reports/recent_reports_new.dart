@@ -7,6 +7,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:gemini_landscaping_app/models/site_report.dart';
 import 'package:gemini_landscaping_app/providers/report_provider.dart';
 import 'package:gemini_landscaping_app/screens/add_report/add_site_report.dart';
+import 'package:gemini_landscaping_app/screens/utility_screens/equipment_report_form.dart';
 import 'package:gemini_landscaping_app/screens/winter_reports/addWinterReport.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
@@ -185,6 +186,21 @@ class _RecentReportsState extends ConsumerState<RecentReports> {
                       context,
                       MaterialPageRoute(
                           builder: (_) => const AddWinterReport()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                _sheetOption(
+                  icon: Icons.warning_amber_outlined,
+                  label: 'Equipment Report',
+                  subtitle: 'Report vehicle or equipment issues',
+                  color: Colors.amber[700]!,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const EquipmentReportForm()),
                     );
                   },
                 ),

@@ -14,6 +14,8 @@ import 'package:gemini_landscaping_app/screens/add_report/notes_section.dart';
 import 'package:gemini_landscaping_app/screens/add_report/report_details_page.dart';
 import 'package:gemini_landscaping_app/screens/add_report/service_list.dart';
 import 'package:gemini_landscaping_app/screens/add_report/site_picker.dart';
+import 'package:gemini_landscaping_app/models/equipment_model.dart';
+import 'package:gemini_landscaping_app/models/repair_entry.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -76,6 +78,13 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   bool _hasDisposal = false;
   final _disposalLocationController = TextEditingController();
   final _disposalCostController = TextEditingController();
+
+  // Equipment issue linking
+  List<Equipment> _equipmentList = [];
+  bool _equipmentLoaded = false;
+  String? _linkedEquipmentId;
+  final _equipmentIssueController = TextEditingController();
+  String _equipmentIssuePriority = 'medium';
 
   // Draft tracking
   String? _draftId;
@@ -469,11 +478,15 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
 
     try {
       final collection = FirebaseFirestore.instance.collection('SiteReports');
+      String reportId;
       if (_draftId != null && _draftId!.isNotEmpty) {
         await collection.doc(_draftId).set(report.toMap());
+        reportId = _draftId!;
       } else {
-        await collection.add(report.toMap());
+        final docRef = await collection.add(report.toMap());
+        reportId = docRef.id;
       }
+      await _createEquipmentRepairEntry(reportId);
       // Prevent dispose() from re-saving as draft
       _draftTimer?.cancel();
       _draftTimer = null;
@@ -595,13 +608,18 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     try {
       final collection = FirebaseFirestore.instance.collection('SiteReports');
       // Submit maintenance report
+      String mainReportId;
       if (_draftId != null && _draftId!.isNotEmpty) {
         await collection.doc(_draftId).set(mainReport.toMap());
+        mainReportId = _draftId!;
       } else {
-        await collection.add(mainReport.toMap());
+        final docRef = await collection.add(mainReport.toMap());
+        mainReportId = docRef.id;
       }
       // Submit additional services report (always new doc)
       await collection.add(additionalReport.toMap());
+      // Link equipment issue to the main report
+      await _createEquipmentRepairEntry(mainReportId);
       // Prevent dispose() from re-saving as draft
       _draftTimer?.cancel();
       _draftTimer = null;
@@ -704,16 +722,74 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
 
     try {
       final collection = FirebaseFirestore.instance.collection('SiteReports');
+      String reportId;
       if (_draftId != null && _draftId!.isNotEmpty) {
         await collection.doc(_draftId).set(report.toMap());
+        reportId = _draftId!;
       } else {
-        await collection.add(report.toMap());
+        final docRef = await collection.add(report.toMap());
+        reportId = docRef.id;
       }
+      await _createEquipmentRepairEntry(reportId);
       _draftTimer?.cancel();
       _draftTimer = null;
       if (mounted) Navigator.pop(context);
     } catch (e) {
       _showError('Failed to submit report, please try again.');
+    }
+  }
+
+  // --- Equipment issue linking ---
+  bool get _hasEquipmentIssueTag =>
+      _selectedNoteTags.contains('Equipment issue');
+
+  Future<void> _loadEquipmentList() async {
+    if (_equipmentLoaded) return;
+    final snapshot = await FirebaseFirestore.instance
+        .collection('equipment')
+        .where('active', isEqualTo: true)
+        .get();
+    final list = snapshot.docs
+        .map((doc) => Equipment.fromMap(doc.id, doc.data()))
+        .toList();
+    list.sort((a, b) => a.name.compareTo(b.name));
+    if (mounted) {
+      setState(() {
+        _equipmentList = list;
+        _equipmentLoaded = true;
+      });
+    }
+  }
+
+  /// Creates a repair_entry in the linked equipment's subcollection.
+  /// Call after report is saved so we have the report doc ID.
+  Future<void> _createEquipmentRepairEntry(String reportId) async {
+    if (!_hasEquipmentIssueTag || _linkedEquipmentId == null) return;
+
+    final entry = RepairEntry(
+      id: '',
+      dateTime: DateTime.now(),
+      description: _equipmentIssueController.text.trim().isNotEmpty
+          ? _equipmentIssueController.text.trim()
+          : 'Issue reported from site report',
+      priority: _equipmentIssuePriority,
+      reportedBy: currentUser.email ?? 'unknown',
+      linkedReportId: reportId,
+      linkedSiteName: dropdownValue,
+    );
+
+    await FirebaseFirestore.instance
+        .collection('equipment')
+        .doc(_linkedEquipmentId)
+        .collection('repair_entries')
+        .add(entry.toMap());
+
+    // Update equipment status if priority warrants it
+    if (_equipmentIssuePriority == 'high') {
+      await FirebaseFirestore.instance
+          .collection('equipment')
+          .doc(_linkedEquipmentId)
+          .update({'currentStatus': 'needs-attention'});
     }
   }
 
@@ -794,6 +870,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     _notesController.dispose();
     _disposalLocationController.dispose();
     _disposalCostController.dispose();
+    _equipmentIssueController.dispose();
     for (var m in _materials) {
       (m['vendorController'] as TextEditingController).dispose();
       (m['materialController'] as TextEditingController).dispose();
@@ -1014,6 +1091,158 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
           ),
         ),
       ],
+    );
+  }
+
+  // --- Inline equipment issue picker ---
+  Widget _buildEquipmentIssuePicker() {
+    return Container(
+      margin: EdgeInsets.only(top: 8),
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.amber[50],
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.amber[300]!),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.warning_amber, size: 16, color: Colors.amber[800]),
+              SizedBox(width: 6),
+              Text(
+                'Link Equipment Issue',
+                style: GoogleFonts.montserrat(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.amber[900],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          // Equipment dropdown
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: _equipmentLoaded
+                ? DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      value: _linkedEquipmentId,
+                      hint: Text('Select equipment...',
+                          style: GoogleFonts.montserrat(
+                              fontSize: 12, color: Colors.grey[400])),
+                      style: GoogleFonts.montserrat(
+                          fontSize: 12, color: Colors.black87),
+                      items: _equipmentList.map((eq) {
+                        return DropdownMenuItem(
+                          value: eq.id,
+                          child: Text('${eq.name} (${eq.equipmentType})',
+                              overflow: TextOverflow.ellipsis),
+                        );
+                      }).toList(),
+                      onChanged: (v) {
+                        setState(() => _linkedEquipmentId = v);
+                      },
+                    ),
+                  )
+                : Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child:
+                              CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        SizedBox(width: 8),
+                        Text('Loading equipment...',
+                            style: GoogleFonts.montserrat(
+                                fontSize: 12, color: Colors.grey[500])),
+                      ],
+                    ),
+                  ),
+          ),
+          SizedBox(height: 8),
+          // Brief description
+          TextField(
+            controller: _equipmentIssueController,
+            style: GoogleFonts.montserrat(fontSize: 12),
+            maxLines: 2,
+            decoration: InputDecoration(
+              hintText: 'Brief description of issue...',
+              hintStyle: GoogleFonts.montserrat(
+                  fontSize: 12, color: Colors.grey[400]),
+              filled: true,
+              fillColor: Colors.white,
+              isDense: true,
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8)),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide:
+                    BorderSide(color: Colors.amber[700]!, width: 1.5),
+              ),
+            ),
+          ),
+          SizedBox(height: 8),
+          // Priority chips
+          Row(
+            children: [
+              Text('Priority: ',
+                  style: GoogleFonts.montserrat(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[700])),
+              SizedBox(width: 4),
+              ...['low', 'medium', 'high'].map((p) {
+                final isSelected = _equipmentIssuePriority == p;
+                final color = p == 'high'
+                    ? Colors.red
+                    : p == 'medium'
+                        ? Colors.orange
+                        : Colors.amber[700]!;
+                return GestureDetector(
+                  onTap: () =>
+                      setState(() => _equipmentIssuePriority = p),
+                  child: Container(
+                    margin: EdgeInsets.only(right: 6),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color:
+                          isSelected ? color.withAlpha(25) : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected ? color : Colors.grey[300]!,
+                      ),
+                    ),
+                    child: Text(
+                      p[0].toUpperCase() + p.substring(1),
+                      style: GoogleFonts.montserrat(
+                        fontSize: 11,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                        color: isSelected ? color : Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -1312,6 +1541,11 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                                   ? _selectedNoteTags.remove(tag)
                                   : _selectedNoteTags.add(tag);
                             });
+                            // Load equipment list when Equipment issue tag is selected
+                            if (tag == 'Equipment issue' &&
+                                _selectedNoteTags.contains(tag)) {
+                              _loadEquipmentList();
+                            }
                             _scheduleDraftSave();
                           },
                           child: Container(
@@ -1372,6 +1606,9 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                     ),
 
                   SizedBox(height: 4),
+
+                  // === INLINE EQUIPMENT ISSUE PICKER ===
+                  if (_hasEquipmentIssueTag) _buildEquipmentIssuePicker(),
 
                   // === MAINTENANCE-ONLY REMINDER ===
                   if (_isRegularMaintenance && _hasExtrasSelected)
