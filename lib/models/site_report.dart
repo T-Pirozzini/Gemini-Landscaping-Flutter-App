@@ -7,12 +7,20 @@ class ReportPhase {
   final List<EmployeeTime> employees;
   final int totalDuration; // minutes
   final Map<String, List<String>> services;
+  final Map<String, List<EmployeeTime>>? serviceEmployees; // per-service time tracking
+  final Map<String, String>? serviceNotes; // per-service notes
+  final Map<String, List<MaterialList>>? serviceMaterials; // per-service materials
+  final Map<String, Disposal>? serviceDisposal; // per-service disposal
 
   ReportPhase({
     required this.isRegularMaintenance,
     required this.employees,
     required this.totalDuration,
     required this.services,
+    this.serviceEmployees,
+    this.serviceNotes,
+    this.serviceMaterials,
+    this.serviceDisposal,
   });
 
   factory ReportPhase.fromMap(Map<String, dynamic> map) {
@@ -32,11 +40,61 @@ class ReportPhase {
     final services =
         servicesData.map((k, v) => MapEntry(k, List<String>.from(v)));
 
+    // Parse per-service employee times if present
+    Map<String, List<EmployeeTime>>? serviceEmployees;
+    if (map['serviceEmployees'] != null) {
+      final seData = map['serviceEmployees'] as Map<String, dynamic>;
+      serviceEmployees = seData.map((serviceName, empMap) {
+        final emps = (empMap as Map<String, dynamic>).entries.map((entry) {
+          final data = entry.value as Map<String, dynamic>;
+          return EmployeeTime(
+            name: entry.key,
+            timeOn: (data['timeOn'] as Timestamp).toDate(),
+            timeOff: (data['timeOff'] as Timestamp).toDate(),
+            duration: data['duration'] as int,
+          );
+        }).toList();
+        return MapEntry(serviceName, emps);
+      });
+    }
+
+    // Parse per-service notes
+    Map<String, String>? serviceNotes;
+    if (map['serviceNotes'] != null) {
+      serviceNotes = Map<String, String>.from(
+        map['serviceNotes'] as Map<String, dynamic>,
+      );
+    }
+
+    // Parse per-service materials
+    Map<String, List<MaterialList>>? serviceMaterials;
+    if (map['serviceMaterials'] != null) {
+      final smData = map['serviceMaterials'] as Map<String, dynamic>;
+      serviceMaterials = smData.map((key, value) {
+        final matList = (value as List<dynamic>)
+            .map((m) => MaterialList.fromMap(m as Map<String, dynamic>))
+            .toList();
+        return MapEntry(key, matList);
+      });
+    }
+
+    // Parse per-service disposal
+    Map<String, Disposal>? serviceDisposal;
+    if (map['serviceDisposal'] != null) {
+      final sdData = map['serviceDisposal'] as Map<String, dynamic>;
+      serviceDisposal = sdData.map((key, value) =>
+          MapEntry(key, Disposal.fromMap(value as Map<String, dynamic>)));
+    }
+
     return ReportPhase(
       isRegularMaintenance: map['isRegularMaintenance'] ?? true,
       employees: employees,
       totalDuration: map['totalCombinedDuration'] ?? 0,
       services: services,
+      serviceEmployees: serviceEmployees,
+      serviceNotes: serviceNotes,
+      serviceMaterials: serviceMaterials,
+      serviceDisposal: serviceDisposal,
     );
   }
 
@@ -49,12 +107,37 @@ class ReportPhase {
         'duration': emp.duration,
       };
     }
-    return {
+    final map = <String, dynamic>{
       'isRegularMaintenance': isRegularMaintenance,
       'employeeTimes': employeeTimesMap,
       'totalCombinedDuration': totalDuration,
       'services': services,
     };
+    if (serviceEmployees != null) {
+      map['serviceEmployees'] = serviceEmployees!.map((service, emps) {
+        final empMap = <String, dynamic>{};
+        for (var emp in emps) {
+          empMap[emp.name] = {
+            'timeOn': Timestamp.fromDate(emp.timeOn),
+            'timeOff': Timestamp.fromDate(emp.timeOff),
+            'duration': emp.duration,
+          };
+        }
+        return MapEntry(service, empMap);
+      });
+    }
+    if (serviceNotes != null && serviceNotes!.isNotEmpty) {
+      map['serviceNotes'] = serviceNotes;
+    }
+    if (serviceMaterials != null && serviceMaterials!.isNotEmpty) {
+      map['serviceMaterials'] = serviceMaterials!.map((key, matList) =>
+          MapEntry(key, matList.map((m) => m.toMap()).toList()));
+    }
+    if (serviceDisposal != null && serviceDisposal!.isNotEmpty) {
+      map['serviceDisposal'] = serviceDisposal!
+          .map((key, d) => MapEntry(key, d.toMap()));
+    }
+    return map;
   }
 
   ReportPhase copyWith({
@@ -62,12 +145,20 @@ class ReportPhase {
     List<EmployeeTime>? employees,
     int? totalDuration,
     Map<String, List<String>>? services,
+    Map<String, List<EmployeeTime>>? serviceEmployees,
+    Map<String, String>? serviceNotes,
+    Map<String, List<MaterialList>>? serviceMaterials,
+    Map<String, Disposal>? serviceDisposal,
   }) {
     return ReportPhase(
       isRegularMaintenance: isRegularMaintenance ?? this.isRegularMaintenance,
       employees: employees ?? this.employees,
       totalDuration: totalDuration ?? this.totalDuration,
       services: services ?? this.services,
+      serviceEmployees: serviceEmployees ?? this.serviceEmployees,
+      serviceNotes: serviceNotes ?? this.serviceNotes,
+      serviceMaterials: serviceMaterials ?? this.serviceMaterials,
+      serviceDisposal: serviceDisposal ?? this.serviceDisposal,
     );
   }
 }

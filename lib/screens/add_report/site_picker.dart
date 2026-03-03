@@ -150,9 +150,39 @@ class _SitePickerDialogState extends State<_SitePickerDialog> {
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Select a Site',
-              style: GoogleFonts.montserrat(
-                  fontSize: 16, fontWeight: FontWeight.w600)),
+          Row(
+            children: [
+              Text('Select a Site',
+                  style: GoogleFonts.montserrat(
+                      fontSize: 16, fontWeight: FontWeight.w600)),
+              Spacer(),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showAddSiteSheet();
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Color.fromARGB(255, 59, 82, 73),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add, size: 14, color: Colors.white),
+                      SizedBox(width: 4),
+                      Text('New Site',
+                          style: GoogleFonts.montserrat(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
           SizedBox(height: 8),
           TextField(
             controller: _searchController,

@@ -209,6 +209,177 @@ class _ReportPreviewState extends ConsumerState<ReportPreview> {
     );
   }
 
+  Map<String, List<EmployeeTime>>? _phaseWithServiceEmployees(SiteReport report) {
+    if (report.additionalPhase?.serviceEmployees != null) {
+      return report.additionalPhase!.serviceEmployees;
+    }
+    if (report.regularPhase?.serviceEmployees != null) {
+      return report.regularPhase!.serviceEmployees;
+    }
+    return null;
+  }
+
+  Widget _buildPerServiceEmployeesContent(
+      Map<String, List<EmployeeTime>> serviceEmployees,
+      Color accentColor,
+      {ReportPhase? phase}) {
+    final vancouver = tz.getLocation('America/Vancouver');
+    int grandTotal = 0;
+    for (var emps in serviceEmployees.values) {
+      for (var e in emps) {
+        grandTotal += e.duration;
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...serviceEmployees.entries.map((entry) {
+          int svcDuration = 0;
+          for (var e in entry.value) {
+            svcDuration += e.duration;
+          }
+          final svcNotes = phase?.serviceNotes?[entry.key];
+          final svcMats = phase?.serviceMaterials?[entry.key];
+          final svcDisp = phase?.serviceDisposal?[entry.key];
+
+          return Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withAlpha(25),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.amber.withAlpha(80)),
+                  ),
+                  child: Text(
+                    entry.key.toUpperCase(),
+                    style: GoogleFonts.montserrat(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.amber[900],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 4),
+                Table(
+                  border: TableBorder.all(color: Colors.grey.shade300),
+                  children: [
+                    TableRow(
+                      decoration: BoxDecoration(color: accentColor),
+                      children: [
+                        _tableHeader('Name'),
+                        _tableHeader('On'),
+                        _tableHeader('Off'),
+                        _tableHeader('Hours'),
+                      ],
+                    ),
+                    ...entry.value.map((emp) {
+                      return TableRow(
+                        children: [
+                          _tableCell(emp.name),
+                          _tableCell(DateFormat('h:mm a').format(
+                              tz.TZDateTime.from(emp.timeOn, vancouver))),
+                          _tableCell(DateFormat('h:mm a').format(
+                              tz.TZDateTime.from(emp.timeOff, vancouver))),
+                          _tableCell(
+                              '${(emp.duration / 60).toStringAsFixed(1)}'),
+                        ],
+                      );
+                    }),
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Text(
+                    '${(svcDuration / 60).toStringAsFixed(1)} hrs',
+                    style: GoogleFonts.montserrat(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[600]),
+                  ),
+                ),
+                // Per-service notes
+                if (svcNotes != null && svcNotes.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(top: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.notes, size: 14, color: Colors.grey[500]),
+                        SizedBox(width: 4),
+                        Expanded(
+                          child: Text(svcNotes,
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 12, color: Colors.grey[700])),
+                        ),
+                      ],
+                    ),
+                  ),
+                // Per-service materials
+                if (svcMats != null && svcMats.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(top: 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: svcMats
+                          .map((m) => Padding(
+                                padding: EdgeInsets.only(bottom: 2),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.inventory_2_outlined,
+                                        size: 14, color: Colors.grey[500]),
+                                    SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        '${m.description} (${m.vendor}) — \$${m.cost}',
+                                        style: GoogleFonts.montserrat(
+                                            fontSize: 12,
+                                            color: Colors.grey[700]),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                // Per-service disposal
+                if (svcDisp != null && svcDisp.hasDisposal)
+                  Padding(
+                    padding: EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.local_shipping_outlined,
+                            size: 14, color: Colors.grey[500]),
+                        SizedBox(width: 4),
+                        Text(
+                          'Disposal: ${svcDisp.location} — \$${svcDisp.cost}',
+                          style: GoogleFonts.montserrat(
+                              fontSize: 12, color: Colors.grey[700]),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }),
+        Padding(
+          padding: EdgeInsets.only(top: 4),
+          child: Text(
+            'Total: ${(grandTotal / 60).toStringAsFixed(1)} hrs',
+            style: GoogleFonts.montserrat(
+                fontSize: 12, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildServicesContent(
       Map<String, List<String>> services, Color accentColor) {
     if (services.isEmpty ||
@@ -425,15 +596,27 @@ class _ReportPreviewState extends ConsumerState<ReportPreview> {
                       ),
                     ),
                   ] else ...[
-                    _sectionCard(
-                      title: 'Team & Time',
-                      icon: Icons.people_outline,
-                      child: _buildEmployeesTable(
-                        report.employees,
-                        report.totalCombinedDuration,
-                        accentColor,
+                    // Check for per-service employee times (Additional Services reports)
+                    if (_phaseWithServiceEmployees(report) != null)
+                      _sectionCard(
+                        title: 'Team & Time (by Service)',
+                        icon: Icons.people_outline,
+                        child: _buildPerServiceEmployeesContent(
+                          _phaseWithServiceEmployees(report)!,
+                          accentColor,
+                          phase: report.additionalPhase ?? report.regularPhase,
+                        ),
+                      )
+                    else
+                      _sectionCard(
+                        title: 'Team & Time',
+                        icon: Icons.people_outline,
+                        child: _buildEmployeesTable(
+                          report.employees,
+                          report.totalCombinedDuration,
+                          accentColor,
+                        ),
                       ),
-                    ),
                     _sectionCard(
                       title: 'Services Provided',
                       icon: Icons.checklist,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ServiceCategory extends StatelessWidget {
+class ServiceCategory extends StatefulWidget {
   final String title;
   final IconData icon;
   final Color accentColor;
@@ -12,6 +12,7 @@ class ServiceCategory extends StatelessWidget {
   final ValueChanged<List<String>> onMainChanged;
   final ValueChanged<List<String>> onExtrasChanged;
   final bool showOther;
+  final bool collapsibleExtras;
 
   const ServiceCategory({
     super.key,
@@ -25,43 +26,84 @@ class ServiceCategory extends StatelessWidget {
     required this.onMainChanged,
     required this.onExtrasChanged,
     this.showOther = true,
+    this.collapsibleExtras = false,
   });
 
   @override
-  Widget build(BuildContext context) {
-    // Collect "other" items = selected extras that aren't in the predefined list
-    final otherItems =
-        selectedExtras.where((s) => !extraServices.contains(s)).toList();
+  State<ServiceCategory> createState() => _ServiceCategoryState();
+}
 
-    return Padding(
-      padding: EdgeInsets.only(top: 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // --- Category header (colored & bold) ---
-          Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Row(
-              children: [
-                Icon(icon, size: 16, color: accentColor),
-                SizedBox(width: 5),
-                Text(
-                  title,
-                  style: GoogleFonts.montserrat(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: accentColor,
-                  ),
+class _ServiceCategoryState extends State<ServiceCategory> {
+  bool _extrasExpanded = false;
+
+  @override
+  void didUpdateWidget(ServiceCategory oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Auto-expand when an extra gets selected
+    if (!_extrasExpanded && widget.selectedExtras.isNotEmpty) {
+      _extrasExpanded = true;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final otherItems = widget.selectedExtras
+        .where((s) => !widget.extraServices.contains(s))
+        .toList();
+    final hasExtras = widget.extraServices.isNotEmpty || widget.showOther;
+    final extrasCount = widget.selectedExtras.length;
+    final showExtrasContent =
+        !widget.collapsibleExtras || _extrasExpanded;
+
+    return Container(
+      margin: EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            // Colored left accent bar
+            Container(
+              width: 4,
+              decoration: BoxDecoration(
+                color: widget.accentColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  bottomLeft: Radius.circular(10),
                 ),
-              ],
+              ),
             ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(10, 8, 10, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+          // --- Category header (colored & bold) ---
+          Row(
+            children: [
+              Icon(widget.icon, size: 18, color: widget.accentColor),
+              SizedBox(width: 6),
+              Text(
+                widget.title,
+                style: GoogleFonts.montserrat(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: widget.accentColor,
+                ),
+              ),
+            ],
           ),
+          SizedBox(height: 6),
           // --- Main service chips ---
           Wrap(
-            spacing: 4,
-            runSpacing: 0,
-            children: mainServices.map((service) {
-              final isSelected = selectedMain.contains(service);
+            spacing: 6,
+            runSpacing: 2,
+            children: widget.mainServices.map((service) {
+              final isSelected = widget.selectedMain.contains(service);
               return _ServiceChip(
                 label: service,
                 isSelected: isSelected,
@@ -69,35 +111,60 @@ class ServiceCategory extends StatelessWidget {
                 selectedBorder: Colors.green[400]!,
                 selectedText: Colors.green[900]!,
                 onTap: () {
-                  final updated = List<String>.from(selectedMain);
-                  isSelected ? updated.remove(service) : updated.add(service);
-                  onMainChanged(updated);
+                  final updated = List<String>.from(widget.selectedMain);
+                  isSelected
+                      ? updated.remove(service)
+                      : updated.add(service);
+                  widget.onMainChanged(updated);
                 },
               );
             }).toList(),
           ),
-          // --- Extras sub-label ---
-          if (extraServices.isNotEmpty || showOther)
-            Padding(
-              padding: EdgeInsets.only(top: 3, bottom: 2),
-              child: Text(
-                'EXTRAS',
-                style: GoogleFonts.montserrat(
-                  fontSize: 8,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.amber[700],
-                  letterSpacing: 0.6,
+          // --- Extras label (tappable if collapsible) ---
+          if (hasExtras)
+            GestureDetector(
+              onTap: widget.collapsibleExtras
+                  ? () => setState(() => _extrasExpanded = !_extrasExpanded)
+                  : null,
+              child: Padding(
+                padding: EdgeInsets.only(top: 6, bottom: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      extrasCount > 0 && !showExtrasContent
+                          ? 'EXTRAS ($extrasCount)'
+                          : 'EXTRAS',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.amber[700],
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                    if (widget.collapsibleExtras) ...[
+                      SizedBox(width: 3),
+                      Icon(
+                        _extrasExpanded
+                            ? Icons.expand_less
+                            : Icons.expand_more,
+                        size: 14,
+                        color: Colors.amber[700],
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ),
-          // --- Extras chips ---
-          if (extraServices.isNotEmpty || showOther)
+          // --- Extras chips (collapsible) ---
+          if (hasExtras && showExtrasContent)
             Wrap(
-              spacing: 4,
-              runSpacing: 0,
+              spacing: 6,
+              runSpacing: 2,
               children: [
-                ...extraServices.map((service) {
-                  final isSelected = selectedExtras.contains(service);
+                ...widget.extraServices.map((service) {
+                  final isSelected =
+                      widget.selectedExtras.contains(service);
                   return _ServiceChip(
                     label: service,
                     isSelected: isSelected,
@@ -105,11 +172,12 @@ class ServiceCategory extends StatelessWidget {
                     selectedBorder: Colors.amber[400]!,
                     selectedText: Colors.amber[900]!,
                     onTap: () {
-                      final updated = List<String>.from(selectedExtras);
+                      final updated =
+                          List<String>.from(widget.selectedExtras);
                       isSelected
                           ? updated.remove(service)
                           : updated.add(service);
-                      onExtrasChanged(updated);
+                      widget.onExtrasChanged(updated);
                     },
                   );
                 }),
@@ -122,26 +190,33 @@ class ServiceCategory extends StatelessWidget {
                     selectedBorder: Colors.amber[400]!,
                     selectedText: Colors.amber[900]!,
                     onTap: () {
-                      final updated = List<String>.from(selectedExtras);
+                      final updated =
+                          List<String>.from(widget.selectedExtras);
                       updated.remove(item);
-                      onExtrasChanged(updated);
+                      widget.onExtrasChanged(updated);
                     },
                   );
                 }),
                 // "Other" button
-                if (showOther)
+                if (widget.showOther)
                   _OtherChip(
                     onAdd: (value) {
-                      final updated = List<String>.from(selectedExtras);
+                      final updated =
+                          List<String>.from(widget.selectedExtras);
                       if (!updated.contains(value)) {
                         updated.add(value);
-                        onExtrasChanged(updated);
+                        widget.onExtrasChanged(updated);
                       }
                     },
                   ),
               ],
             ),
-        ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -170,20 +245,20 @@ class _ServiceChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.only(bottom: 4),
-        padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+        margin: EdgeInsets.only(bottom: 6),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? selectedColor : Colors.grey[100],
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? selectedColor : Colors.grey[50],
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? selectedBorder : Colors.grey[300]!,
-            width: 0.5,
+            width: isSelected ? 1.0 : 0.5,
           ),
         ),
         child: Text(
           label,
           style: GoogleFonts.montserrat(
-            fontSize: 10,
+            fontSize: 12,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
             color: isSelected ? selectedText : Colors.grey[700],
           ),
@@ -204,11 +279,11 @@ class _OtherChip extends StatelessWidget {
     return GestureDetector(
       onTap: () => _showOtherDialog(context),
       child: Container(
-        margin: EdgeInsets.only(bottom: 4),
-        padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+        margin: EdgeInsets.only(bottom: 6),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: Colors.amber[300]!,
             width: 1,
@@ -218,12 +293,12 @@ class _OtherChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.add, size: 10, color: Colors.amber[700]),
-            SizedBox(width: 2),
+            Icon(Icons.add, size: 12, color: Colors.amber[700]),
+            SizedBox(width: 3),
             Text(
               'other',
               style: GoogleFonts.montserrat(
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: Colors.amber[700],
               ),
@@ -270,7 +345,8 @@ class _OtherChip extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Cancel', style: GoogleFonts.montserrat(fontSize: 12)),
+            child:
+                Text('Cancel', style: GoogleFonts.montserrat(fontSize: 12)),
           ),
           TextButton(
             onPressed: () {

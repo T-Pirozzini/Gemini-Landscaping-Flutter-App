@@ -9,6 +9,7 @@ import 'package:gemini_landscaping_app/models/site_report.dart';
 import 'package:gemini_landscaping_app/services/firestore_service.dart';
 import 'package:gemini_landscaping_app/screens/add_report/date_picker.dart';
 import 'package:gemini_landscaping_app/screens/add_report/employee_times.dart';
+import 'package:gemini_landscaping_app/screens/add_report/material.dart';
 import 'package:gemini_landscaping_app/screens/add_report/notes_section.dart';
 import 'package:gemini_landscaping_app/screens/add_report/report_details_page.dart';
 import 'package:gemini_landscaping_app/screens/add_report/service_list.dart';
@@ -63,11 +64,18 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
 
   // Quick note tags
   List<String> _selectedNoteTags = [];
+  bool _notesExpanded = false;
+  bool _hasDetailedNotes = false;
+  final _notesController = TextEditingController();
 
-  // Page 2 checkboxes
+  // Inline materials
   bool _hasMaterials = false;
+  List<Map<String, dynamic>> _materials = [];
+
+  // Inline disposal
   bool _hasDisposal = false;
-  bool _hasNotes = false;
+  final _disposalLocationController = TextEditingController();
+  final _disposalCostController = TextEditingController();
 
   // Draft tracking
   String? _draftId;
@@ -181,7 +189,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
       });
     }
 
-    if (draft.description.isNotEmpty) _hasNotes = true;
+    if (draft.description.isNotEmpty) _hasDetailedNotes = true;
     if (draft.materials.isNotEmpty) _hasMaterials = true;
     if (draft.disposal?.hasDisposal == true) _hasDisposal = true;
   }
@@ -342,7 +350,9 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     return endDT.difference(startDT);
   }
 
-  ReportPhase? _buildPhase() {
+  static const _extrasKeys = {'Lawn Extras', 'Garden Extras', 'Common Extras'};
+
+  ReportPhase? _buildPhase({bool excludeExtras = false}) {
     final selectedDate = DateFormat('MMMM d, yyyy').parse(dateController.text);
     int totalDuration = 0;
 
@@ -369,7 +379,9 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     if (employeeTimes.isEmpty) return null;
 
     final filteredServices = Map<String, List<String>>.fromEntries(
-        _services.entries.where((e) => e.value.isNotEmpty));
+        _services.entries.where((e) =>
+            e.value.isNotEmpty &&
+            (!excludeExtras || !_extrasKeys.contains(e.key))));
 
     return ReportPhase(
       isRegularMaintenance: _isRegularMaintenance,
@@ -410,29 +422,35 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     );
   }
 
-  // --- Submit ---
-  Future<void> _submitReport({
-    List<Map<String, String>> materials = const [],
-    bool hasDisposal = false,
-    String disposalLocation = '',
-    String disposalCost = '',
-    String notesText = '',
-  }) async {
-    final phase = _buildPhase();
-
-    final materialsList = materials
+  // --- Collect inline page 1 data ---
+  List<MaterialList> _collectMaterials() {
+    if (!_hasMaterials) return [];
+    return _materials
         .map((m) => MaterialList(
-              vendor: m['vendor'] ?? '',
-              description: m['description'] ?? '',
-              cost: m['cost'] ?? '',
+              vendor: (m['vendorController'] as TextEditingController).text,
+              description:
+                  (m['materialController'] as TextEditingController).text,
+              cost: (m['costController'] as TextEditingController).text,
             ))
         .toList();
+  }
 
-    final disposal = Disposal(
-      hasDisposal: hasDisposal,
-      location: disposalLocation,
-      cost: disposalCost,
+  Disposal _collectDisposal() {
+    return Disposal(
+      hasDisposal: _hasDisposal,
+      location: _disposalLocationController.text,
+      cost: _disposalCostController.text,
     );
+  }
+
+  String _collectNotesText() {
+    return _hasDetailedNotes ? _notesController.text : '';
+  }
+
+  // --- Submit single maintenance report ---
+  Future<void> _submitSingleReport() async {
+    // Build phase with only main services (strip extras)
+    final phase = _buildPhase();
 
     final report = SiteReport.fromPhases(
       siteName: dropdownValue ?? '',
@@ -440,10 +458,10 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
       address: address,
       submittedBy: currentUser.email ?? '',
       timestamp: DateTime.now(),
-      materials: materialsList,
-      disposal: disposal,
+      materials: _collectMaterials(),
+      disposal: _collectDisposal(),
       noteTags: _selectedNoteTags,
-      description: notesText,
+      description: _collectNotesText(),
       status: 'submitted',
       regularPhase: _isRegularMaintenance ? phase : null,
       additionalPhase: !_isRegularMaintenance ? phase : null,
@@ -456,6 +474,243 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
       } else {
         await collection.add(report.toMap());
       }
+      // Prevent dispose() from re-saving as draft
+      _draftTimer?.cancel();
+      _draftTimer = null;
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      _showError('Failed to submit report, please try again.');
+    }
+  }
+
+  // --- Submit both reports (maintenance + additional services) ---
+  Future<void> _submitBothReports(Map<String, dynamic> page2Data) async {
+    final selectedDate = DateFormat('MMMM d, yyyy').parse(dateController.text);
+
+    // 1. Build Maintenance report (main services only, no extras)
+    final mainPhase = _buildPhase(excludeExtras: true);
+    final mainReport = SiteReport.fromPhases(
+      siteName: dropdownValue ?? '',
+      date: dateController.text,
+      address: address,
+      submittedBy: currentUser.email ?? '',
+      timestamp: DateTime.now(),
+      materials: _collectMaterials(),
+      disposal: _collectDisposal(),
+      noteTags: _selectedNoteTags,
+      description: _collectNotesText(),
+      status: 'submitted',
+      regularPhase: mainPhase,
+    );
+
+    // 2. Build Additional Services report from page 2 data
+    final serviceEmpsRaw = page2Data['serviceEmployees']
+        as Map<String, List<Map<String, dynamic>>>;
+
+    // Build per-service EmployeeTime map
+    final serviceEmployees = <String, List<EmployeeTime>>{};
+    final allAdditionalEmps = <EmployeeTime>[];
+    int additionalDuration = 0;
+
+    for (var entry in serviceEmpsRaw.entries) {
+      final emps = entry.value.map((e) {
+        final timeOn = e['timeOn'] as TimeOfDay;
+        final timeOff = e['timeOff'] as TimeOfDay;
+        final duration = _calculateDuration(timeOn, timeOff);
+        additionalDuration += duration.inMinutes;
+        return EmployeeTime(
+          name: e['name'] as String,
+          timeOn: DateTime(selectedDate.year, selectedDate.month,
+              selectedDate.day, timeOn.hour, timeOn.minute),
+          timeOff: DateTime(selectedDate.year, selectedDate.month,
+              selectedDate.day, timeOff.hour, timeOff.minute),
+          duration: duration.inMinutes,
+        );
+      }).toList();
+      serviceEmployees[entry.key] = emps;
+      allAdditionalEmps.addAll(emps);
+    }
+
+    // Build extras services map
+    final extrasServices = Map<String, List<String>>.from(_selectedExtrasMap);
+
+    // Per-service notes from page 2
+    final serviceNotesRaw =
+        page2Data['serviceNotes'] as Map<String, String>? ?? {};
+
+    // Per-service materials from page 2
+    Map<String, List<MaterialList>>? serviceMaterials;
+    final smRaw = page2Data['serviceMaterials']
+        as Map<String, List<Map<String, dynamic>>>?;
+    if (smRaw != null && smRaw.isNotEmpty) {
+      serviceMaterials = smRaw.map((key, matList) => MapEntry(
+            key,
+            matList
+                .map((m) => MaterialList(
+                      vendor: m['vendor'] ?? '',
+                      description: m['description'] ?? '',
+                      cost: m['cost'] ?? '',
+                    ))
+                .toList(),
+          ));
+    }
+
+    // Per-service disposal from page 2
+    Map<String, Disposal>? serviceDisposal;
+    final sdRaw =
+        page2Data['serviceDisposal'] as Map<String, Map<String, dynamic>>?;
+    if (sdRaw != null && sdRaw.isNotEmpty) {
+      serviceDisposal = sdRaw.map((key, d) => MapEntry(
+            key,
+            Disposal(
+              hasDisposal: d['hasDisposal'] ?? true,
+              location: d['location'] ?? '',
+              cost: d['cost'] ?? '',
+            ),
+          ));
+    }
+
+    final additionalPhase = ReportPhase(
+      isRegularMaintenance: false,
+      employees: allAdditionalEmps,
+      totalDuration: additionalDuration,
+      services: extrasServices,
+      serviceEmployees: serviceEmployees,
+      serviceNotes: serviceNotesRaw.isNotEmpty ? serviceNotesRaw : null,
+      serviceMaterials: serviceMaterials,
+      serviceDisposal: serviceDisposal,
+    );
+
+    final additionalReport = SiteReport.fromPhases(
+      siteName: dropdownValue ?? '',
+      date: dateController.text,
+      address: address,
+      submittedBy: currentUser.email ?? '',
+      timestamp: DateTime.now(),
+      materials: [],
+      status: 'submitted',
+      additionalPhase: additionalPhase,
+    );
+
+    try {
+      final collection = FirebaseFirestore.instance.collection('SiteReports');
+      // Submit maintenance report
+      if (_draftId != null && _draftId!.isNotEmpty) {
+        await collection.doc(_draftId).set(mainReport.toMap());
+      } else {
+        await collection.add(mainReport.toMap());
+      }
+      // Submit additional services report (always new doc)
+      await collection.add(additionalReport.toMap());
+      // Prevent dispose() from re-saving as draft
+      _draftTimer?.cancel();
+      _draftTimer = null;
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      _showError('Failed to submit reports, please try again.');
+    }
+  }
+
+  // --- Submit extras-only report (no maintenance report) ---
+  Future<void> _submitExtrasOnly(Map<String, dynamic> page2Data) async {
+    final selectedDate = DateFormat('MMMM d, yyyy').parse(dateController.text);
+
+    // Build additional phase from page 2 data (same parsing as _submitBothReports)
+    final serviceEmpsRaw = page2Data['serviceEmployees']
+        as Map<String, List<Map<String, dynamic>>>;
+
+    final serviceEmployees = <String, List<EmployeeTime>>{};
+    final allAdditionalEmps = <EmployeeTime>[];
+    int additionalDuration = 0;
+
+    for (var entry in serviceEmpsRaw.entries) {
+      final emps = entry.value.map((e) {
+        final timeOn = e['timeOn'] as TimeOfDay;
+        final timeOff = e['timeOff'] as TimeOfDay;
+        final duration = _calculateDuration(timeOn, timeOff);
+        additionalDuration += duration.inMinutes;
+        return EmployeeTime(
+          name: e['name'] as String,
+          timeOn: DateTime(selectedDate.year, selectedDate.month,
+              selectedDate.day, timeOn.hour, timeOn.minute),
+          timeOff: DateTime(selectedDate.year, selectedDate.month,
+              selectedDate.day, timeOff.hour, timeOff.minute),
+          duration: duration.inMinutes,
+        );
+      }).toList();
+      serviceEmployees[entry.key] = emps;
+      allAdditionalEmps.addAll(emps);
+    }
+
+    final extrasServices = Map<String, List<String>>.from(_selectedExtrasMap);
+
+    final serviceNotesRaw =
+        page2Data['serviceNotes'] as Map<String, String>? ?? {};
+
+    Map<String, List<MaterialList>>? serviceMaterials;
+    final smRaw = page2Data['serviceMaterials']
+        as Map<String, List<Map<String, dynamic>>>?;
+    if (smRaw != null && smRaw.isNotEmpty) {
+      serviceMaterials = smRaw.map((key, matList) => MapEntry(
+            key,
+            matList
+                .map((m) => MaterialList(
+                      vendor: m['vendor'] ?? '',
+                      description: m['description'] ?? '',
+                      cost: m['cost'] ?? '',
+                    ))
+                .toList(),
+          ));
+    }
+
+    Map<String, Disposal>? serviceDisposal;
+    final sdRaw =
+        page2Data['serviceDisposal'] as Map<String, Map<String, dynamic>>?;
+    if (sdRaw != null && sdRaw.isNotEmpty) {
+      serviceDisposal = sdRaw.map((key, d) => MapEntry(
+            key,
+            Disposal(
+              hasDisposal: d['hasDisposal'] ?? true,
+              location: d['location'] ?? '',
+              cost: d['cost'] ?? '',
+            ),
+          ));
+    }
+
+    final additionalPhase = ReportPhase(
+      isRegularMaintenance: false,
+      employees: allAdditionalEmps,
+      totalDuration: additionalDuration,
+      services: extrasServices,
+      serviceEmployees: serviceEmployees,
+      serviceNotes: serviceNotesRaw.isNotEmpty ? serviceNotesRaw : null,
+      serviceMaterials: serviceMaterials,
+      serviceDisposal: serviceDisposal,
+    );
+
+    final report = SiteReport.fromPhases(
+      siteName: dropdownValue ?? '',
+      date: dateController.text,
+      address: address,
+      submittedBy: currentUser.email ?? '',
+      timestamp: DateTime.now(),
+      materials: _collectMaterials(),
+      disposal: _collectDisposal(),
+      noteTags: _selectedNoteTags,
+      description: _collectNotesText(),
+      status: 'submitted',
+      additionalPhase: additionalPhase,
+    );
+
+    try {
+      final collection = FirebaseFirestore.instance.collection('SiteReports');
+      if (_draftId != null && _draftId!.isNotEmpty) {
+        await collection.doc(_draftId).set(report.toMap());
+      } else {
+        await collection.add(report.toMap());
+      }
+      _draftTimer?.cancel();
+      _draftTimer = null;
       if (mounted) Navigator.pop(context);
     } catch (e) {
       _showError('Failed to submit report, please try again.');
@@ -466,39 +721,65 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   void _handleAction() {
     if (!_validateForm()) return;
 
-    final needsPage2 = _hasMaterials || _hasDisposal || _hasNotes;
-    if (needsPage2) {
-      _navigateToDetails();
+    if (!_isRegularMaintenance) {
+      // Additional services mode — all services go to page 2
+      if (_hasAnyServicesSelected) {
+        _navigateToAdditionalServices();
+      } else {
+        _showError('Please select at least one service.');
+      }
+    } else if (_hasExtrasSelected) {
+      // Regular maintenance + extras → page 2 for extras
+      _navigateToAdditionalServices();
     } else {
-      _submitReport();
+      // Regular maintenance only → submit single report
+      _submitSingleReport();
     }
   }
 
-  void _navigateToDetails() async {
+  void _navigateToAdditionalServices() async {
+    // Gather employee names from page 1
+    final employeeNames = _employees
+        .where((e) =>
+            e['selectedName'] != null &&
+            (e['selectedName'] as String).isNotEmpty)
+        .map((e) => e['selectedName'] as String)
+        .toList();
+
+    // Find the earliest start time from page 1 employees
+    TimeOfDay siteStartTime = TimeOfDay(hour: 23, minute: 59);
+    for (var emp in _employees) {
+      if (emp['selectedName'] != null) {
+        final t = emp['timeOn'] as TimeOfDay;
+        if (t.hour * 60 + t.minute <
+            siteStartTime.hour * 60 + siteStartTime.minute) {
+          siteStartTime = t;
+        }
+      }
+    }
+
+    final extrasOnly = !_isRegularMaintenance;
+
     final result = await Navigator.push<Map<String, dynamic>>(
       context,
       MaterialPageRoute(
-        builder: (_) => ReportDetailsPage(
-          hasMaterials: _hasMaterials,
-          hasDisposal: _hasDisposal,
-          hasNotes: _hasNotes,
-          selectedNoteTags: _selectedNoteTags,
+        builder: (_) => AdditionalServicesPage(
+          date: dateController.text,
+          siteName: dropdownValue ?? '',
+          selectedExtras: _selectedExtrasMap,
+          employeeNames: employeeNames,
+          siteStartTime: siteStartTime,
+          extrasOnly: extrasOnly,
         ),
       ),
     );
 
     if (result != null) {
-      await _submitReport(
-        materials: List<Map<String, String>>.from(
-          (result['materials'] as List<dynamic>?)
-                  ?.map((m) => Map<String, String>.from(m)) ??
-              [],
-        ),
-        hasDisposal: result['hasDisposal'] ?? false,
-        disposalLocation: result['disposalLocation'] ?? '',
-        disposalCost: result['disposalCost'] ?? '',
-        notesText: result['notesText'] ?? '',
-      );
+      if (extrasOnly) {
+        await _submitExtrasOnly(result);
+      } else {
+        await _submitBothReports(result);
+      }
     }
   }
 
@@ -510,6 +791,14 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
       _saveDraftNow();
     }
     dateController.dispose();
+    _notesController.dispose();
+    _disposalLocationController.dispose();
+    _disposalCostController.dispose();
+    for (var m in _materials) {
+      (m['vendorController'] as TextEditingController).dispose();
+      (m['materialController'] as TextEditingController).dispose();
+      (m['costController'] as TextEditingController).dispose();
+    }
     super.dispose();
   }
 
@@ -519,18 +808,85 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     _scheduleDraftSave();
   }
 
+  // --- Extras selected check ---
+  bool get _hasExtrasSelected =>
+      _services['Lawn Extras']!.isNotEmpty ||
+      _services['Garden Extras']!.isNotEmpty ||
+      _services['Common Extras']!.isNotEmpty;
+
+  bool get _hasAnyServicesSelected => _services.values.any((v) => v.isNotEmpty);
+
+  // Show "Next" button when extras-only mode with services, or maintenance with extras
+  bool get _showNextButton =>
+      (!_isRegularMaintenance && _hasAnyServicesSelected) ||
+      (_isRegularMaintenance && _hasExtrasSelected);
+
+  Map<String, List<String>> get _selectedExtrasMap {
+    final map = <String, List<String>>{};
+    if (_isRegularMaintenance) {
+      // Only extras categories
+      for (var key in ['Lawn Extras', 'Garden Extras', 'Common Extras']) {
+        if (_services[key]!.isNotEmpty) {
+          map[key] = _services[key]!;
+        }
+      }
+    } else {
+      // All categories — everything is an "extra" in additional services mode
+      for (var entry in _services.entries) {
+        if (entry.value.isNotEmpty) {
+          map[entry.key] = entry.value;
+        }
+      }
+    }
+    return map;
+  }
+
+  // --- Inline materials ---
+  void _addMaterial() {
+    setState(() {
+      _materials.add({
+        'vendorController': TextEditingController(),
+        'materialController': TextEditingController(),
+        'costController': TextEditingController(),
+      });
+    });
+  }
+
+  void _deleteMaterial(int index) {
+    final m = _materials[index];
+    (m['vendorController'] as TextEditingController).dispose();
+    (m['materialController'] as TextEditingController).dispose();
+    (m['costController'] as TextEditingController).dispose();
+    setState(() => _materials.removeAt(index));
+  }
+
   // --- Section header ---
-  Widget _sectionHeader(String title) {
+  Widget _sectionHeader(String title, {IconData? icon}) {
     return Padding(
-      padding: EdgeInsets.only(top: 10, bottom: 4),
-      child: Text(
-        title.toUpperCase(),
-        style: GoogleFonts.montserrat(
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          color: Colors.grey[500],
-          letterSpacing: 0.8,
-        ),
+      padding: EdgeInsets.only(top: 14, bottom: 6),
+      child: Row(
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 15, color: Color.fromARGB(255, 59, 82, 73)),
+            SizedBox(width: 6),
+          ],
+          Text(
+            title.toUpperCase(),
+            style: GoogleFonts.montserrat(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: Color.fromARGB(255, 59, 82, 73),
+              letterSpacing: 0.8,
+            ),
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: Divider(
+              color: Colors.grey[300],
+              thickness: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -552,11 +908,12 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
             'rake leaves',
             'litter pick up',
           ],
-          extraServices: const ['aerate', 'fertilize', 'lime'],
+          extraServices: const ['aerate', 'lawn fertilizer', 'lime'],
           selectedMain: _services['Lawn Care']!,
           selectedExtras: _services['Lawn Extras']!,
           onMainChanged: (v) => _onServiceChanged('Lawn Care', v),
           onExtrasChanged: (v) => _onServiceChanged('Lawn Extras', v),
+          collapsibleExtras: true,
         ),
         ServiceCategory(
           title: 'Garden Maintenance',
@@ -571,7 +928,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
             'litter pick up',
           ],
           extraServices: const [
-            'fertilize',
+            'garden fertilizer',
             'bark mulch gardens',
             'bark mulch tree wells',
             'top soil gardens',
@@ -581,6 +938,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
           selectedExtras: _services['Garden Extras']!,
           onMainChanged: (v) => _onServiceChanged('Garden Maintenance', v),
           onExtrasChanged: (v) => _onServiceChanged('Garden Extras', v),
+          collapsibleExtras: true,
         ),
         ServiceCategory(
           title: 'Common Areas',
@@ -605,6 +963,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
           selectedExtras: _services['Common Extras']!,
           onMainChanged: (v) => _onServiceChanged('Common Areas', v),
           onExtrasChanged: (v) => _onServiceChanged('Common Extras', v),
+          collapsibleExtras: true,
         ),
       ],
     );
@@ -635,17 +994,17 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         GestureDetector(
           onTap: () => _addEmployee(),
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 4),
+            padding: EdgeInsets.symmetric(vertical: 6),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.add_circle_outline,
-                    size: 14, color: Colors.green[700]),
-                SizedBox(width: 4),
+                    size: 16, color: Colors.green[700]),
+                SizedBox(width: 6),
                 Text(
                   'Add employee',
                   style: GoogleFonts.montserrat(
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: Colors.green[700],
                   ),
@@ -658,30 +1017,41 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     );
   }
 
-  // --- Checkbox row ---
-  Widget _checkboxRow(
+  // --- Toggle row ---
+  Widget _toggleRow(
       String label, IconData icon, bool value, ValueChanged<bool?> onChanged) {
     return GestureDetector(
       onTap: () => onChanged(!value),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 4),
+      child: Container(
+        margin: EdgeInsets.only(top: 6),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: value ? Colors.green[50] : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: value ? Colors.green[300]! : Colors.grey[200]!,
+          ),
+        ),
         child: Row(
           children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: Checkbox(
-                value: value,
-                onChanged: onChanged,
-                activeColor: Color.fromARGB(255, 31, 182, 77),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                visualDensity: VisualDensity.compact,
+            Icon(icon,
+                size: 18, color: value ? Colors.green[700] : Colors.grey[500]),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.montserrat(
+                  fontSize: 13,
+                  fontWeight: value ? FontWeight.w600 : FontWeight.w400,
+                  color: value ? Colors.green[800] : Colors.grey[700],
+                ),
               ),
             ),
-            SizedBox(width: 8),
-            Icon(icon, size: 15, color: Colors.grey[600]),
-            SizedBox(width: 6),
-            Text(label, style: GoogleFonts.montserrat(fontSize: 11)),
+            Icon(
+              value ? Icons.check_circle : Icons.circle_outlined,
+              size: 20,
+              color: value ? Colors.green[600] : Colors.grey[300],
+            ),
           ],
         ),
       ),
@@ -690,7 +1060,6 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
 
   @override
   Widget build(BuildContext context) {
-    final needsPage2 = _hasMaterials || _hasDisposal || _hasNotes;
     final accentColor = _isRegularMaintenance
         ? Color.fromARGB(255, 31, 182, 77)
         : Color.fromARGB(255, 97, 125, 140);
@@ -698,6 +1067,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         _isRegularMaintenance ? 'Maintenance Program' : 'Additional Service';
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: accentColor,
         leading: IconButton(
@@ -718,12 +1088,12 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(8),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // === SITE & DATE ===
-                  _sectionHeader('Site & Date'),
+                  _sectionHeader('Site & Date', icon: Icons.business),
                   DatePickerComponent(dateController: dateController),
                   SizedBox(height: 6),
                   SitePickerComponent(
@@ -739,97 +1109,408 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                     },
                   ),
 
-                  // === EMPLOYEES & TIMES ===
-                  _sectionHeader('Employees & Times'),
-                  _buildEmployeesSection(),
-
-                  // === SERVICES ===
-                  _buildServicesSection(),
-
-                  // === QUICK NOTE TAGS ===
-                  _sectionHeader('Quick Notes'),
-                  Wrap(
-                    spacing: 4,
-                    runSpacing: 0,
-                    children: NotesSection.defaultTags.map((tag) {
-                      final isSelected = _selectedNoteTags.contains(tag);
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            isSelected
-                                ? _selectedNoteTags.remove(tag)
-                                : _selectedNoteTags.add(tag);
-                            if (_selectedNoteTags.isNotEmpty) {
-                              _hasNotes = true;
-                            }
-                          });
-                          _scheduleDraftSave();
-                        },
-                        child: Container(
-                          margin: EdgeInsets.only(bottom: 4),
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Colors.green[100]
-                                : Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isSelected
-                                  ? Colors.green[400]!
-                                  : Colors.grey[300]!,
-                              width: 0.5,
-                            ),
-                          ),
-                          child: Text(
-                            tag,
-                            style: GoogleFonts.montserrat(
-                              fontSize: 10,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: isSelected
-                                  ? Colors.green[900]
-                                  : Colors.grey[700],
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(height: 6),
-
-                  // === PAGE 2 CHECKBOXES ===
+                  // === REPORT TYPE TOGGLE ===
+                  SizedBox(height: 10),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      border: Border.all(color: Colors.grey[200]!),
-                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey[300]!),
                     ),
-                    child: Column(
+                    padding: EdgeInsets.all(3),
+                    child: Row(
                       children: [
-                        _checkboxRow(
-                          'Materials purchased',
-                          Icons.inventory_2_outlined,
-                          _hasMaterials,
-                          (v) => setState(() => _hasMaterials = v ?? false),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              if (!_isRegularMaintenance) {
+                                setState(() => _isRegularMaintenance = true);
+                              }
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: _isRegularMaintenance
+                                    ? Color.fromARGB(255, 31, 182, 77)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Maintenance',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 13,
+                                  fontWeight: _isRegularMaintenance
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: _isRegularMaintenance
+                                      ? Colors.white
+                                      : Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                        _checkboxRow(
-                          'Disposal run',
-                          Icons.local_shipping_outlined,
-                          _hasDisposal,
-                          (v) => setState(() => _hasDisposal = v ?? false),
-                        ),
-                        _checkboxRow(
-                          'Add detailed notes',
-                          Icons.edit_note,
-                          _hasNotes,
-                          (v) => setState(() => _hasNotes = v ?? false),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              if (_isRegularMaintenance) {
+                                setState(() => _isRegularMaintenance = false);
+                              }
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: !_isRegularMaintenance
+                                    ? Color.fromARGB(255, 97, 125, 140)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Additional Services',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 13,
+                                  fontWeight: !_isRegularMaintenance
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: !_isRegularMaintenance
+                                      ? Colors.white
+                                      : Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
+
+                  // === EMPLOYEES & TIMES ===
+                  _sectionHeader('Employees & Times',
+                      icon: Icons.people_outline),
+                  _buildEmployeesSection(),
+
+                  // === SERVICES ===
+                  _sectionHeader('Services', icon: Icons.checklist),
+                  _buildServicesSection(),
+
+                  // === QUICK NOTES (collapsible) ===
+                  GestureDetector(
+                    onTap: () =>
+                        setState(() => _notesExpanded = !_notesExpanded),
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 14, bottom: 6),
+                      child: Row(
+                        children: [
+                          Icon(Icons.sticky_note_2_outlined,
+                              size: 15, color: Color.fromARGB(255, 59, 82, 73)),
+                          SizedBox(width: 6),
+                          Text(
+                            'QUICK NOTES',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: Color.fromARGB(255, 59, 82, 73),
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                          if (_selectedNoteTags.isNotEmpty && !_notesExpanded)
+                            Container(
+                              margin: EdgeInsets.only(left: 6),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: Colors.green[100],
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '${_selectedNoteTags.length}',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.green[800],
+                                ),
+                              ),
+                            ),
+                          SizedBox(width: 4),
+                          Icon(
+                            _notesExpanded
+                                ? Icons.expand_less
+                                : Icons.expand_more,
+                            size: 16,
+                            color: Color.fromARGB(255, 59, 82, 73),
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Divider(
+                                color: Colors.grey[300], thickness: 0.5),
+                          ),
+                          SizedBox(width: 8),
+                          // "Add detailed notes" toggle
+                          GestureDetector(
+                            onTap: () => setState(
+                                () => _hasDetailedNotes = !_hasDetailedNotes),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _hasDetailedNotes
+                                    ? Colors.green[50]
+                                    : Colors.grey[100],
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: _hasDetailedNotes
+                                      ? Colors.green[300]!
+                                      : Colors.grey[300]!,
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    _hasDetailedNotes
+                                        ? Icons.edit_note
+                                        : Icons.edit_note,
+                                    size: 14,
+                                    color: _hasDetailedNotes
+                                        ? Colors.green[700]
+                                        : Colors.grey[500],
+                                  ),
+                                  SizedBox(width: 3),
+                                  Text(
+                                    'Add notes',
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 10,
+                                      fontWeight: _hasDetailedNotes
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                      color: _hasDetailedNotes
+                                          ? Colors.green[700]
+                                          : Colors.grey[500],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (_notesExpanded)
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 2,
+                      children: NotesSection.defaultTags.map((tag) {
+                        final isSelected = _selectedNoteTags.contains(tag);
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              isSelected
+                                  ? _selectedNoteTags.remove(tag)
+                                  : _selectedNoteTags.add(tag);
+                            });
+                            _scheduleDraftSave();
+                          },
+                          child: Container(
+                            margin: EdgeInsets.only(bottom: 6),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.green[100]
+                                  : Colors.grey[50],
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Colors.green[400]!
+                                    : Colors.grey[300]!,
+                                width: isSelected ? 1.0 : 0.5,
+                              ),
+                            ),
+                            child: Text(
+                              tag,
+                              style: GoogleFonts.montserrat(
+                                fontSize: 12,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                                color: isSelected
+                                    ? Colors.green[900]
+                                    : Colors.grey[700],
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  if (_hasDetailedNotes)
+                    Container(
+                      margin: EdgeInsets.only(top: 4),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[300]!),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      height: 80,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: TextField(
+                          controller: _notesController,
+                          maxLines: null,
+                          style: GoogleFonts.montserrat(fontSize: 12),
+                          keyboardType: TextInputType.multiline,
+                          decoration: InputDecoration(
+                            hintText: 'Any additional details...',
+                            hintStyle: GoogleFonts.montserrat(
+                                fontSize: 12, color: Colors.grey[400]),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  SizedBox(height: 4),
+
+                  // === MAINTENANCE-ONLY REMINDER ===
+                  if (_isRegularMaintenance && _hasExtrasSelected)
+                    Padding(
+                      padding: EdgeInsets.only(top: 8, bottom: 2),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline,
+                              size: 14, color: Colors.blueGrey[400]),
+                          SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Maintenance only — extras have their own on the next page',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 11,
+                                color: Colors.blueGrey[400],
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // === INLINE MATERIALS ===
+                  _toggleRow(
+                    'Materials purchased',
+                    Icons.inventory_2_outlined,
+                    _hasMaterials,
+                    (v) {
+                      setState(() {
+                        _hasMaterials = v ?? false;
+                        if (_hasMaterials && _materials.isEmpty) {
+                          _addMaterial();
+                        }
+                      });
+                    },
+                  ),
+                  if (_hasMaterials) ...[
+                    ..._materials.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final material = entry.value;
+                      return Padding(
+                        padding: EdgeInsets.only(top: 6),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: MaterialComponent(
+                                vendorController: material['vendorController'],
+                                materialController:
+                                    material['materialController'],
+                                costController: material['costController'],
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            GestureDetector(
+                              onTap: () => _deleteMaterial(index),
+                              child: Container(
+                                padding: EdgeInsets.all(6),
+                                child: Icon(Icons.remove_circle_outline,
+                                    color: Colors.red[300], size: 18),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    GestureDetector(
+                      onTap: _addMaterial,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 6),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.add_circle_outline,
+                                size: 16, color: Colors.green[700]),
+                            SizedBox(width: 6),
+                            Text('Add material',
+                                style: GoogleFonts.montserrat(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.green[700])),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  // === INLINE DISPOSAL ===
+                  _toggleRow(
+                    'Disposal run',
+                    Icons.local_shipping_outlined,
+                    _hasDisposal,
+                    (v) => setState(() => _hasDisposal = v ?? false),
+                  ),
+                  if (_hasDisposal)
+                    Padding(
+                      padding: EdgeInsets.only(top: 6),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: TextField(
+                              controller: _disposalLocationController,
+                              style: GoogleFonts.montserrat(fontSize: 12),
+                              decoration: InputDecoration(
+                                hintText: 'Location',
+                                hintStyle: GoogleFonts.montserrat(
+                                    fontSize: 12, color: Colors.grey[400]),
+                                isDense: true,
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 8),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              controller: _disposalCostController,
+                              style: GoogleFonts.montserrat(fontSize: 12),
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
+                              decoration: InputDecoration(
+                                hintText: '\$ Cost',
+                                hintStyle: GoogleFonts.montserrat(
+                                    fontSize: 12, color: Colors.grey[400]),
+                                isDense: true,
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 8),
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8)),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   SizedBox(height: 16),
                 ],
               ),
@@ -844,10 +1525,10 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                 width: double.infinity,
                 height: 44,
                 child: ElevatedButton.icon(
-                  icon: Icon(needsPage2 ? Icons.arrow_forward : Icons.send,
+                  icon: Icon(_showNextButton ? Icons.arrow_forward : Icons.send,
                       size: 16),
                   label: Text(
-                    needsPage2 ? 'Next' : 'Submit Report',
+                    _showNextButton ? 'Next' : 'Submit Report',
                     style: GoogleFonts.montserrat(
                         fontSize: 14, fontWeight: FontWeight.w600),
                   ),

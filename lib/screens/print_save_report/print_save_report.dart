@@ -199,69 +199,85 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
                 pw.Container(height: 1, color: PdfColors.grey300),
                 pw.SizedBox(height: 6),
               ] else ...[
-                pw.Text('TEAM & TIME',
-                    style: pw.TextStyle(
-                        fontSize: 11, fontWeight: pw.FontWeight.bold)),
-                pw.SizedBox(height: 4),
-                pw.Table(
-                  border: pw.TableBorder.all(color: PdfColors.grey300),
-                  children: [
-                    pw.TableRow(
-                      decoration: pw.BoxDecoration(color: accentColor),
-                      children: [
-                        _pdfTableHeader('NAME'),
-                        _pdfTableHeader('ON'),
-                        _pdfTableHeader('OFF'),
-                        _pdfTableHeader('HOURS'),
-                      ],
-                    ),
-                    ...report.employees.asMap().entries.map((entry) {
-                      final i = entry.key;
-                      final employee = entry.value;
-                      final rowColor =
-                          i % 2 == 1 ? lightAccent : PdfColors.white;
-                      return pw.TableRow(
-                        decoration: pw.BoxDecoration(color: rowColor),
+                // Check for per-service employee times
+                if (_getServiceEmployees(report) != null) ...[
+                  pw.Text('TEAM & TIME (BY SERVICE)',
+                      style: pw.TextStyle(
+                          fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                  pw.SizedBox(height: 4),
+                  ..._pdfPerServiceEmployees(
+                    _getServiceEmployees(report)!,
+                    accentColor,
+                    lightAccent,
+                    vancouver,
+                    phase: report.additionalPhase ?? report.regularPhase,
+                  ),
+                  pw.SizedBox(height: 10),
+                ] else ...[
+                  pw.Text('TEAM & TIME',
+                      style: pw.TextStyle(
+                          fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                  pw.SizedBox(height: 4),
+                  pw.Table(
+                    border: pw.TableBorder.all(color: PdfColors.grey300),
+                    children: [
+                      pw.TableRow(
+                        decoration: pw.BoxDecoration(color: accentColor),
                         children: [
-                          _pdfTableCell(employee.name),
-                          _pdfTableCell(DateFormat('h:mm a').format(
-                              tz.TZDateTime.from(employee.timeOn, vancouver))),
-                          _pdfTableCell(DateFormat('h:mm a').format(
-                              tz.TZDateTime.from(employee.timeOff, vancouver))),
-                          _pdfTableCell(
-                              '${(employee.duration / 60).toStringAsFixed(1)} hrs'),
+                          _pdfTableHeader('NAME'),
+                          _pdfTableHeader('ON'),
+                          _pdfTableHeader('OFF'),
+                          _pdfTableHeader('HOURS'),
                         ],
-                      );
-                    }).toList(),
-                    pw.TableRow(
-                      decoration: pw.BoxDecoration(color: PdfColors.grey100),
-                      children: [
-                        pw.Container(),
-                        pw.Container(),
-                        pw.Container(
-                          alignment: pw.Alignment.centerRight,
-                          padding: const pw.EdgeInsets.symmetric(
-                              horizontal: 4, vertical: 3),
-                          child: pw.Text('Total:',
-                              style: pw.TextStyle(
-                                  fontWeight: pw.FontWeight.bold,
-                                  fontSize: 10)),
-                        ),
-                        pw.Container(
-                          alignment: pw.Alignment.center,
-                          padding:
-                              const pw.EdgeInsets.symmetric(vertical: 3),
-                          child: pw.Text(
-                              '${(report.totalCombinedDuration / 60).toStringAsFixed(1)} hrs',
-                              style: pw.TextStyle(
-                                  fontWeight: pw.FontWeight.bold,
-                                  fontSize: 10)),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                pw.SizedBox(height: 10),
+                      ),
+                      ...report.employees.asMap().entries.map((entry) {
+                        final i = entry.key;
+                        final employee = entry.value;
+                        final rowColor =
+                            i % 2 == 1 ? lightAccent : PdfColors.white;
+                        return pw.TableRow(
+                          decoration: pw.BoxDecoration(color: rowColor),
+                          children: [
+                            _pdfTableCell(employee.name),
+                            _pdfTableCell(DateFormat('h:mm a').format(
+                                tz.TZDateTime.from(employee.timeOn, vancouver))),
+                            _pdfTableCell(DateFormat('h:mm a').format(
+                                tz.TZDateTime.from(employee.timeOff, vancouver))),
+                            _pdfTableCell(
+                                '${(employee.duration / 60).toStringAsFixed(1)} hrs'),
+                          ],
+                        );
+                      }).toList(),
+                      pw.TableRow(
+                        decoration: pw.BoxDecoration(color: PdfColors.grey100),
+                        children: [
+                          pw.Container(),
+                          pw.Container(),
+                          pw.Container(
+                            alignment: pw.Alignment.centerRight,
+                            padding: const pw.EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 3),
+                            child: pw.Text('Total:',
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    fontSize: 10)),
+                          ),
+                          pw.Container(
+                            alignment: pw.Alignment.center,
+                            padding:
+                                const pw.EdgeInsets.symmetric(vertical: 3),
+                            child: pw.Text(
+                                '${(report.totalCombinedDuration / 60).toStringAsFixed(1)} hrs',
+                                style: pw.TextStyle(
+                                    fontWeight: pw.FontWeight.bold,
+                                    fontSize: 10)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  pw.SizedBox(height: 10),
+                ],
                 pw.Text('SERVICES PROVIDED',
                     style: pw.TextStyle(
                         fontSize: 11, fontWeight: pw.FontWeight.bold)),
@@ -456,6 +472,138 @@ class _PrintSaveReportState extends State<PrintSaveReport> {
     );
 
     return doc.save();
+  }
+
+  Map<String, List<EmployeeTime>>? _getServiceEmployees(SiteReport report) {
+    if (report.additionalPhase?.serviceEmployees != null) {
+      return report.additionalPhase!.serviceEmployees;
+    }
+    if (report.regularPhase?.serviceEmployees != null) {
+      return report.regularPhase!.serviceEmployees;
+    }
+    return null;
+  }
+
+  List<pw.Widget> _pdfPerServiceEmployees(
+    Map<String, List<EmployeeTime>> serviceEmployees,
+    PdfColor accentColor,
+    PdfColor lightAccent,
+    tz.Location vancouver, {
+    ReportPhase? phase,
+  }) {
+    int grandTotal = 0;
+    for (var emps in serviceEmployees.values) {
+      for (var e in emps) {
+        grandTotal += e.duration;
+      }
+    }
+
+    return [
+      ...serviceEmployees.entries.map((entry) {
+        int svcDuration = 0;
+        for (var e in entry.value) {
+          svcDuration += e.duration;
+        }
+        final svcNotes = phase?.serviceNotes?[entry.key];
+        final svcMats = phase?.serviceMaterials?[entry.key];
+        final svcDisp = phase?.serviceDisposal?[entry.key];
+
+        return pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Container(
+              padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 6, vertical: 2),
+              decoration: pw.BoxDecoration(
+                color: PdfColor(1, 0.92, 0.23, 0.1),
+                border: pw.Border.all(color: PdfColor(1, 0.76, 0.03)),
+                borderRadius: pw.BorderRadius.circular(3),
+              ),
+              child: pw.Text(entry.key.toUpperCase(),
+                  style: pw.TextStyle(
+                      fontSize: 9, fontWeight: pw.FontWeight.bold)),
+            ),
+            pw.SizedBox(height: 2),
+            pw.Table(
+              border: pw.TableBorder.all(color: PdfColors.grey300),
+              children: [
+                pw.TableRow(
+                  decoration: pw.BoxDecoration(color: accentColor),
+                  children: [
+                    _pdfTableHeader('NAME'),
+                    _pdfTableHeader('ON'),
+                    _pdfTableHeader('OFF'),
+                    _pdfTableHeader('HOURS'),
+                  ],
+                ),
+                ...entry.value.asMap().entries.map((empEntry) {
+                  final i = empEntry.key;
+                  final emp = empEntry.value;
+                  final rowColor =
+                      i % 2 == 1 ? lightAccent : PdfColors.white;
+                  return pw.TableRow(
+                    decoration: pw.BoxDecoration(color: rowColor),
+                    children: [
+                      _pdfTableCell(emp.name),
+                      _pdfTableCell(DateFormat('h:mm a')
+                          .format(tz.TZDateTime.from(emp.timeOn, vancouver))),
+                      _pdfTableCell(DateFormat('h:mm a')
+                          .format(tz.TZDateTime.from(emp.timeOff, vancouver))),
+                      _pdfTableCell(
+                          '${(emp.duration / 60).toStringAsFixed(1)} hrs'),
+                    ],
+                  );
+                }),
+              ],
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.only(top: 1, bottom: 2),
+              child: pw.Text(
+                  '${(svcDuration / 60).toStringAsFixed(1)} hrs',
+                  style: pw.TextStyle(
+                      fontSize: 8, fontWeight: pw.FontWeight.bold)),
+            ),
+            // Per-service notes
+            if (svcNotes != null && svcNotes.isNotEmpty)
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(bottom: 2),
+                child: pw.Text('Notes: $svcNotes',
+                    style: pw.TextStyle(
+                        fontSize: 8, fontStyle: pw.FontStyle.italic)),
+              ),
+            // Per-service materials
+            if (svcMats != null && svcMats.isNotEmpty)
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(bottom: 2),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: svcMats
+                      .map((m) => pw.Text(
+                          'Material: ${m.description} (${m.vendor}) — \$${m.cost}',
+                          style: const pw.TextStyle(fontSize: 8)))
+                      .toList(),
+                ),
+              ),
+            // Per-service disposal
+            if (svcDisp != null && svcDisp.hasDisposal)
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(bottom: 2),
+                child: pw.Text(
+                    'Disposal: ${svcDisp.location} — \$${svcDisp.cost}',
+                    style: const pw.TextStyle(fontSize: 8)),
+              ),
+            pw.SizedBox(height: 4),
+          ],
+        );
+      }),
+      pw.Padding(
+        padding: const pw.EdgeInsets.only(top: 2),
+        child: pw.Text(
+            'Total: ${(grandTotal / 60).toStringAsFixed(1)} hrs',
+            style: pw.TextStyle(
+                fontSize: 10, fontWeight: pw.FontWeight.bold)),
+      ),
+    ];
   }
 
   pw.Widget _pdfPhaseSection({

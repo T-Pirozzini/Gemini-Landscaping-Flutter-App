@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -169,23 +170,168 @@ class _EmployeeTimesComponentState
     );
   }
 
-  Future<void> _pickTime(bool isTimeOn) async {
-    final initial = isTimeOn ? timeOn : timeOff;
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: initial,
-    );
-    if (picked != null) {
-      setState(() {
-        if (isTimeOn) {
-          timeOn = picked;
-          widget.onTimeOnChanged(picked);
-        } else {
-          timeOff = picked;
-          widget.onTimeOffChanged(picked);
-        }
-      });
+  void _pickTime(bool isTimeOn) {
+    final current = isTimeOn ? timeOn : timeOff;
+
+    // Generate 30-min slots from 6:00 to 19:30
+    final slots = <TimeOfDay>[];
+    for (var h = 6; h <= 19; h++) {
+      slots.add(TimeOfDay(hour: h, minute: 0));
+      slots.add(TimeOfDay(hour: h, minute: 30));
     }
+
+    var pickerTime = DateTime(2000, 1, 1, current.hour, current.minute);
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (sheetContext) {
+        var showExact = false;
+        return StatefulBuilder(
+          builder: (_, setSheetState) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        isTimeOn ? 'Start Time' : 'End Time',
+                        style: GoogleFonts.montserrat(
+                            fontSize: 14, fontWeight: FontWeight.w600),
+                      ),
+                      Spacer(),
+                      if (showExact)
+                        GestureDetector(
+                          onTap: () {
+                            final picked = TimeOfDay(
+                                hour: pickerTime.hour,
+                                minute: pickerTime.minute);
+                            setState(() {
+                              if (isTimeOn) {
+                                timeOn = picked;
+                                widget.onTimeOnChanged(picked);
+                              } else {
+                                timeOff = picked;
+                                widget.onTimeOffChanged(picked);
+                              }
+                            });
+                            Navigator.pop(sheetContext);
+                          },
+                          child: Text('Done',
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      Color.fromARGB(255, 31, 182, 77))),
+                        )
+                      else
+                        GestureDetector(
+                          onTap: () =>
+                              setSheetState(() => showExact = true),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.tune,
+                                  size: 14, color: Colors.grey[500]),
+                              SizedBox(width: 4),
+                              Text('Exact',
+                                  style: GoogleFonts.montserrat(
+                                      fontSize: 12,
+                                      color: Colors.grey[500])),
+                            ],
+                          ),
+                        ),
+                      SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(sheetContext),
+                        child: Icon(Icons.close,
+                            size: 20, color: Colors.grey[500]),
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(height: 1),
+                if (showExact)
+                  SizedBox(
+                    height: 200,
+                    child: CupertinoDatePicker(
+                      mode: CupertinoDatePickerMode.time,
+                      use24hFormat: true,
+                      initialDateTime: pickerTime,
+                      onDateTimeChanged: (dt) => pickerTime = dt,
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: EdgeInsets.all(12),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        childAspectRatio: 2.5,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                      ),
+                      itemCount: slots.length,
+                      itemBuilder: (_, i) {
+                        final slot = slots[i];
+                        final isSelected = slot.hour == current.hour &&
+                            slot.minute == current.minute;
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              if (isTimeOn) {
+                                timeOn = slot;
+                                widget.onTimeOnChanged(slot);
+                              } else {
+                                timeOff = slot;
+                                widget.onTimeOffChanged(slot);
+                              }
+                            });
+                            Navigator.pop(sheetContext);
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Color.fromARGB(255, 31, 182, 77)
+                                  : Colors.grey[100],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Color.fromARGB(255, 31, 182, 77)
+                                    : Colors.grey[300]!,
+                              ),
+                            ),
+                            child: Text(
+                              _formatTime(slot),
+                              style: GoogleFonts.montserrat(
+                                fontSize: 13,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.black87,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -194,85 +340,99 @@ class _EmployeeTimesComponentState
     final hasName = widget.selectedName != null && widget.selectedName!.isNotEmpty;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: Colors.grey[200]!),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
           // Name — tappable
           Expanded(
             child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: () {
                 usersAsync.whenData((users) => _showEmployeePicker(users));
               },
-              child: Row(
-                children: [
-                  Icon(Icons.person_outline,
-                      size: 16,
-                      color: hasName ? Colors.green[700] : Colors.grey[400]),
-                  SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      hasName ? widget.selectedName! : 'Select employee',
-                      style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        fontWeight: hasName ? FontWeight.w500 : FontWeight.w400,
-                        color: hasName ? Colors.black87 : Colors.grey[500],
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Icon(Icons.person_outline,
+                        size: 18,
+                        color: hasName ? Colors.green[700] : Colors.grey[400]),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        hasName ? widget.selectedName! : 'Select employee',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 13,
+                          fontWeight:
+                              hasName ? FontWeight.w500 : FontWeight.w400,
+                          color: hasName ? Colors.black87 : Colors.grey[500],
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-          // Times — compact tappable chips
+          // Times — tappable chips with generous targets
           GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () => _pickTime(true),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(4),
+                color: Colors.blueGrey[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blueGrey[200]!),
               ),
               child: Text(
                 _formatTime(timeOn),
                 style: GoogleFonts.montserrat(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.green[800]),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blueGrey[800]),
               ),
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 3),
-            child: Icon(Icons.arrow_forward, size: 10, color: Colors.grey[400]),
+            padding: EdgeInsets.symmetric(horizontal: 4),
+            child:
+                Icon(Icons.arrow_forward, size: 12, color: Colors.grey[400]),
           ),
           GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () => _pickTime(false),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.red[50],
-                borderRadius: BorderRadius.circular(4),
+                color: Colors.blueGrey[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blueGrey[200]!),
               ),
               child: Text(
                 _formatTime(timeOff),
                 style: GoogleFonts.montserrat(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.red[800]),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blueGrey[800]),
               ),
             ),
           ),
           // Delete
-          SizedBox(width: 4),
+          SizedBox(width: 6),
           GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: widget.onDelete,
-            child: Icon(Icons.close, size: 16, color: Colors.grey[400]),
+            child: Padding(
+              padding: EdgeInsets.all(4),
+              child: Icon(Icons.close, size: 18, color: Colors.grey[400]),
+            ),
           ),
         ],
       ),

@@ -8,7 +8,6 @@ import 'package:gemini_landscaping_app/models/site_report.dart';
 import 'package:gemini_landscaping_app/providers/report_provider.dart';
 import 'package:gemini_landscaping_app/screens/add_report/add_site_report.dart';
 import 'package:gemini_landscaping_app/screens/winter_reports/addWinterReport.dart';
-import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
 // --- Date Utils ---
@@ -99,11 +98,7 @@ class RecentReports extends ConsumerStatefulWidget {
   _RecentReportsState createState() => _RecentReportsState();
 }
 
-class _RecentReportsState extends ConsumerState<RecentReports>
-    with SingleTickerProviderStateMixin {
-  late Animation<double> _animation;
-  late AnimationController _animationController;
-
+class _RecentReportsState extends ConsumerState<RecentReports> {
   String _searchQuery = '';
   ReportFilter _activeFilter = ReportFilter.all;
 
@@ -111,18 +106,154 @@ class _RecentReportsState extends ConsumerState<RecentReports>
   void initState() {
     super.initState();
     tz.initializeTimeZones();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    _animation =
-        CurvedAnimation(curve: Curves.easeInOut, parent: _animationController);
   }
 
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
+  void _showNewReportSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag handle
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'New Report',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _sheetOption(
+                  icon: Icons.note_add_outlined,
+                  label: 'Maintenance Program',
+                  subtitle: 'Regular scheduled maintenance',
+                  color: const Color.fromARGB(255, 31, 182, 77),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const AddSiteReport(isRegularMaintenance: true),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                _sheetOption(
+                  icon: Icons.assignment_add,
+                  label: 'Additional Service',
+                  subtitle: 'One-time or extra work',
+                  color: const Color.fromARGB(255, 97, 125, 140),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            const AddSiteReport(isRegularMaintenance: false),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                _sheetOption(
+                  icon: Icons.cloudy_snowing,
+                  label: 'Winter Report',
+                  subtitle: 'Snow and ice services',
+                  color: const Color.fromARGB(255, 59, 82, 73),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const AddWinterReport()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _sheetOption({
+    required IconData icon,
+    required String label,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade200),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[800],
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.montserrat(
+                        fontSize: 11,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: Colors.grey[400], size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   // --- Filter reports ---
@@ -287,11 +418,9 @@ class _RecentReportsState extends ConsumerState<RecentReports>
             ),
           ),
           // Filter chips
-          SizedBox(
-            height: 38,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Row(
               children: ReportFilter.values.map((filter) {
                 final isSelected = _activeFilter == filter;
                 final label = {
@@ -302,21 +431,35 @@ class _RecentReportsState extends ConsumerState<RecentReports>
                   ReportFilter.filed: 'Filed',
                   ReportFilter.draft: 'Draft',
                 }[filter]!;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: FilterChip(
-                    label: Text(label,
-                        style: GoogleFonts.montserrat(fontSize: 11)),
-                    selected: isSelected,
-                    selectedColor: Colors.green[200],
-                    checkmarkColor: Colors.green[800],
-                    backgroundColor: Colors.grey[100],
-                    onSelected: (_) =>
-                        setState(() => _activeFilter = filter),
-                    visualDensity: VisualDensity.compact,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _activeFilter = filter),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color.fromARGB(255, 31, 182, 77)
+                            : Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isSelected
+                              ? const Color.fromARGB(255, 31, 182, 77)
+                              : Colors.grey.shade300,
+                          width: 0.5,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        label,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 11,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w400,
+                          color: isSelected ? Colors.white : Colors.grey[700],
+                        ),
+                      ),
+                    ),
                   ),
                 );
               }).toList(),
@@ -377,61 +520,10 @@ class _RecentReportsState extends ConsumerState<RecentReports>
           ),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionBubble(
-        iconColor: Colors.white,
-        backGroundColor: const Color.fromARGB(255, 59, 82, 73),
-        animation: _animation,
-        onPress: () => _animationController.isCompleted
-            ? _animationController.reverse()
-            : _animationController.forward(),
-        iconData: Icons.post_add_outlined,
-        items: [
-          Bubble(
-            title: "Maintenance Program",
-            iconColor: Colors.white,
-            bubbleColor: const Color.fromARGB(255, 31, 182, 77),
-            icon: Icons.note_add_outlined,
-            titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
-            onPress: () {
-              _animationController.reverse();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => const AddSiteReport(
-                        isRegularMaintenance: true)),
-              );
-            },
-          ),
-          Bubble(
-            title: "Additional Service",
-            iconColor: Colors.white,
-            bubbleColor: const Color.fromARGB(255, 97, 125, 140),
-            icon: Icons.assignment_add,
-            titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
-            onPress: () {
-              _animationController.reverse();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => const AddSiteReport(
-                        isRegularMaintenance: false)),
-              );
-            },
-          ),
-          Bubble(
-            title: "Winter Report",
-            iconColor: Colors.white,
-            bubbleColor: const Color.fromARGB(255, 59, 82, 73),
-            icon: Icons.cloudy_snowing,
-            titleStyle: const TextStyle(fontSize: 16, color: Colors.white),
-            onPress: () {
-              _animationController.reverse();
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const AddWinterReport()));
-            },
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showNewReportSheet,
+        backgroundColor: const Color.fromARGB(255, 59, 82, 73),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
