@@ -5,8 +5,6 @@ import 'package:gemini_landscaping_app/models/schedule_model.dart';
 import 'package:gemini_landscaping_app/screens/add_report/add_site_report.dart';
 import 'package:gemini_landscaping_app/services/schedule_service.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/mdi.dart';
 
 class DraggableScheduleEntry extends StatefulWidget {
   final ScheduleEntry entry;
@@ -48,10 +46,8 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
   @override
   void initState() {
     super.initState();
-    initialHeight = widget.durationSlots * 40.0; // 40.0 is timeSlotHeight
+    initialHeight = widget.durationSlots * 40.0;
     currentHeight = initialHeight;
-    print(
-        'initState: initialHeight=$initialHeight, durationSlots=${widget.durationSlots}');
   }
 
   @override
@@ -60,8 +56,6 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
     if (oldWidget.durationSlots != widget.durationSlots) {
       initialHeight = widget.durationSlots * 40.0;
       currentHeight = initialHeight;
-      print(
-          'didUpdateWidget: Updated initialHeight=$initialHeight, durationSlots=${widget.durationSlots}');
     }
   }
 
@@ -73,14 +67,11 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
       return;
     }
     dragOffset = 0.0;
-    print('Drag started, initialHeight=$initialHeight');
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     if (widget.userRole != 'admin') return;
     dragOffset += details.delta.dy;
-    print('Dragging: delta.dy=${details.delta.dy}, dragOffset=$dragOffset');
-
     setState(() {
       double newHeight = initialHeight + dragOffset;
       final slotsSpanned = (newHeight / 40.0).ceil();
@@ -90,14 +81,12 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
 
       final newDurationSlots = adjustedSlots;
       final endSlotIndex = (widget.startOffset + newDurationSlots - 1).round();
-      print('Updating highlight: endSlotIndex=$endSlotIndex');
       widget.onResizeHover(endSlotIndex);
     });
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
     if (widget.userRole != 'admin') return;
-    print('Drag ended, new height: $currentHeight');
     final newDurationSlots = (currentHeight / 40.0).round();
     final newEndMinutes = (widget.startOffset + newDurationSlots) * 30 + 7 * 60;
     final newHour = newEndMinutes ~/ 60;
@@ -114,7 +103,6 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
       // Reset dragOffset and update initialHeight for the next resize
       dragOffset = 0.0;
       initialHeight = currentHeight;
-      print('Resize completed: new initialHeight=$initialHeight');
     }
     widget.onResizeHover(null);
   }
@@ -129,7 +117,6 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
     setState(() {
       isMoving = true;
     });
-    print('Dragging the entry started');
   }
 
   void _onDragEnd(DraggableDetails details) {
@@ -137,7 +124,6 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
     setState(() {
       isMoving = false;
     });
-    print('Dragging the entry ended');
   }
 
   void _repeatNextWeek() async {
@@ -223,7 +209,7 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
                   widget.onRefresh(); // Refresh the schedule
                   Navigator.pop(context);
                 } else {
-                  print('Error: ScheduleEntry ID is null');
+                  debugPrint('Error: ScheduleEntry ID is null');
                 }
               },
               child: Text('Save', style: GoogleFonts.roboto()),
@@ -293,7 +279,7 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
                   widget.onRefresh(); // Refresh the schedule
                   Navigator.pop(context); // Close confirmation dialog
                 } else {
-                  print('Error: ScheduleEntry ID is null');
+                  debugPrint('Error: ScheduleEntry ID is null');
                 }
               },
               child:
@@ -345,123 +331,155 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
   Widget build(BuildContext context) {
     Color baseColor = widget.truck.color;
     Color displayColor = widget.entry.status == 'completed'
-        ? baseColor.withOpacity(0.4) // Lighter color for completed
-        : baseColor.withOpacity(0.8); // Default opacity for pending
+        ? baseColor.withValues(alpha: 0.4) // Lighter color for completed
+        : baseColor.withValues(alpha: 0.8); // Default opacity for pending
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Draggable<ScheduleEntry>(
-          data: widget.userRole == 'admin' ? widget.entry : null,
-          feedback: Material(
-            elevation: 4,
-            child: Container(
-              width: 150,
-              height: initialHeight,
-              decoration: BoxDecoration(
-                color: widget.truck.color.withOpacity(0.6),
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: Center(
-                child: SizedBox(
-                  width: 140,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      AutoSizeText(
-                        widget.entry.site.name,
-                        style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          color: Colors.white,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Draggable<ScheduleEntry>(
+            data: widget.userRole == 'admin' ? widget.entry : null,
+            feedback: Material(
+              color: Colors.transparent,
+              elevation: 6,
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                width: 150,
+                height: initialHeight,
+                decoration: BoxDecoration(
+                  color: widget.truck.color.withValues(alpha: 0.85),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: SizedBox(
+                    width: 140,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AutoSizeText(
+                          widget.entry.site.name,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          minFontSize: 8,
                         ),
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                        minFontSize: 8,
-                      ),
-                      AutoSizeText(
-                        _formatDuration(
-                            widget.entry.startTime, widget.entry.endTime),
-                        style: GoogleFonts.montserrat(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                        AutoSizeText(
+                          _formatDuration(
+                              widget.entry.startTime, widget.entry.endTime),
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white70,
+                          ),
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
                         ),
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          childWhenDragging: const SizedBox.shrink(),
-          onDragStarted: _onDragStarted,
-          onDragEnd: _onDragEnd,
-          child: Container(
-            height: currentHeight,
-            decoration: BoxDecoration(
-              color: displayColor,
-              border: Border.all(color: Colors.white, width: 1),
-            ),
-            child: Center(
-              child: SizedBox(
-                width: 110,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AutoSizeText(
-                      widget.entry.site.name,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 14,
-                        color: Colors.white,
-                      ),
-                      maxLines: 1,
-                      textAlign: TextAlign.center,
-                      minFontSize: 8,
-                    ),
-                    AutoSizeText(
-                      _formatDuration(
-                          widget.entry.startTime, widget.entry.endTime),
-                      style: GoogleFonts.montserrat(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      textAlign: TextAlign.center,
+            childWhenDragging: const SizedBox.shrink(),
+            onDragStarted: _onDragStarted,
+            onDragEnd: _onDragEnd,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                height: currentHeight,
+                decoration: BoxDecoration(
+                  color: displayColor,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.12),
+                      offset: const Offset(0, 1),
+                      blurRadius: 3,
                     ),
                   ],
                 ),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AutoSizeText(
+                          widget.entry.site.name,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          minFontSize: 8,
+                        ),
+                        AutoSizeText(
+                          _formatDuration(
+                              widget.entry.startTime, widget.entry.endTime),
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white70,
+                          ),
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
-        ),
         if (!isMoving)
           Positioned(
             top: 2,
-            left: 2, // Move to top-right corner for better balance
+            right: 2,
             child: MenuAnchor(
               builder: (context, controller, child) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.more_vert,
-                      color: Colors.black54,
-                      size: 18,
+                final hasNotes = widget.entry.notes != null &&
+                    widget.entry.notes!.isNotEmpty;
+                return GestureDetector(
+                  onTap: () => controller.isOpen
+                      ? controller.close()
+                      : controller.open(),
+                  child: Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      borderRadius: BorderRadius.circular(4),
                     ),
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
-                    onPressed: () {
-                      if (controller.isOpen) {
-                        controller.close();
-                      } else {
-                        controller.open();
-                      }
-                    },
+                    child: Stack(
+                      children: [
+                        const Center(
+                          child: Icon(Icons.more_vert,
+                              color: Colors.white, size: 14),
+                        ),
+                        // Pink dot when notes exist
+                        if (hasNotes)
+                          Positioned(
+                            top: 1,
+                            right: 1,
+                            child: Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Colors.pinkAccent,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -499,54 +517,30 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
               ],
             ),
           ),
-        Positioned(
-          top: 4,
-          right: 4,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final availableWidth = constraints.maxWidth;
-              final baseIconSize = (availableWidth / 5) / 2.5;
-              final iconSize = baseIconSize.clamp(10.0, 16.0);
-              final splashRadius = iconSize * 1.2;
-              final padding = (iconSize / 14.0) * 1.0;
-
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Tooltip(
-                    message: 'Add/Edit Notes',
-                    child: Material(
-                      color: Colors.white70,
-                      elevation: 1,
-                      shape: CircleBorder(),
-                      child: Padding(
-                        padding: EdgeInsets.all(padding),
-                        child: IconButton(
-                          icon: widget.entry.notes != null &&
-                                  widget.entry.notes != ""
-                              ? Iconify(
-                                  Mdi.note_alert,
-                                  size: iconSize,
-                                  color: Colors.pinkAccent,
-                                )
-                              : Iconify(
-                                  Mdi.note_outline,
-                                  size: iconSize,
-                                  color: Colors.black54,
-                                ),
-                          splashRadius: splashRadius,
-                          padding: EdgeInsets.zero,
-                          constraints: BoxConstraints(),
-                          onPressed: () => _showNotesDialog(context),
-                        ),
-                      ),
-                    ),
+        // Completed checkmark overlay
+        if (widget.entry.status == 'completed' && !isMoving)
+          Positioned(
+            bottom: widget.userRole == 'admin' ? 18 : 2,
+            right: 2,
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 2,
                   ),
                 ],
-              );
-            },
+              ),
+              child: Icon(
+                Icons.check_circle,
+                size: 16,
+                color: Colors.green.shade700,
+              ),
+            ),
           ),
-        ),
         if (!isMoving && widget.userRole == 'admin')
           Positioned(
             bottom: 0,
@@ -558,19 +552,20 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
               onVerticalDragUpdate: _onVerticalDragUpdate,
               onVerticalDragEnd: _onVerticalDragEnd,
               child: Container(
-                height: 15,
-                color: Colors.black.withOpacity(0.3),
+                height: 20,
+                color: Colors.black.withValues(alpha: 0.3),
                 child: Center(
                   child: Icon(
                     Icons.drag_handle,
-                    size: 15,
+                    size: 16,
                     color: Colors.white,
                   ),
                 ),
               ),
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }
