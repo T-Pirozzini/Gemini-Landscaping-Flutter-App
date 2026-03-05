@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/components/my_button.dart';
 import 'package:gemini_landscaping_app/components/my_textfield.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -33,10 +34,20 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       // check if password is confirmed
       if (passwordController.text == confirmPasswordController.text) {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        final userCred =
+            await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: emailController.text,
           password: passwordController.text,
         );
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(userCred.user!.uid)
+            .set({
+          'email': emailController.text,
+          'username': emailController.text.split('@')[0],
+          'role': 'employee',
+          'active': true,
+        });
       } else {
         // show error message, passwords don't match
         showErrorMessage("Passwords don't match!");

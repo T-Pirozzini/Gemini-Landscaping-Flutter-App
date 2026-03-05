@@ -19,6 +19,26 @@ class _EditReportState extends State<EditReport> {
   late List<Map<String, TextEditingController>> _employeeTimes;
   late List<Map<String, TextEditingController>> _materials;
   late String serviceType;
+  late bool _hasDisposal;
+  late TextEditingController _disposalLocationController;
+  late TextEditingController _disposalCostController;
+  late List<String> _selectedNoteTags;
+  late bool _hasBothPhases;
+  late List<Map<String, TextEditingController>> _regularEmployeeTimes;
+  late List<Map<String, TextEditingController>> _additionalEmployeeTimes;
+
+  List<Map<String, TextEditingController>> _employeesFromPhase(
+      ReportPhase phase) {
+    return phase.employees
+        .map((employee) => {
+              'nameController': TextEditingController(text: employee.name),
+              'timeOnController': TextEditingController(
+                  text: DateFormat('h:mm a').format(employee.timeOn)),
+              'timeOffController': TextEditingController(
+                  text: DateFormat('h:mm a').format(employee.timeOff)),
+            })
+        .toList();
+  }
 
   @override
   void initState() {
@@ -29,15 +49,26 @@ class _EditReportState extends State<EditReport> {
     _isRegularMaintenance = widget.report.isRegularMaintenance;
     serviceType =
         _isRegularMaintenance ? 'Regular Maintenance' : 'Additional Service';
-    _employeeTimes = widget.report.employees
-        .map((employee) => {
-              'nameController': TextEditingController(text: employee.name),
-              'timeOnController': TextEditingController(
-                  text: DateFormat('h:mm a').format(employee.timeOn)),
-              'timeOffController': TextEditingController(
-                  text: DateFormat('h:mm a').format(employee.timeOff)),
-            })
-        .toList();
+    _hasBothPhases = widget.report.hasBothPhases;
+    if (_hasBothPhases) {
+      _regularEmployeeTimes =
+          _employeesFromPhase(widget.report.regularPhase!);
+      _additionalEmployeeTimes =
+          _employeesFromPhase(widget.report.additionalPhase!);
+      _employeeTimes = [];
+    } else {
+      _regularEmployeeTimes = [];
+      _additionalEmployeeTimes = [];
+      _employeeTimes = widget.report.employees
+          .map((employee) => {
+                'nameController': TextEditingController(text: employee.name),
+                'timeOnController': TextEditingController(
+                    text: DateFormat('h:mm a').format(employee.timeOn)),
+                'timeOffController': TextEditingController(
+                    text: DateFormat('h:mm a').format(employee.timeOff)),
+              })
+          .toList();
+    }
     _materials = widget.report.materials
         .map((material) => {
               'vendorController': TextEditingController(text: material.vendor),
@@ -46,67 +77,118 @@ class _EditReportState extends State<EditReport> {
               'costController': TextEditingController(text: material.cost),
             })
         .toList();
+    _hasDisposal = widget.report.disposal?.hasDisposal ?? false;
+    _disposalLocationController =
+        TextEditingController(text: widget.report.disposal?.location ?? '');
+    _disposalCostController =
+        TextEditingController(text: widget.report.disposal?.cost ?? '');
+    _selectedNoteTags = List<String>.from(widget.report.noteTags);
+  }
+
+  Map<String, dynamic> _processEmployeeTimes(
+      List<Map<String, TextEditingController>> employees,
+      DateTime reportDate) {
+    Map<String, dynamic> employeeTimesMap = {};
+    int totalMinutes = 0;
+    for (var employee in employees) {
+      String name = employee['nameController']!.text;
+      if (name.isEmpty) continue;
+      TimeOfDay timeOn = _parseTimeOfDay(employee['timeOnController']!.text);
+      TimeOfDay timeOff = _parseTimeOfDay(employee['timeOffController']!.text);
+      Duration duration = _calculateDuration(timeOn, timeOff);
+      Timestamp timeOnTs = _convertTimeOfDayToTimestamp(timeOn, reportDate);
+      Timestamp timeOffTs = _convertTimeOfDayToTimestamp(timeOff, reportDate);
+      totalMinutes += duration.inMinutes;
+      employeeTimesMap[name] = {
+        'timeOn': timeOnTs,
+        'timeOff': timeOffTs,
+        'duration': duration.inMinutes,
+      };
+    }
+    return {'employeeTimesMap': employeeTimesMap, 'totalMinutes': totalMinutes};
   }
 
   void _updateReport() async {
     if (_formKey.currentState!.validate()) {
-      Map<String, dynamic> employeeTimesMap = {};
-      Duration totalCombinedDuration = Duration();
-
       DateTime reportDate =
           DateFormat('MMMM d, yyyy').parse(_dateController.text);
 
-      for (var employee in _employeeTimes) {
-        String name = employee['nameController']!.text;
-        TimeOfDay? timeOn = _parseTimeOfDay(employee['timeOnController']!.text);
-        TimeOfDay? timeOff =
-            _parseTimeOfDay(employee['timeOffController']!.text);
+      final materialsData = _materials.map((material) {
+        return {
+          "vendor": material['vendorController']!.text,
+          "description": material['materialController']!.text,
+          "cost": material['costController']!.text,
+        };
+      }).toList();
 
-        if (name.isNotEmpty) {
-          Duration duration = _calculateDuration(timeOn, timeOff);
-
-          // Convert TimeOfDay to Timestamp
-          Timestamp timeOnTimestamp =
-              _convertTimeOfDayToTimestamp(timeOn, reportDate);
-          Timestamp timeOffTimestamp =
-              _convertTimeOfDayToTimestamp(timeOff, reportDate);
-
-          totalCombinedDuration += duration;
-
-          employeeTimesMap[name] = {
-            'timeOn': timeOnTimestamp,
-            'timeOff': timeOffTimestamp,
-            'duration': duration.inMinutes,
-          };
-        }
-      }
+      final sharedFields = {
+        "timestamp": DateTime.now(),
+        "siteInfo": {
+          'date': _dateController.text,
+          'siteName': widget.report.siteName,
+          'address': widget.report.address,
+        },
+        "services": widget.report.services,
+        "materials": materialsData,
+        "description": _descriptionController.text,
+        "disposal": {
+          "hasDisposal": _hasDisposal,
+          "location": _disposalLocationController.text,
+          "cost": _disposalCostController.text,
+        },
+        "noteTags": _selectedNoteTags,
+        "submittedBy": widget.report.submittedBy,
+        "filed": widget.report.filed,
+      };
 
       try {
-        await FirebaseFirestore.instance
-            .collection('SiteReports')
-            .doc(widget.report.id)
-            .update({
-          "timestamp": DateTime.now(),
-          "isRegularMaintenance": _isRegularMaintenance,
-          "employeeTimes": employeeTimesMap,
-          "totalCombinedDuration": totalCombinedDuration.inMinutes,
-          "siteInfo": {
-            'date': _dateController.text,
-            'siteName': widget.report.siteName,
-            'address': widget.report.address,
-          },
-          "services": widget.report.services,
-          "materials": _materials.map((material) {
-            return {
-              "vendor": material['vendorController']!.text,
-              "description": material['materialController']!.text,
-              "cost": material['costController']!.text,
-            };
-          }).toList(),
-          "description": _descriptionController.text,
-          "submittedBy": widget.report.submittedBy,
-          "filed": widget.report.filed,
-        });
+        if (_hasBothPhases) {
+          final regData =
+              _processEmployeeTimes(_regularEmployeeTimes, reportDate);
+          final addData =
+              _processEmployeeTimes(_additionalEmployeeTimes, reportDate);
+          final allEmployees = <String, dynamic>{
+            ...(regData['employeeTimesMap'] as Map<String, dynamic>),
+            ...(addData['employeeTimesMap'] as Map<String, dynamic>),
+          };
+          final totalMinutes =
+              (regData['totalMinutes'] as int) +
+              (addData['totalMinutes'] as int);
+
+          await FirebaseFirestore.instance
+              .collection('SiteReports')
+              .doc(widget.report.id)
+              .update({
+            ...sharedFields,
+            "version": 2,
+            "isRegularMaintenance": true,
+            "employeeTimes": allEmployees,
+            "totalCombinedDuration": totalMinutes,
+            "regularPhase": {
+              "isRegularMaintenance": true,
+              "employeeTimes": regData['employeeTimesMap'],
+              "totalCombinedDuration": regData['totalMinutes'],
+              "services": widget.report.regularPhase!.services,
+            },
+            "additionalPhase": {
+              "isRegularMaintenance": false,
+              "employeeTimes": addData['employeeTimesMap'],
+              "totalCombinedDuration": addData['totalMinutes'],
+              "services": widget.report.additionalPhase!.services,
+            },
+          });
+        } else {
+          final empData = _processEmployeeTimes(_employeeTimes, reportDate);
+          await FirebaseFirestore.instance
+              .collection('SiteReports')
+              .doc(widget.report.id)
+              .update({
+            ...sharedFields,
+            "isRegularMaintenance": _isRegularMaintenance,
+            "employeeTimes": empData['employeeTimesMap'],
+            "totalCombinedDuration": empData['totalMinutes'],
+          });
+        }
 
         Navigator.pop(context);
         Navigator.pop(context);
@@ -212,17 +294,129 @@ class _EditReportState extends State<EditReport> {
   void dispose() {
     _dateController.dispose();
     _descriptionController.dispose();
-    _employeeTimes.forEach((employee) {
-      employee['nameController']!.dispose();
-      employee['timeOnController']!.dispose();
-      employee['timeOffController']!.dispose();
-    });
+    _disposalLocationController.dispose();
+    _disposalCostController.dispose();
+    for (var list in [_employeeTimes, _regularEmployeeTimes, _additionalEmployeeTimes]) {
+      for (var employee in list) {
+        employee['nameController']!.dispose();
+        employee['timeOnController']!.dispose();
+        employee['timeOffController']!.dispose();
+      }
+    }
     _materials.forEach((material) {
       material['vendorController']!.dispose();
       material['materialController']!.dispose();
       material['costController']!.dispose();
     });
     super.dispose();
+  }
+
+  List<Widget> _buildEmployeeSection(
+      String title,
+      List<Map<String, TextEditingController>> employees,
+      VoidCallback addEmployee) {
+    return [
+      Text(title, style: TextStyle(fontSize: 18)),
+      SizedBox(height: 8),
+      ...employees.asMap().entries.map((entry) {
+        int index = entry.key;
+        Map<String, TextEditingController> employee = entry.value;
+        return Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: 150,
+                  padding: EdgeInsets.only(right: 10),
+                  child: TextFormField(
+                    controller: employee['nameController'],
+                    decoration: InputDecoration(
+                      labelText: 'Employee Name',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter an employee name';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            labelText: 'Time On',
+                            border: OutlineInputBorder(),
+                          ),
+                          controller: employee['timeOnController'],
+                          onTap: () async {
+                            TimeOfDay? pickedTime = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.now(),
+                            );
+                            if (pickedTime != null) {
+                              setState(() {
+                                employee['timeOnController']!.text =
+                                    pickedTime.format(context);
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: TextFormField(
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            labelText: 'Time Off',
+                            border: OutlineInputBorder(),
+                          ),
+                          controller: employee['timeOffController'],
+                          onTap: () async {
+                            TimeOfDay? pickedTime = await showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.now(),
+                            );
+                            if (pickedTime != null) {
+                              setState(() {
+                                employee['timeOffController']!.text =
+                                    pickedTime.format(context);
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      Container(
+                        width: 40,
+                        child: MaterialButton(
+                          onPressed: () {
+                            setState(() {
+                              employees.removeAt(index);
+                            });
+                          },
+                          child: Icon(Icons.delete),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 4),
+          ],
+        );
+      }).toList(),
+      MaterialButton(
+        color: const Color.fromARGB(255, 59, 82, 73),
+        onPressed: addEmployee,
+        child: Text('Add Employee', style: TextStyle(color: Colors.white)),
+      ),
+    ];
   }
 
   @override
@@ -271,19 +465,28 @@ class _EditReportState extends State<EditReport> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SwitchListTile(
-                  title: Text(serviceType),
-                  value: _isRegularMaintenance,
-                  activeColor: Colors.green,
-                  inactiveThumbColor: const Color.fromARGB(255, 59, 82, 73),
-                  onChanged: (bool value) {
-                    setState(() {
-                      _isRegularMaintenance = value;
-                      serviceType =
-                          value ? 'Regular Maintenance' : 'Additional Service';
-                    });
-                  },
-                ),
+                if (_hasBothPhases)
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    child: Text('Regular + Additional',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w600)),
+                  )
+                else
+                  SwitchListTile(
+                    title: Text(serviceType),
+                    value: _isRegularMaintenance,
+                    activeColor: Colors.green,
+                    inactiveThumbColor: const Color.fromARGB(255, 59, 82, 73),
+                    onChanged: (bool value) {
+                      setState(() {
+                        _isRegularMaintenance = value;
+                        serviceType = value
+                            ? 'Regular Maintenance'
+                            : 'Additional Service';
+                      });
+                    },
+                  ),
                 SizedBox(height: 4),
                 Center(
                     child: Text(widget.report.siteName,
@@ -319,122 +522,38 @@ class _EditReportState extends State<EditReport> {
                 ),
                 SizedBox(height: 10),
                 Divider(),
-                Text('Employee Times', style: TextStyle(fontSize: 18)),
-                SizedBox(height: 8),
-                ..._employeeTimes.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  Map<String, TextEditingController> employee = entry.value;
-                  return Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            width: 150,
-                            padding: EdgeInsets.only(right: 10),
-                            child: TextFormField(
-                              controller: employee['nameController'],
-                              decoration: InputDecoration(
-                                labelText: 'Employee Name',
-                                border: OutlineInputBorder(),
-                              ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter an employee name';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    readOnly: true,
-                                    decoration: InputDecoration(
-                                      labelText: 'Time On',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    controller: employee['timeOnController'],
-                                    onTap: () async {
-                                      TimeOfDay initialTime = TimeOfDay.now();
-
-                                      TimeOfDay? pickedTime =
-                                          await showTimePicker(
-                                        context: context,
-                                        initialTime: initialTime,
-                                      );
-                                      if (pickedTime != null) {
-                                        setState(() {
-                                          employee['timeOnController']!.text =
-                                              pickedTime.format(context);
-                                        });
-                                      }
-                                    },
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Expanded(
-                                  child: TextFormField(
-                                    readOnly: true,
-                                    decoration: InputDecoration(
-                                      labelText: 'Time Off',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    controller: employee['timeOffController'],
-                                    onTap: () async {
-                                      TimeOfDay initialTime = TimeOfDay.now();
-                                      TimeOfDay? pickedTime =
-                                          await showTimePicker(
-                                        context: context,
-                                        initialTime: initialTime,
-                                      );
-                                      if (pickedTime != null) {
-                                        setState(() {
-                                          employee['timeOffController']!.text =
-                                              pickedTime.format(context);
-                                        });
-                                      }
-                                    },
-                                  ),
-                                ),
-                                Container(
-                                  width: 40,
-                                  child: MaterialButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _employeeTimes.removeAt(index);
-                                      });
-                                    },
-                                    child: Icon(Icons.delete),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 4),
-                    ],
-                  );
-                }).toList(),
-                MaterialButton(
-                  color: const Color.fromARGB(255, 59, 82, 73),
-                  onPressed: () {
-                    setState(() {
-                      _employeeTimes.add({
-                        'nameController': TextEditingController(),
-                        'timeOnController': TextEditingController(),
-                        'timeOffController': TextEditingController(),
-                      });
-                    });
-                  },
-                  child: Text(
-                    'Add Employee',
-                    style: TextStyle(color: Colors.white),
+                if (_hasBothPhases) ...[
+                  ..._buildEmployeeSection(
+                    'Regular Maintenance — Employees',
+                    _regularEmployeeTimes,
+                    () => setState(() => _regularEmployeeTimes.add({
+                          'nameController': TextEditingController(),
+                          'timeOnController': TextEditingController(),
+                          'timeOffController': TextEditingController(),
+                        })),
                   ),
-                ),
+                  SizedBox(height: 10),
+                  Divider(),
+                  ..._buildEmployeeSection(
+                    'Additional Services — Employees',
+                    _additionalEmployeeTimes,
+                    () => setState(() => _additionalEmployeeTimes.add({
+                          'nameController': TextEditingController(),
+                          'timeOnController': TextEditingController(),
+                          'timeOffController': TextEditingController(),
+                        })),
+                  ),
+                ] else ...[
+                  ..._buildEmployeeSection(
+                    'Employee Times',
+                    _employeeTimes,
+                    () => setState(() => _employeeTimes.add({
+                          'nameController': TextEditingController(),
+                          'timeOnController': TextEditingController(),
+                          'timeOffController': TextEditingController(),
+                        })),
+                  ),
+                ],
                 SizedBox(height: 10),
                 Divider(),
                 Text('Materials', style: TextStyle(fontSize: 18)),
@@ -515,12 +634,85 @@ class _EditReportState extends State<EditReport> {
                 ),
                 SizedBox(height: 10),
                 Divider(),
-                Text('Description', style: TextStyle(fontSize: 18)),
+                Text('Disposal', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 8),
+                SwitchListTile(
+                  title: Text('Disposal Run'),
+                  subtitle: Text('Did you do a dump run?'),
+                  value: _hasDisposal,
+                  thumbColor: WidgetStateProperty.resolveWith((states) =>
+                      states.contains(WidgetState.selected)
+                          ? Colors.green
+                          : null),
+                  trackColor: WidgetStateProperty.resolveWith((states) =>
+                      states.contains(WidgetState.selected)
+                          ? Colors.green[200]
+                          : null),
+                  contentPadding: EdgeInsets.zero,
+                  onChanged: (v) => setState(() => _hasDisposal = v),
+                ),
+                if (_hasDisposal) ...[
+                  SizedBox(height: 8),
+                  TextFormField(
+                    controller: _disposalLocationController,
+                    decoration: InputDecoration(
+                      labelText: 'Dump Location',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  TextFormField(
+                    controller: _disposalCostController,
+                    keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      labelText: 'Disposal Cost (\$)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+                SizedBox(height: 10),
+                Divider(),
+                Text('Shift Notes', style: TextStyle(fontSize: 18)),
+                SizedBox(height: 8),
+                Text('Quick Tags:', style: TextStyle(fontSize: 14)),
+                SizedBox(height: 4),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    'Focused on specific area',
+                    'Ran out of time',
+                    'Resident feedback',
+                    'Equipment issue',
+                    'Extra work needed next visit',
+                    'Weather delay',
+                    'Irrigation issue',
+                  ].map((tag) {
+                    final isSelected = _selectedNoteTags.contains(tag);
+                    return FilterChip(
+                      label: Text(tag, style: TextStyle(fontSize: 11)),
+                      selected: isSelected,
+                      selectedColor: Colors.green[200],
+                      checkmarkColor: Colors.green[800],
+                      backgroundColor: Colors.grey[100],
+                      onSelected: (selected) {
+                        setState(() {
+                          selected
+                              ? _selectedNoteTags.add(tag)
+                              : _selectedNoteTags.remove(tag);
+                        });
+                      },
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    );
+                  }).toList(),
+                ),
                 SizedBox(height: 8),
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: 'Description',
+                    labelText: 'Additional Notes',
                     border: OutlineInputBorder(),
                   ),
                   maxLines: null,

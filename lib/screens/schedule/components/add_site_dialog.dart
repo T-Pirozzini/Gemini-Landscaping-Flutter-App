@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gemini_landscaping_app/models/site_info.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gemini_landscaping_app/providers/management_company_provider.dart';
 
-class AddSiteDialog extends StatelessWidget {
+class AddSiteDialog extends ConsumerStatefulWidget {
   final TextEditingController nameController;
   final TextEditingController addressController;
-  final VoidCallback onSuccess; // Callback for successful addition
+  final VoidCallback onSuccess;
 
   const AddSiteDialog({
     required this.nameController,
@@ -15,18 +17,26 @@ class AddSiteDialog extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  @override
+  ConsumerState<AddSiteDialog> createState() => _AddSiteDialogState();
+}
+
+class _AddSiteDialogState extends ConsumerState<AddSiteDialog> {
+  final _formKey = GlobalKey<FormState>();
+  String _selectedManagement = '';
+
   Future<void> _saveSite(BuildContext context) async {
     try {
       final siteRef = FirebaseFirestore.instance.collection('SiteList');
       final newDocRef = siteRef.doc();
 
       final newSite = SiteInfo(
-        address: addressController.text.trim().isEmpty
+        address: widget.addressController.text.trim().isEmpty
             ? ""
-            : addressController.text.trim(),
+            : widget.addressController.text.trim(),
         imageUrl: "",
-        management: "",
-        name: nameController.text.trim(),
+        management: _selectedManagement,
+        name: widget.nameController.text.trim(),
         status: true,
         target: 0.0,
         id: newDocRef.id,
@@ -34,15 +44,11 @@ class AddSiteDialog extends StatelessWidget {
       );
 
       await newDocRef.set(newSite.toMap());
-      
-      // Clear controllers
-      nameController.clear();
-      addressController.clear();
-      
-      // Notify parent of success
-      onSuccess();
-      
-      // Show success message
+
+      widget.nameController.clear();
+      widget.addressController.clear();
+      widget.onSuccess();
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Site added successfully!')),
       );
@@ -55,7 +61,11 @@ class AddSiteDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
+    final companiesAsync = ref.watch(managementCompaniesStreamProvider);
+    final companyNames = <String>[''];
+    companiesAsync.whenData((companies) {
+      companyNames.addAll(companies.map((c) => c.name));
+    });
 
     return AlertDialog(
       title: Text(
@@ -69,7 +79,7 @@ class AddSiteDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
-                controller: nameController,
+                controller: widget.nameController,
                 decoration: const InputDecoration(
                   labelText: 'Site Name',
                   border: OutlineInputBorder(),
@@ -83,11 +93,31 @@ class AddSiteDialog extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               TextFormField(
-                controller: addressController,
+                controller: widget.addressController,
                 decoration: const InputDecoration(
                   labelText: 'Address (Optional)',
                   border: OutlineInputBorder(),
                 ),
+              ),
+              const SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                value: _selectedManagement,
+                decoration: const InputDecoration(
+                  labelText: 'Management Company',
+                  border: OutlineInputBorder(),
+                ),
+                items: companyNames.map((name) {
+                  return DropdownMenuItem(
+                    value: name,
+                    child: Text(
+                      name.isEmpty ? 'None' : name,
+                      style: GoogleFonts.montserrat(fontSize: 14),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() => _selectedManagement = value ?? '');
+                },
               ),
             ],
           ),

@@ -15,16 +15,6 @@ class TimeColumn extends StatelessWidget {
     const double timeSlotHeight = 40.0;
     const int slotsPerDay = 22;
 
-    // Get current time
-    final now = DateTime.now();
-    final currentHour = now.hour;
-    final currentMinute = now.minute;
-
-    // Calculate the current slot index (7:00 AM = slot 0)
-    final minutesSince7AM = (currentHour - 7) * 60 + currentMinute;
-    final currentSlotIndex =
-        (minutesSince7AM / 30).floor(); // 30-min increments
-
     return SizedBox(
       width: 50.0,
       child: Column(
@@ -33,53 +23,59 @@ class TimeColumn extends StatelessWidget {
             Container(
               height: timeSlotHeight,
               width: double.infinity,
-              color: Colors.white,
+              color: Colors.grey[50],
               child: Center(
-                  child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text('Time', style: TextStyle(fontSize: 12)))),
+                child: Text(
+                  'Time',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ),
             ),
           ...List.generate(slotsPerDay, (index) {
-            // Calculate the hour in 24-hour format
             final hour24 = 7 + (index ~/ 2);
             final minute = (index % 2) * 30;
-
-            // Convert to 12-hour format
             final hour12 =
                 hour24 > 12 ? hour24 - 12 : (hour24 == 0 ? 12 : hour24);
-            final period = hour24 >= 12 ? 'PM' : 'AM';
             final isHovered = hoveredSlotIndex == index;
-            final isCurrentTime = index == currentSlotIndex &&
-                now.day == DateTime.now().day; // Ensure same day
+            final isFullHour = index % 2 == 0;
 
             return Container(
               height: timeSlotHeight,
               width: double.infinity,
-              padding: const EdgeInsets.all(4.0),
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
               decoration: BoxDecoration(
-                color: isCurrentTime
-                    ? Colors.greenAccent
-                        .withOpacity(0.6) // Highlight current time
-                    : isHovered
-                        ? Colors.orangeAccent.withOpacity(0.6)
-                        : Color.fromARGB(255, 59, 82, 73).withValues(
-                            alpha: 0.6,
-                          ),
-                border:
-                    Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+                color: isHovered
+                    ? Colors.orange.withValues(alpha: 0.08)
+                    : Colors.grey[50],
+                border: Border(
+                  top: BorderSide(
+                    color: isFullHour
+                        ? Colors.grey[300]!
+                        : Colors.grey.withValues(alpha: 0.15),
+                    width: isFullHour ? 1.0 : 0.5,
+                  ),
+                  right: BorderSide(
+                    color: Colors.grey[300]!,
+                    width: 1.0,
+                  ),
+                ),
               ),
-              child: Center(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    minute == 0 ? '$hour12:00 $period' : '$hour12:30 $period',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isHovered || isCurrentTime
-                          ? Colors.black
-                          : Colors.white,
-                    ),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  minute == 0 ? '$hour12:00' : '$hour12:30',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 10,
+                    fontWeight: isFullHour ? FontWeight.w600 : FontWeight.w400,
+                    color: isHovered
+                        ? Colors.orange[800]
+                        : isFullHour
+                            ? Colors.grey[700]
+                            : Colors.grey[400],
                   ),
                 ),
               ),

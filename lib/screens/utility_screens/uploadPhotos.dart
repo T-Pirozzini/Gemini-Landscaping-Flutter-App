@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -8,16 +9,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gemini_landscaping_app/providers/admin_provider.dart';
 
-class UploadPhotos extends StatefulWidget {
+class UploadPhotos extends ConsumerStatefulWidget {
   const UploadPhotos({super.key});
 
   @override
-  State<UploadPhotos> createState() => _UploadPhotosState();
+  ConsumerState<UploadPhotos> createState() => _UploadPhotosState();
 }
 
-class _UploadPhotosState extends State<UploadPhotos> {
+class _UploadPhotosState extends ConsumerState<UploadPhotos> {
   List<Map<String, dynamic>> imageFolders = [];
   final picker = ImagePicker();
 
@@ -107,13 +108,9 @@ class _UploadPhotosState extends State<UploadPhotos> {
 
   Future<void> _deleteImage(
       String imageUrl, String folderId, String imageDocId) async {
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-    final authorizedUsers = [
-      "5wwYztIxTifV0EQk3N7dfXsY0jm1",
-      "4Qpgb3aORKhUVXjgT2SNh6zgCWE3"
-    ];
+    final isAdmin = ref.read(isAdminProvider);
 
-    if (authorizedUsers.contains(currentUserId)) {
+    if (isAdmin) {
       try {
         // Delete image from Firebase Storage
         final Reference storageRef =

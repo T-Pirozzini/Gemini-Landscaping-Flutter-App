@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/screens/auth/auth_page.dart';
+import 'package:gemini_landscaping_app/services/notification_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_options.dart';
 
@@ -9,6 +10,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await NotificationService().initialize();
   runApp(ProviderScope(child: MyApp()));
 }
 
@@ -28,6 +30,7 @@ class _MyAppState extends State<MyApp> {
         FocusScope.of(context).requestFocus(FocusNode());
       },
       child: MaterialApp(
+        navigatorKey: NotificationService().navigatorKey,
         title: "Gemini Landscaping",
         debugShowCheckedModeBanner: false,
         theme: ThemeData(

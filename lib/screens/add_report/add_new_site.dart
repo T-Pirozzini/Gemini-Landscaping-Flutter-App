@@ -1,18 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:gemini_landscaping_app/providers/management_company_provider.dart';
 
-class AddNewSiteComponent extends StatefulWidget {
+class AddNewSiteComponent extends ConsumerStatefulWidget {
   final User currentUser;
   final VoidCallback onSiteAdded;
   const AddNewSiteComponent(
       {super.key, required this.currentUser, required this.onSiteAdded});
 
   @override
-  State<AddNewSiteComponent> createState() => _AddNewSiteComponentState();
+  ConsumerState<AddNewSiteComponent> createState() =>
+      _AddNewSiteComponentState();
 }
 
-class _AddNewSiteComponentState extends State<AddNewSiteComponent> {
+class _AddNewSiteComponentState extends ConsumerState<AddNewSiteComponent> {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -30,11 +34,19 @@ class _AddNewSiteComponentState extends State<AddNewSiteComponent> {
           onPressed: () {
             TextEditingController nameController = TextEditingController();
             TextEditingController addressController = TextEditingController();
+            String selectedManagement = '';
+
+            final companiesAsync =
+                ref.read(managementCompaniesStreamProvider);
+            final companyNames = <String>[''];
+            companiesAsync.whenData((companies) {
+              companyNames.addAll(companies.map((c) => c.name));
+            });
 
             showModalBottomSheet(
               isScrollControlled: true,
               context: context,
-              builder: (BuildContext context) {
+              builder: (BuildContext sheetContext) {
                 return StatefulBuilder(
                   builder: (BuildContext context, StateSetter setState) {
                     return Padding(
@@ -88,6 +100,36 @@ class _AddNewSiteComponentState extends State<AddNewSiteComponent> {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: 5),
+                                  Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * .8,
+                                    child: DropdownButtonFormField<String>(
+                                      value: selectedManagement,
+                                      decoration: InputDecoration(
+                                        labelText: 'Management Company',
+                                        border: OutlineInputBorder(),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.green, width: 2.0),
+                                        ),
+                                      ),
+                                      items: companyNames.map((name) {
+                                        return DropdownMenuItem(
+                                          value: name,
+                                          child: Text(
+                                            name.isEmpty ? 'None' : name,
+                                            style: GoogleFonts.montserrat(
+                                                fontSize: 14),
+                                          ),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        setState(() =>
+                                            selectedManagement = value ?? '');
+                                      },
+                                    ),
+                                  ),
                                 ],
                               ),
                               SizedBox(height: 5),
@@ -101,30 +143,24 @@ class _AddNewSiteComponentState extends State<AddNewSiteComponent> {
                                       FirebaseFirestore.instance
                                           .collection('SiteList');
 
-                                  // Create a new document and set its data
                                   DocumentReference docRef =
                                       await siteCollection.add({
                                     'name': nameController.text,
                                     'address': addressController.text,
-                                    'management': "",
+                                    'management': selectedManagement,
                                     'imageUrl': "",
                                     'status': true,
                                     'addedBy': widget.currentUser.email,
                                     'target': 1000,
                                   });
 
-                                  // Update the document with its ID
                                   await docRef.update({'id': docRef.id});
 
-                                  // Clear the text fields
                                   nameController.clear();
                                   addressController.clear();
 
-                                  // Notify the parent widget to refresh the site list
                                   widget.onSiteAdded();
-
-                                  // Close the bottom sheet after adding equipment
-                                  Navigator.pop(context);
+                                  Navigator.pop(sheetContext);
                                 },
                                 child: Text('Add Site'),
                               ),

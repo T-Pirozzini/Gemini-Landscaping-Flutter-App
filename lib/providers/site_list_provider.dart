@@ -6,3 +6,9 @@ final siteListProvider = FutureProvider<List<SiteInfo>>((ref) async {
   final firestoreService = FirestoreService();
   return firestoreService.fetchAllSites();
 });
+
+final allSitesIncludingInactiveProvider =
+    FutureProvider<List<SiteInfo>>((ref) async {
+  final firestoreService = FirestoreService();
+  return firestoreService.fetchAllSitesIncludingInactive();
+});

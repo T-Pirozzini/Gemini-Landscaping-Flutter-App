@@ -37,23 +37,33 @@ class _DatePickerComponentState extends State<DatePickerComponent> {
         if (pickedDate != null) {
           String formattedDate = DateFormat('MMMM d, yyyy').format(pickedDate);
           setState(() {
-            widget.dateController.text =
-                formattedDate; // Update the date in the controller
+            widget.dateController.text = formattedDate;
           });
         }
       },
-      child: Row(
-        children: [
-          Icon(
-            Icons.edit_calendar,
-            color: Colors.green,
-          ),
-          SizedBox(width: 8), // Add some space between the icon and text
-          Text(
-            widget.dateController.text,
-            style: GoogleFonts.montserrat(fontSize: 14),
-          ),
-        ],
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.calendar_today, size: 14, color: Colors.green[700]),
+            SizedBox(width: 6),
+            Text(
+              widget.dateController.text,
+              style: GoogleFonts.montserrat(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(width: 4),
+            Icon(Icons.arrow_drop_down, size: 16, color: Colors.grey[500]),
+          ],
+        ),
       ),
     );
   }

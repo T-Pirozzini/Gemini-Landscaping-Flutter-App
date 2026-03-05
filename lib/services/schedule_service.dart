@@ -177,4 +177,92 @@ class ScheduleService {
       throw Exception('Failed to delete schedule entry: $e');
     }
   }
+
+  /// Fetch all schedule entries for a Mon–Fri week in a single query.
+  /// Returns a map keyed by midnight of each day.
+  Future<Map<DateTime, List<ScheduleEntry>>> fetchSchedulesForWeek(
+      DateTime monday) async {
+    final endOfWeek = monday.add(const Duration(days: 5)); // Saturday 00:00
+
+    final snapshot = await _firestore
+        .collection('Schedules')
+        .where('startTime',
+            isGreaterThanOrEqualTo: monday.toIso8601String())
+        .where('startTime', isLessThan: endOfWeek.toIso8601String())
+        .get();
+
+    final sites = await fetchActiveSites();
+    final siteMap = {for (var site in sites) site.id: site};
+
+    // Initialize map with empty lists for each weekday
+    final Map<DateTime, List<ScheduleEntry>> result = {};
+    for (var i = 0; i < 5; i++) {
+      result[monday.add(Duration(days: i))] = [];
+    }
+
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      final siteId = data['siteId'] as String;
+      final site = siteMap[siteId];
+      if (site == null) continue; // Skip entries with deleted sites
+      final entry = ScheduleEntry.fromMap(doc.id, data, site);
+      final dayKey = DateTime(
+          entry.startTime.year, entry.startTime.month, entry.startTime.day);
+      result.putIfAbsent(dayKey, () => []);
+      result[dayKey]!.add(entry);
+    }
+
+    return result;
+  }
+
+  /// Move an entry to a different date, preserving time-of-day and truck.
+  Future<void> moveEntryToDate(ScheduleEntry entry, DateTime newDate) async {
+    final newStart = DateTime(
+      newDate.year,
+      newDate.month,
+      newDate.day,
+      entry.startTime.hour,
+      entry.startTime.minute,
+    );
+    final newEnd = DateTime(
+      newDate.year,
+      newDate.month,
+      newDate.day,
+      entry.endTime.hour,
+      entry.endTime.minute,
+    );
+
+    final moved = ScheduleEntry(
+      id: entry.id,
+      site: entry.site,
+      startTime: newStart,
+      endTime: newEnd,
+      truckId: entry.truckId,
+      notes: entry.notes,
+      status: entry.status,
+    );
+    await updateScheduleEntry(moved);
+  }
+
+  /// Batch copy entries with a day offset. Creates new documents.
+  /// Sets status to 'pending' on all copies.
+  Future<void> batchCopyEntries(
+      List<ScheduleEntry> entries, int dayOffset) async {
+    final batch = _firestore.batch();
+    for (var entry in entries) {
+      final newStart = entry.startTime.add(Duration(days: dayOffset));
+      final newEnd = entry.endTime.add(Duration(days: dayOffset));
+      final copy = ScheduleEntry(
+        site: entry.site,
+        startTime: newStart,
+        endTime: newEnd,
+        truckId: entry.truckId,
+        notes: entry.notes,
+        status: 'pending',
+      );
+      final ref = _firestore.collection('Schedules').doc();
+      batch.set(ref, copy.toMap());
+    }
+    await batch.commit();
+  }
 }

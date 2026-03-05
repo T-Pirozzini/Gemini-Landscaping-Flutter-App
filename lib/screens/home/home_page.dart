@@ -53,7 +53,8 @@ class _HomeState extends State<Home> {
       ),
       body: pages[currentIndex],
       // Bottom Navigator
-      bottomNavigationBar: CurvedNavigationBar(
+      bottomNavigationBar: SafeArea(
+        child: CurvedNavigationBar(
         height: 60,
         index: currentIndex,
         backgroundColor: Colors.grey.shade200,
@@ -87,6 +88,7 @@ class _HomeState extends State<Home> {
             size: 30,
           ),
         ],
+        ),
       ),
     );
   }

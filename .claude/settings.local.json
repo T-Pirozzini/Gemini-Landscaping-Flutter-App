@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/c/src/flutter/bin/flutter.bat analyze)",
+      "Bash(/c/src/flutter/bin/flutter.bat analyze lib/screens/add_report/service_list.dart lib/screens/add_report/add_site_report.dart lib/screens/print_save_report/print_save_report.dart)"
+    ]
+  }
+}
