@@ -65,6 +65,7 @@ dependencies:
   flutter_timezone: ^5.0.1
   firebase_messaging: ^15.2.5
   flutter_local_notifications: ^19.2.1
+  hand_signature: ^3.0.2
   
 
 dev_dependencies:

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gemini_landscaping_app/models/site_info.dart';
 import 'package:gemini_landscaping_app/providers/site_list_provider.dart';
+import 'package:gemini_landscaping_app/providers/management_company_provider.dart';
 
 class SitePickerComponent extends ConsumerStatefulWidget {
   final String? dropdownValue;
@@ -105,7 +106,7 @@ class _SitePickerComponentState extends ConsumerState<SitePickerComponent> {
   }
 }
 
-class _SitePickerDialog extends StatefulWidget {
+class _SitePickerDialog extends ConsumerStatefulWidget {
   final List<SiteInfo> siteList;
   final ValueChanged<SiteInfo> onSiteSelected;
   final ValueChanged<SiteInfo> onSiteAdded;
@@ -117,10 +118,10 @@ class _SitePickerDialog extends StatefulWidget {
   });
 
   @override
-  State<_SitePickerDialog> createState() => _SitePickerDialogState();
+  ConsumerState<_SitePickerDialog> createState() => _SitePickerDialogState();
 }
 
-class _SitePickerDialogState extends State<_SitePickerDialog> {
+class _SitePickerDialogState extends ConsumerState<_SitePickerDialog> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -275,6 +276,14 @@ class _SitePickerDialogState extends State<_SitePickerDialog> {
   void _showAddSiteSheet() {
     final nameController = TextEditingController();
     final addressController = TextEditingController();
+    String selectedManagement = '';
+
+    // Read management companies from provider
+    final companiesAsync = ref.read(managementCompaniesStreamProvider);
+    final companyNames = <String>[''];
+    companiesAsync.whenData((companies) {
+      companyNames.addAll(companies.map((c) => c.name));
+    });
 
     showModalBottomSheet(
       isScrollControlled: true,
@@ -283,100 +292,134 @@ class _SitePickerDialogState extends State<_SitePickerDialog> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (sheetContext) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
-            left: 24,
-            right: 24,
-            top: 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Add a New Site',
-                style: GoogleFonts.montserrat(
-                    fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+                left: 24,
+                right: 24,
+                top: 24,
               ),
-              SizedBox(height: 16),
-              TextField(
-                controller: nameController,
-                style: GoogleFonts.montserrat(fontSize: 14),
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  labelText: 'Site Name',
-                  labelStyle: GoogleFonts.montserrat(fontSize: 14),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.green, width: 2),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Add a New Site',
+                    style: GoogleFonts.montserrat(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              ),
-              SizedBox(height: 12),
-              TextField(
-                controller: addressController,
-                style: GoogleFonts.montserrat(fontSize: 14),
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  labelText: 'Address',
-                  labelStyle: GoogleFonts.montserrat(fontSize: 14),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.green, width: 2),
+                  SizedBox(height: 16),
+                  TextField(
+                    controller: nameController,
+                    style: GoogleFonts.montserrat(fontSize: 14),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      labelText: 'Site Name',
+                      labelStyle: GoogleFonts.montserrat(fontSize: 14),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide:
+                            BorderSide(color: Colors.green, width: 2),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 59, 82, 73),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  SizedBox(height: 12),
+                  TextField(
+                    controller: addressController,
+                    style: GoogleFonts.montserrat(fontSize: 14),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      labelText: 'Address',
+                      labelStyle: GoogleFonts.montserrat(fontSize: 14),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide:
+                            BorderSide(color: Colors.green, width: 2),
+                      ),
+                    ),
                   ),
-                  padding: EdgeInsets.symmetric(vertical: 14),
-                  textStyle: GoogleFonts.montserrat(
-                      fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                onPressed: () async {
-                  if (nameController.text.trim().isEmpty) return;
+                  SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    value: selectedManagement,
+                    decoration: InputDecoration(
+                      labelText: 'Management Company',
+                      labelStyle: GoogleFonts.montserrat(fontSize: 14),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide:
+                            BorderSide(color: Colors.green, width: 2),
+                      ),
+                    ),
+                    items: companyNames.map((name) {
+                      return DropdownMenuItem(
+                        value: name,
+                        child: Text(
+                          name.isEmpty ? 'None' : name,
+                          style: GoogleFonts.montserrat(fontSize: 14),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setSheetState(
+                          () => selectedManagement = value ?? '');
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 59, 82, 73),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      textStyle: GoogleFonts.montserrat(
+                          fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                    onPressed: () async {
+                      if (nameController.text.trim().isEmpty) return;
 
-                  final docRef = await FirebaseFirestore.instance
-                      .collection('SiteList')
-                      .add({
-                    'name': nameController.text.trim(),
-                    'address': addressController.text.trim(),
-                    'management': '',
-                    'imageUrl': '',
-                    'status': true,
-                    'target': 1000,
-                    'program': true,
-                  });
-                  await docRef.update({'id': docRef.id});
+                      final docRef = await FirebaseFirestore.instance
+                          .collection('SiteList')
+                          .add({
+                        'name': nameController.text.trim(),
+                        'address': addressController.text.trim(),
+                        'management': selectedManagement,
+                        'imageUrl': '',
+                        'status': true,
+                        'target': 1000,
+                        'program': true,
+                      });
+                      await docRef.update({'id': docRef.id});
 
-                  final newSite = SiteInfo(
-                    id: docRef.id,
-                    name: nameController.text.trim(),
-                    address: addressController.text.trim(),
-                    management: '',
-                    imageUrl: '',
-                    status: true,
-                    target: 1000,
-                    program: true,
-                  );
+                      final newSite = SiteInfo(
+                        id: docRef.id,
+                        name: nameController.text.trim(),
+                        address: addressController.text.trim(),
+                        management: selectedManagement,
+                        imageUrl: '',
+                        status: true,
+                        target: 1000,
+                        program: true,
+                      );
 
-                  Navigator.of(sheetContext).pop();
-                  widget.onSiteAdded(newSite);
-                },
-                child: Text('Add Site'),
+                      Navigator.of(sheetContext).pop();
+                      widget.onSiteAdded(newSite);
+                    },
+                    child: Text('Add Site'),
+                  ),
+                  SizedBox(height: 16),
+                ],
               ),
-              SizedBox(height: 16),
-            ],
-          ),
+            );
+          },
         );
       },
     );

@@ -487,6 +487,13 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         reportId = docRef.id;
       }
       await _createEquipmentRepairEntry(reportId);
+      // Auto-detect service program matches (fire-and-forget)
+      FirestoreService().detectServiceProgramMatches(
+        reportId: reportId,
+        siteName: report.siteName,
+        reportDate: report.date,
+        services: report.services,
+      );
       // Prevent dispose() from re-saving as draft
       _draftTimer?.cancel();
       _draftTimer = null;
@@ -617,9 +624,22 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         mainReportId = docRef.id;
       }
       // Submit additional services report (always new doc)
-      await collection.add(additionalReport.toMap());
+      final addDocRef = await collection.add(additionalReport.toMap());
       // Link equipment issue to the main report
       await _createEquipmentRepairEntry(mainReportId);
+      // Auto-detect service program matches (fire-and-forget)
+      FirestoreService().detectServiceProgramMatches(
+        reportId: mainReportId,
+        siteName: mainReport.siteName,
+        reportDate: mainReport.date,
+        services: mainReport.services,
+      );
+      FirestoreService().detectServiceProgramMatches(
+        reportId: addDocRef.id,
+        siteName: additionalReport.siteName,
+        reportDate: additionalReport.date,
+        services: additionalReport.services,
+      );
       // Prevent dispose() from re-saving as draft
       _draftTimer?.cancel();
       _draftTimer = null;
@@ -731,6 +751,13 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         reportId = docRef.id;
       }
       await _createEquipmentRepairEntry(reportId);
+      // Auto-detect service program matches (fire-and-forget)
+      FirestoreService().detectServiceProgramMatches(
+        reportId: reportId,
+        siteName: report.siteName,
+        reportDate: report.date,
+        services: report.services,
+      );
       _draftTimer?.cancel();
       _draftTimer = null;
       if (mounted) Navigator.pop(context);
@@ -1159,8 +1186,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                         SizedBox(
                           width: 16,
                           height: 16,
-                          child:
-                              CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                         SizedBox(width: 8),
                         Text('Loading equipment...',
@@ -1178,19 +1204,18 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
             maxLines: 2,
             decoration: InputDecoration(
               hintText: 'Brief description of issue...',
-              hintStyle: GoogleFonts.montserrat(
-                  fontSize: 12, color: Colors.grey[400]),
+              hintStyle:
+                  GoogleFonts.montserrat(fontSize: 12, color: Colors.grey[400]),
               filled: true,
               fillColor: Colors.white,
               isDense: true,
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8)),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide:
-                    BorderSide(color: Colors.amber[700]!, width: 1.5),
+                borderSide: BorderSide(color: Colors.amber[700]!, width: 1.5),
               ),
             ),
           ),
@@ -1212,15 +1237,12 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                         ? Colors.orange
                         : Colors.amber[700]!;
                 return GestureDetector(
-                  onTap: () =>
-                      setState(() => _equipmentIssuePriority = p),
+                  onTap: () => setState(() => _equipmentIssuePriority = p),
                   child: Container(
                     margin: EdgeInsets.only(right: 6),
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color:
-                          isSelected ? color.withAlpha(25) : Colors.white,
+                      color: isSelected ? color.withAlpha(25) : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected ? color : Colors.grey[300]!,
@@ -1230,9 +1252,8 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                       p[0].toUpperCase() + p.substring(1),
                       style: GoogleFonts.montserrat(
                         fontSize: 11,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w400,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.w400,
                         color: isSelected ? color : Colors.grey[600],
                       ),
                     ),
