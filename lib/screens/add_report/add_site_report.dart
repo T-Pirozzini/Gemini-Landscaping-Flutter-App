@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,7 +17,9 @@ import 'package:gemini_landscaping_app/screens/add_report/service_list.dart';
 import 'package:gemini_landscaping_app/screens/add_report/site_picker.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:gemini_landscaping_app/models/repair_entry.dart';
+import 'package:gemini_landscaping_app/services/photo_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 class AddSiteReport extends ConsumerStatefulWidget {
@@ -85,6 +88,10 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   String? _linkedEquipmentId;
   final _equipmentIssueController = TextEditingController();
   String _equipmentIssuePriority = 'medium';
+
+  // Photos
+  final List<File> _pickedPhotos = [];
+  final _imagePicker = ImagePicker();
 
   // Draft tracking
   String? _draftId;
@@ -417,6 +424,72 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
     return true;
   }
 
+  // ─── Photo picking ──────────────────────────────────
+  Future<void> _pickPhoto(ImageSource source) async {
+    final picked = await _imagePicker.pickImage(
+      source: source,
+      maxWidth: 1200,
+      imageQuality: 85,
+    );
+    if (picked != null) {
+      setState(() => _pickedPhotos.add(File(picked.path)));
+    }
+  }
+
+  void _showPhotoSourceSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take Photo'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickPhoto(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from Gallery'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _pickPhoto(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Upload picked photos after report is saved. Fire-and-forget.
+  void _uploadReportPhotos(String reportId) {
+    if (_pickedPhotos.isEmpty) return;
+    final siteId = selectedSite?.id;
+    final siteName = dropdownValue ?? '';
+    final uploadedBy = currentUser.displayName ?? currentUser.email ?? '';
+    final uploadedByUid = currentUser.uid;
+    final files = List<File>.from(_pickedPhotos);
+
+    // Fire-and-forget — don't block navigation
+    PhotoService().uploadMultiple(
+      files: files,
+      category: 'site',
+      uploadedBy: uploadedBy,
+      uploadedByUid: uploadedByUid,
+      siteId: siteId,
+      siteName: siteName,
+      reportId: reportId,
+      tags: ['report'],
+    );
+  }
+
   void _showError(String msg) {
     showDialog(
       context: context,
@@ -487,6 +560,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         reportId = docRef.id;
       }
       await _createEquipmentRepairEntry(reportId);
+      _uploadReportPhotos(reportId);
       // Auto-detect service program matches (fire-and-forget)
       FirestoreService().detectServiceProgramMatches(
         reportId: reportId,
@@ -627,6 +701,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
       final addDocRef = await collection.add(additionalReport.toMap());
       // Link equipment issue to the main report
       await _createEquipmentRepairEntry(mainReportId);
+      _uploadReportPhotos(mainReportId);
       // Auto-detect service program matches (fire-and-forget)
       FirestoreService().detectServiceProgramMatches(
         reportId: mainReportId,
@@ -751,6 +826,7 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
         reportId = docRef.id;
       }
       await _createEquipmentRepairEntry(reportId);
+      _uploadReportPhotos(reportId);
       // Auto-detect service program matches (fire-and-forget)
       FirestoreService().detectServiceProgramMatches(
         reportId: reportId,
@@ -1769,6 +1845,122 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
                         ],
                       ),
                     ),
+                  SizedBox(height: 16),
+
+                  // === PHOTOS (optional) ===
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.camera_alt,
+                                size: 16, color: Colors.grey[600]),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Site Photos',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '(optional)',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 11,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                            const Spacer(),
+                            GestureDetector(
+                              onTap: _showPhotoSourceSheet,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(255, 59, 82, 73),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.add,
+                                        size: 14, color: Colors.white),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Add',
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (_pickedPhotos.isNotEmpty) ...[
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            height: 80,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: _pickedPhotos.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(width: 8),
+                              itemBuilder: (context, index) {
+                                return Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.file(
+                                        _pickedPhotos[index],
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 2,
+                                      right: 2,
+                                      child: GestureDetector(
+                                        onTap: () => setState(() =>
+                                            _pickedPhotos.removeAt(index)),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.black54,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          padding: const EdgeInsets.all(3),
+                                          child: const Icon(Icons.close,
+                                              size: 12, color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                          Text(
+                            '${_pickedPhotos.length} photo${_pickedPhotos.length == 1 ? '' : 's'} will upload with report',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 10,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                   SizedBox(height: 16),
                 ],
               ),

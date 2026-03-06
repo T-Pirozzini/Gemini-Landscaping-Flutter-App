@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/screens/field_quote/field_quote_list.dart';
 import 'package:gemini_landscaping_app/screens/utility_screens/announcement_page.dart';
 import 'package:gemini_landscaping_app/screens/utility_screens/equipment_page.dart';
-import 'package:gemini_landscaping_app/screens/utility_screens/uploadPhotos.dart';
+import 'package:gemini_landscaping_app/screens/photos/photo_browser.dart';
 
 class UtilityController extends StatefulWidget {
   const UtilityController({super.key});
@@ -29,7 +29,7 @@ class UtilityControllerState extends State<UtilityController> {
             tabs: [
               Tab(text: 'Announcements'),
               Tab(text: 'Quotes'),
-              Tab(text: 'Upload Photos'),
+              Tab(text: 'Photos'),
               Tab(text: 'Equipment'),
             ],
           ),
@@ -38,7 +38,7 @@ class UtilityControllerState extends State<UtilityController> {
           children: [
             AnnouncementPage(),
             FieldQuoteList(),
-            UploadPhotos(),
+            PhotoBrowser(),
             EquipmentPage(),
           ],
         ),

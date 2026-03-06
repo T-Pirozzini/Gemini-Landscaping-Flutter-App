@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:gemini_landscaping_app/models/schedule_model.dart';
 import 'package:gemini_landscaping_app/screens/add_report/add_site_report.dart';
+import 'package:gemini_landscaping_app/screens/photos/upload_photo_sheet.dart';
 import 'package:gemini_landscaping_app/services/schedule_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -217,6 +218,22 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
           ],
         );
       },
+    );
+  }
+
+  void _showAttachPhotosSheet(BuildContext context) {
+    if (widget.entry.id == null) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => UploadPhotoSheet(
+        preselectedSiteId: widget.entry.site.id,
+        preselectedSiteName: widget.entry.site.name,
+        preselectedCategory: 'instruction',
+      ),
     );
   }
 
@@ -464,7 +481,7 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
                           child: Icon(Icons.more_vert,
                               color: Colors.white, size: 14),
                         ),
-                        // Pink dot when notes exist
+                        // Pink dot when notes or photos exist
                         if (hasNotes)
                           Positioned(
                             top: 1,
@@ -508,6 +525,13 @@ class _DraggableScheduleEntryState extends State<DraggableScheduleEntry> {
                   child: Text('View Site Address'),
                   onPressed: () => _showSiteAddressDialog(context),
                 ),
+                if (widget.userRole == 'admin')
+                  MenuItemButton(
+                    leadingIcon:
+                        Icon(Icons.add_a_photo, color: Colors.blue[600]),
+                    child: Text('Attach Work Photos'),
+                    onPressed: () => _showAttachPhotosSheet(context),
+                  ),
                 if (widget.userRole == 'admin')
                   MenuItemButton(
                     leadingIcon: Icon(Icons.delete, color: Colors.red.shade400),

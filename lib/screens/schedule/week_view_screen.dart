@@ -46,6 +46,12 @@ class WeekViewBodyState extends State<WeekViewBody> {
   DateTime? get selectedDay => _selectedDay;
 
   @override
+  void dispose() {
+    _gridScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     _userRole = widget.userRole;
@@ -61,6 +67,7 @@ class WeekViewBodyState extends State<WeekViewBody> {
     if (oldWidget.monday != widget.monday) {
       _weekDays = _computeWeekDays(widget.monday);
       _selectedDay = _findTodayInWeek() ?? _weekDays.first;
+      _gridScrollInitialized = false;
       _loadWeekData();
     }
   }
@@ -422,7 +429,10 @@ class WeekViewBodyState extends State<WeekViewBody> {
             return Padding(
               padding: const EdgeInsets.only(right: 6),
               child: GestureDetector(
-                onTap: () => setState(() => _gridTruckId = truck.id),
+                onTap: () => setState(() {
+                  _gridTruckId = truck.id;
+                  _gridScrollInitialized = false;
+                }),
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -583,10 +593,51 @@ class WeekViewBodyState extends State<WeekViewBody> {
     );
   }
 
-  // === WEEK GRID (top half) ===
+  // === WEEK GRID (top half) — time-based layout ===
+
+  static const _gridStartHour = 6; // 6 AM
+  static const _gridEndHour = 18; // 6 PM
+  static const _hourHeight = 40.0;
+  static const _timeColWidth = 36.0;
+  static const _gridTotalHeight =
+      (_gridEndHour - _gridStartHour) * _hourHeight;
+
+  final ScrollController _gridScrollController = ScrollController();
+  bool _gridScrollInitialized = false;
+
+  double _timeToY(DateTime time) {
+    final hoursFrac = time.hour + time.minute / 60.0 - _gridStartHour;
+    return hoursFrac * _hourHeight;
+  }
+
+  void _scrollToRelevantTime() {
+    if (_gridScrollInitialized) return;
+    _gridScrollInitialized = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_gridScrollController.hasClients) return;
+      // Scroll so the earliest entry (or current time) is near the top
+      double targetY;
+      final allVisible = _weekSchedules.values
+          .expand((list) => list)
+          .where((e) =>
+              _gridTruckId == null || e.truckId == _gridTruckId)
+          .toList();
+      if (allVisible.isNotEmpty) {
+        allVisible.sort((a, b) => a.startTime.compareTo(b.startTime));
+        targetY = _timeToY(allVisible.first.startTime) - 20;
+      } else {
+        targetY = _timeToY(DateTime.now()) - 40;
+      }
+      targetY = targetY.clamp(
+          0.0, _gridScrollController.position.maxScrollExtent);
+      _gridScrollController.jumpTo(targetY);
+    });
+  }
+
   Widget _buildWeekGrid() {
+    _scrollToRelevantTime();
     final screenWidth = MediaQuery.of(context).size.width;
-    final dayColumnWidth = screenWidth / 5;
+    final dayColumnWidth = (screenWidth - _timeColWidth) / 5;
 
     return Container(
       color: Colors.white,
@@ -594,180 +645,262 @@ class WeekViewBodyState extends State<WeekViewBody> {
         children: [
           // Day headers
           Row(
-            children: _weekDays.map((day) {
-              final isToday = _isToday(day);
-              final isSelected = _isSelectedDay(day);
-              return GestureDetector(
-                onTap: () => setState(() => _selectedDay = day),
-                onLongPress: _isAdmin ? () => _showCopyDaySheet(day) : null,
-                child: Container(
-                  width: dayColumnWidth,
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? _darkGreen.withValues(alpha: 0.1)
-                        : Colors.transparent,
-                    border: Border(
-                      bottom: BorderSide(
-                        color: isSelected ? _darkGreen : Colors.transparent,
-                        width: 2,
+            children: [
+              SizedBox(width: _timeColWidth),
+              ..._weekDays.map((day) {
+                final isToday = _isToday(day);
+                final isSelected = _isSelectedDay(day);
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedDay = day),
+                  onLongPress:
+                      _isAdmin ? () => _showCopyDaySheet(day) : null,
+                  child: Container(
+                    width: dayColumnWidth,
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? _darkGreen.withValues(alpha: 0.1)
+                          : Colors.transparent,
+                      border: Border(
+                        bottom: BorderSide(
+                          color:
+                              isSelected ? _darkGreen : Colors.transparent,
+                          width: 2,
+                        ),
                       ),
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        DateFormat('E').format(day),
-                        style: GoogleFonts.montserrat(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: isToday
-                              ? const Color.fromARGB(255, 31, 182, 77)
-                              : Colors.grey[600],
-                        ),
-                      ),
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: isToday
-                              ? const Color.fromARGB(255, 31, 182, 77)
-                              : Colors.transparent,
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${day.day}',
+                    child: Column(
+                      children: [
+                        Text(
+                          DateFormat('E').format(day),
                           style: GoogleFonts.montserrat(
-                            fontSize: 12,
+                            fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: isToday ? Colors.white : Colors.black87,
+                            color: isToday
+                                ? const Color.fromARGB(255, 31, 182, 77)
+                                : Colors.grey[600],
                           ),
                         ),
-                      ),
-                      if (_isAdmin)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 2),
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: isToday
+                                ? const Color.fromARGB(255, 31, 182, 77)
+                                : Colors.transparent,
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
                           child: Text(
-                            'hold to copy',
+                            '${day.day}',
                             style: GoogleFonts.montserrat(
-                              fontSize: 7,
-                              color: Colors.grey[400],
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color:
+                                  isToday ? Colors.white : Colors.black87,
                             ),
                           ),
                         ),
-                    ],
+                        if (_isAdmin)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(
+                              'hold to copy',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 7,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }),
+            ],
           ),
-          // Entry blocks per day — each column is a DragTarget
+          // Scrollable time-based grid
           SizedBox(
-            height: 200,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: _weekDays.asMap().entries.map((mapEntry) {
-                final idx = mapEntry.key;
-                final day = mapEntry.value;
-                final allEntries = _weekSchedules[day] ?? [];
-                final entries = _gridTruckId == null
-                    ? allEntries
-                    : allEntries.where((e) => e.truckId == _gridTruckId).toList();
-                final isSelected = _isSelectedDay(day);
-                final isHovered = _hoveredDayIndex == idx;
-
-                return DragTarget<ScheduleEntry>(
-                  onWillAcceptWithDetails: (details) {
-                    setState(() => _hoveredDayIndex = idx);
-                    return true;
-                  },
-                  onLeave: (_) {
-                    setState(() => _hoveredDayIndex = null);
-                  },
-                  onAcceptWithDetails: (details) {
-                    setState(() => _hoveredDayIndex = null);
-                    _moveEntryToDay(details.data, day);
-                  },
-                  builder: (context, candidateData, rejectedData) {
-                    return Container(
-                      width: dayColumnWidth,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 2, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isHovered
-                            ? Colors.green.withValues(alpha: 0.1)
-                            : isSelected
-                                ? _darkGreen.withValues(alpha: 0.05)
-                                : Colors.transparent,
-                        border: Border(
-                          right: BorderSide(
-                              color: Colors.grey[200]!, width: 0.5),
+            height: 220,
+            child: SingleChildScrollView(
+              controller: _gridScrollController,
+              child: SizedBox(
+                height: _gridTotalHeight,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Time labels
+                    SizedBox(
+                      width: _timeColWidth,
+                      height: _gridTotalHeight,
+                      child: Stack(
+                        children: List.generate(
+                          _gridEndHour - _gridStartHour,
+                          (i) {
+                            final hour = _gridStartHour + i;
+                            final label = hour == 12
+                                ? '12 PM'
+                                : hour > 12
+                                    ? '${hour - 12} PM'
+                                    : '$hour AM';
+                            return Positioned(
+                              top: i * _hourHeight - 6,
+                              left: 0,
+                              right: 2,
+                              child: Text(
+                                label,
+                                textAlign: TextAlign.right,
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 8,
+                                  color: Colors.grey[400],
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
-                      child: entries.isEmpty
-                          ? Center(
-                              child: isHovered
-                                  ? Icon(Icons.add_circle_outline,
-                                      size: 20,
-                                      color: Colors.green.withValues(
-                                          alpha: 0.4))
-                                  : Text(
-                                      '–',
-                                      style: GoogleFonts.montserrat(
-                                          fontSize: 14,
-                                          color: Colors.grey[300]),
+                    ),
+                    // Day columns with positioned entry blocks
+                    ..._weekDays.asMap().entries.map((mapEntry) {
+                      final idx = mapEntry.key;
+                      final day = mapEntry.value;
+                      final allEntries = _weekSchedules[day] ?? [];
+                      final entries = _gridTruckId == null
+                          ? allEntries
+                          : allEntries
+                              .where((e) => e.truckId == _gridTruckId)
+                              .toList();
+                      final isSelected = _isSelectedDay(day);
+                      final isHovered = _hoveredDayIndex == idx;
+
+                      return DragTarget<ScheduleEntry>(
+                        onWillAcceptWithDetails: (details) {
+                          setState(() => _hoveredDayIndex = idx);
+                          return true;
+                        },
+                        onLeave: (_) {
+                          setState(() => _hoveredDayIndex = null);
+                        },
+                        onAcceptWithDetails: (details) {
+                          setState(() => _hoveredDayIndex = null);
+                          _moveEntryToDay(details.data, day);
+                        },
+                        builder: (context, candidateData, rejectedData) {
+                          return Container(
+                            width: dayColumnWidth,
+                            height: _gridTotalHeight,
+                            decoration: BoxDecoration(
+                              color: isHovered
+                                  ? Colors.green
+                                      .withValues(alpha: 0.08)
+                                  : isSelected
+                                      ? _darkGreen
+                                          .withValues(alpha: 0.04)
+                                      : Colors.transparent,
+                              border: Border(
+                                right: BorderSide(
+                                    color: Colors.grey[200]!,
+                                    width: 0.5),
+                              ),
+                            ),
+                            child: Stack(
+                              children: [
+                                // Hour grid lines
+                                ...List.generate(
+                                  _gridEndHour - _gridStartHour,
+                                  (i) => Positioned(
+                                    top: i * _hourHeight,
+                                    left: 0,
+                                    right: 0,
+                                    child: Divider(
+                                      height: 0.5,
+                                      thickness: 0.5,
+                                      color: Colors.grey[200],
                                     ),
-                            )
-                          : SingleChildScrollView(
-                              child: Column(
-                                children: entries.map((entry) {
+                                  ),
+                                ),
+                                // Current time red line
+                                if (_isToday(day))
+                                  Positioned(
+                                    top: _timeToY(DateTime.now()),
+                                    left: 0,
+                                    right: 0,
+                                    child: Container(
+                                      height: 1.5,
+                                      color: Colors.red
+                                          .withValues(alpha: 0.7),
+                                    ),
+                                  ),
+                                // Entry blocks positioned by time
+                                ...entries.map((entry) {
+                                  final top =
+                                      _timeToY(entry.startTime)
+                                          .clamp(0.0, _gridTotalHeight);
+                                  final bottom =
+                                      _timeToY(entry.endTime)
+                                          .clamp(0.0, _gridTotalHeight);
+                                  final height = (bottom - top)
+                                      .clamp(14.0, _gridTotalHeight);
                                   final truck = _activeTrucks
-                                      .where((t) => t.id == entry.truckId)
+                                      .where(
+                                          (t) => t.id == entry.truckId)
                                       .toList();
                                   final truckColor = truck.isNotEmpty
                                       ? truck.first.color
                                       : Colors.grey;
-                                  final durationMin = entry.endTime
-                                      .difference(entry.startTime)
-                                      .inMinutes;
-                                  final blockHeight =
-                                      (durationMin / 30 * 12)
-                                          .clamp(16.0, 40.0);
 
-                                  return Container(
-                                    width: double.infinity,
-                                    height: blockHeight,
-                                    margin:
-                                        const EdgeInsets.only(bottom: 2),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 3, vertical: 1),
-                                    decoration: BoxDecoration(
-                                      color: truckColor.withValues(
-                                          alpha: 0.6),
-                                      borderRadius:
-                                          BorderRadius.circular(3),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      entry.site.name,
-                                      style: GoogleFonts.montserrat(
-                                        fontSize: 8,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white,
+                                  return Positioned(
+                                    top: top,
+                                    left: 1,
+                                    right: 1,
+                                    height: height,
+                                    child: GestureDetector(
+                                      onTap: _isAdmin
+                                          ? () => _showEntryActions(entry)
+                                          : null,
+                                      child: Container(
+                                        padding: const EdgeInsets
+                                            .symmetric(
+                                            horizontal: 2, vertical: 1),
+                                        decoration: BoxDecoration(
+                                          color: truckColor.withValues(
+                                              alpha: 0.7),
+                                          borderRadius:
+                                              BorderRadius.circular(3),
+                                          border: Border.all(
+                                            color: truckColor.withValues(
+                                                alpha: 0.9),
+                                            width: 0.5,
+                                          ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Text(
+                                          entry.site.name,
+                                          style:
+                                              GoogleFonts.montserrat(
+                                            fontSize: 7,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.white,
+                                          ),
+                                          maxLines:
+                                              height > 24 ? 2 : 1,
+                                          overflow:
+                                              TextOverflow.ellipsis,
+                                          textAlign: TextAlign.center,
+                                        ),
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.center,
                                     ),
                                   );
-                                }).toList(),
-                              ),
+                                }),
+                              ],
                             ),
-                    );
-                  },
-                );
-              }).toList(),
+                          );
+                        },
+                      );
+                    }),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
