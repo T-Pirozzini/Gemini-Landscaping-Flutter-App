@@ -1,5 +1,6 @@
 class SiteInfo {
   final String address;
+  final String city;
   final String imageUrl;
   final String management;
   final String name;
@@ -10,6 +11,7 @@ class SiteInfo {
 
   const SiteInfo({
     required this.address,
+    this.city = '',
     required this.imageUrl,
     required this.management,
     required this.name,
@@ -23,6 +25,7 @@ class SiteInfo {
   Map<String, dynamic> toMap() {
     return {
       'address': address,
+      'city': city,
       'imageUrl': imageUrl,
       'management': management,
       'name': name,
@@ -37,6 +40,7 @@ class SiteInfo {
   factory SiteInfo.fromMap(Map<String, dynamic> map, String id) {
     return SiteInfo(
       address: map['address'] ?? '',
+      city: map['city'] ?? '',
       imageUrl: map['imageUrl'] ?? '',
       management: map['management'] ?? '',
       name: map['name'] ?? '',

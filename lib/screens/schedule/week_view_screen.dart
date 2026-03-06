@@ -192,6 +192,34 @@ class WeekViewBodyState extends State<WeekViewBody> {
                 ),
               ),
               const SizedBox(height: 12),
+              // Copy to same day next week
+              ListTile(
+                leading: Icon(Icons.next_week, color: Colors.blue[700]),
+                title: Text(
+                    '${DateFormat('EEEE').format(sourceDay)} next week'),
+                subtitle: Text(
+                  DateFormat('MMM d').format(
+                      sourceDay.add(const Duration(days: 7))),
+                  style: TextStyle(color: Colors.grey[500]),
+                ),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final nextWeekDay =
+                      sourceDay.add(const Duration(days: 7));
+                  // Check existing entries on target day
+                  final nextMonday =
+                      _weekDays.first.add(const Duration(days: 7));
+                  final nextWeekSchedules =
+                      await _service.fetchSchedulesForWeek(nextMonday);
+                  final targetEntries =
+                      nextWeekSchedules[nextWeekDay] ?? [];
+                  if (!mounted) return;
+                  _confirmCopyDay(sourceDay, nextWeekDay,
+                      sourceEntries, targetEntries.length);
+                },
+              ),
+              const Divider(),
+              // Copy to other days this week
               ..._weekDays.where((d) => d != sourceDay).map((targetDay) {
                 final targetEntries = _weekSchedules[targetDay] ?? [];
                 return ListTile(
@@ -349,8 +377,122 @@ class WeekViewBodyState extends State<WeekViewBody> {
     }
   }
 
+  // --- Change truck ---
+  void _showChangeTruckSheet(ScheduleEntry entry) {
+    final currentTruckId = entry.truckId;
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Assign "${entry.site.name}" to...',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ..._activeTrucks.map((truck) {
+                  final isCurrent = truck.id == currentTruckId;
+                  return ListTile(
+                    leading: Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: truck.color,
+                        shape: BoxShape.circle,
+                        border: isCurrent
+                            ? Border.all(color: Colors.black, width: 2)
+                            : null,
+                      ),
+                    ),
+                    title: Text(truck.name),
+                    trailing: isCurrent
+                        ? const Icon(Icons.check, color: Colors.green)
+                        : null,
+                    onTap: isCurrent
+                        ? null
+                        : () async {
+                            Navigator.pop(context);
+                            await _service.updateScheduleEntry(
+                              ScheduleEntry(
+                                id: entry.id,
+                                site: entry.site,
+                                startTime: entry.startTime,
+                                endTime: entry.endTime,
+                                truckId: truck.id,
+                                status: entry.status,
+                                notes: entry.notes,
+                              ),
+                            );
+                            await _loadWeekData();
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      'Moved ${entry.site.name} to ${truck.name}'),
+                                ),
+                              );
+                            }
+                          },
+                  );
+                }),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // --- Delete entry ---
+  Future<void> _deleteEntry(ScheduleEntry entry) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Delete Entry', style: GoogleFonts.montserrat()),
+        content: Text(
+          'Delete "${entry.site.name}" on ${DateFormat('EEE, MMM d').format(entry.startTime)}?',
+          style: GoogleFonts.roboto(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await _service.deleteScheduleEntry(entry.id!);
+    await _loadWeekData();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Deleted ${entry.site.name}')),
+      );
+    }
+  }
+
   // --- Entry action sheet (admin) ---
   void _showEntryActions(ScheduleEntry entry) {
+    final truck = _activeTrucks.where((t) => t.id == entry.truckId).toList();
+    final truckName = truck.isNotEmpty ? truck.first.name : 'Unassigned';
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -366,12 +508,24 @@ class WeekViewBodyState extends State<WeekViewBody> {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Text(
-                    entry.site.name,
-                    style: GoogleFonts.montserrat(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  child: Column(
+                    children: [
+                      Text(
+                        entry.site.name,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        truckName,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 11,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 ListTile(
@@ -384,12 +538,30 @@ class WeekViewBodyState extends State<WeekViewBody> {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.date_range, color: Colors.blue[700]),
+                  leading: Icon(Icons.local_shipping, color: Colors.blue[700]),
+                  title: const Text('Change truck'),
+                  subtitle: Text('Currently: $truckName'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showChangeTruckSheet(entry);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.date_range, color: Colors.orange[700]),
                   title: const Text('Move to another date...'),
                   subtitle: const Text('Move to any day, including next week'),
                   onTap: () {
                     Navigator.pop(context);
                     _showMoveToDatePicker(entry);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.delete_outline, color: Colors.red),
+                  title: const Text('Delete entry',
+                      style: TextStyle(color: Colors.red)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _deleteEntry(entry);
                   },
                 ),
               ],
@@ -849,47 +1021,91 @@ class WeekViewBodyState extends State<WeekViewBody> {
                                       ? truck.first.color
                                       : Colors.grey;
 
+                                  final entryBlock = Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 2, vertical: 1),
+                                    decoration: BoxDecoration(
+                                      color: truckColor.withValues(
+                                          alpha: 0.7),
+                                      borderRadius:
+                                          BorderRadius.circular(3),
+                                      border: Border.all(
+                                        color: truckColor.withValues(
+                                            alpha: 0.9),
+                                        width: 0.5,
+                                      ),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      entry.site.name,
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 7,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white,
+                                      ),
+                                      maxLines:
+                                          height > 24 ? 2 : 1,
+                                      overflow:
+                                          TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  );
+
                                   return Positioned(
                                     top: top,
                                     left: 1,
                                     right: 1,
                                     height: height,
-                                    child: GestureDetector(
-                                      onTap: _isAdmin
-                                          ? () => _showEntryActions(entry)
-                                          : null,
-                                      child: Container(
-                                        padding: const EdgeInsets
-                                            .symmetric(
-                                            horizontal: 2, vertical: 1),
-                                        decoration: BoxDecoration(
-                                          color: truckColor.withValues(
-                                              alpha: 0.7),
-                                          borderRadius:
-                                              BorderRadius.circular(3),
-                                          border: Border.all(
-                                            color: truckColor.withValues(
-                                                alpha: 0.9),
-                                            width: 0.5,
-                                          ),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          entry.site.name,
-                                          style:
-                                              GoogleFonts.montserrat(
-                                            fontSize: 7,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.white,
-                                          ),
-                                          maxLines:
-                                              height > 24 ? 2 : 1,
-                                          overflow:
-                                              TextOverflow.ellipsis,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    ),
+                                    child: _isAdmin
+                                        ? GestureDetector(
+                                            onTap: () =>
+                                                _showEntryActions(entry),
+                                            child: LongPressDraggable<
+                                                ScheduleEntry>(
+                                              data: entry,
+                                              delay: const Duration(
+                                                  milliseconds: 300),
+                                              feedback: Material(
+                                                elevation: 6,
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                                child: Container(
+                                                  width: 120,
+                                                  padding:
+                                                      const EdgeInsets.all(6),
+                                                  decoration: BoxDecoration(
+                                                    color: truckColor
+                                                        .withValues(
+                                                            alpha: 0.85),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            6),
+                                                  ),
+                                                  child: Text(
+                                                    entry.site.name,
+                                                    style: GoogleFonts
+                                                        .montserrat(
+                                                      fontSize: 10,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Colors.white,
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow
+                                                        .ellipsis,
+                                                    textAlign:
+                                                        TextAlign.center,
+                                                  ),
+                                                ),
+                                              ),
+                                              childWhenDragging: Opacity(
+                                                opacity: 0.3,
+                                                child: entryBlock,
+                                              ),
+                                              child: entryBlock,
+                                            ),
+                                          )
+                                        : entryBlock,
                                   );
                                 }),
                               ],

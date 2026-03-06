@@ -23,7 +23,14 @@ class AddSiteDialog extends ConsumerStatefulWidget {
 
 class _AddSiteDialogState extends ConsumerState<AddSiteDialog> {
   final _formKey = GlobalKey<FormState>();
+  final _cityController = TextEditingController();
   String _selectedManagement = '';
+
+  @override
+  void dispose() {
+    _cityController.dispose();
+    super.dispose();
+  }
 
   Future<void> _saveSite(BuildContext context) async {
     try {
@@ -34,6 +41,7 @@ class _AddSiteDialogState extends ConsumerState<AddSiteDialog> {
         address: widget.addressController.text.trim().isEmpty
             ? ""
             : widget.addressController.text.trim(),
+        city: _cityController.text.trim(),
         imageUrl: "",
         management: _selectedManagement,
         name: widget.nameController.text.trim(),
@@ -95,7 +103,15 @@ class _AddSiteDialogState extends ConsumerState<AddSiteDialog> {
               TextFormField(
                 controller: widget.addressController,
                 decoration: const InputDecoration(
-                  labelText: 'Address (Optional)',
+                  labelText: 'Street Address (Optional)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                controller: _cityController,
+                decoration: const InputDecoration(
+                  labelText: 'City (Optional)',
                   border: OutlineInputBorder(),
                 ),
               ),

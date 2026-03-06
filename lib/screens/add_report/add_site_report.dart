@@ -242,17 +242,19 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   }
 
   // --- Draft auto-save ---
+  bool _discarded = false;
+
   bool get _hasContent =>
       dropdownValue != null || _employees.any((e) => e['selectedName'] != null);
 
   void _scheduleDraftSave() {
-    if (!_hasContent) return;
+    if (!_hasContent || _discarded) return;
     _draftTimer?.cancel();
     _draftTimer = Timer(Duration(seconds: 3), () => _saveDraftNow());
   }
 
   Future<void> _saveDraftNow() async {
-    if (!_hasContent) return;
+    if (!_hasContent || _discarded) return;
 
     final phase = _buildPhaseForDraft();
 
@@ -348,9 +350,9 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
       await _saveDraftNow();
       if (mounted) Navigator.pop(context);
     } else if (action == 'discard') {
-      if (_draftId != null &&
-          _draftId!.isNotEmpty &&
-          widget.draftReport == null) {
+      _draftTimer?.cancel();
+      _discarded = true;
+      if (_draftId != null && _draftId!.isNotEmpty) {
         await _firestoreService.deleteDraft(_draftId!);
       }
       if (mounted) Navigator.pop(context);
@@ -965,8 +967,8 @@ class _AddSiteReportState extends ConsumerState<AddSiteReport> {
   @override
   void dispose() {
     _draftTimer?.cancel();
-    // Flush any pending draft save
-    if (_hasContent && _draftTimer != null) {
+    // Flush any pending draft save (skip if user chose to discard)
+    if (_hasContent && !_discarded) {
       _saveDraftNow();
     }
     dateController.dispose();

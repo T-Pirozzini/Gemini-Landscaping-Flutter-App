@@ -34,6 +34,7 @@ class _AddNewSiteComponentState extends ConsumerState<AddNewSiteComponent> {
           onPressed: () {
             TextEditingController nameController = TextEditingController();
             TextEditingController addressController = TextEditingController();
+            TextEditingController cityController = TextEditingController();
             String selectedManagement = '';
 
             final companiesAsync =
@@ -92,7 +93,23 @@ class _AddNewSiteComponentState extends ConsumerState<AddNewSiteComponent> {
                                       controller: addressController,
                                       decoration: InputDecoration(
                                         border: OutlineInputBorder(),
-                                        labelText: 'Address',
+                                        labelText: 'Street Address',
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                              color: Colors.green, width: 2.0),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 5),
+                                  Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * .6,
+                                    child: TextField(
+                                      controller: cityController,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        labelText: 'City (Optional)',
                                         focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
                                               color: Colors.green, width: 2.0),
@@ -147,6 +164,7 @@ class _AddNewSiteComponentState extends ConsumerState<AddNewSiteComponent> {
                                       await siteCollection.add({
                                     'name': nameController.text,
                                     'address': addressController.text,
+                                    'city': cityController.text.trim(),
                                     'management': selectedManagement,
                                     'imageUrl': "",
                                     'status': true,

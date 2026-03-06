@@ -8,6 +8,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:gemini_landscaping_app/models/equipment_model.dart';
 import 'package:gemini_landscaping_app/models/schedule_model.dart';
 import 'package:gemini_landscaping_app/models/site_info.dart';
+import 'package:gemini_landscaping_app/screens/schedule/components/add_site_dialog.dart';
 import 'package:gemini_landscaping_app/screens/schedule/components/time_column.dart';
 import 'package:gemini_landscaping_app/screens/schedule/components/truck_column.dart';
 import 'package:gemini_landscaping_app/screens/schedule/components/truck_manager_dialog.dart';
@@ -606,6 +607,21 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       preselectedStart: startTime,
       lockTruck: true,
       lockStart: true,
+    );
+  }
+
+  void _showAddSiteDialog(BuildContext context) {
+    final nameController = TextEditingController();
+    final addressController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (_) => AddSiteDialog(
+        nameController: nameController,
+        addressController: addressController,
+        onSuccess: () {
+          _loadData();
+        },
+      ),
     );
   }
 
@@ -1298,6 +1314,14 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             backgroundColor: _darkGreen,
             foregroundColor: Colors.white,
             onTap: () => _showSitePicker(context),
+          ),
+        if (userRole == 'admin')
+          SpeedDialChild(
+            child: const Icon(Icons.add_location_alt, color: Colors.white, size: 24),
+            label: 'Add New Site',
+            backgroundColor: _darkGreen,
+            foregroundColor: Colors.white,
+            onTap: () => _showAddSiteDialog(context),
           ),
         if (userRole == 'admin')
           SpeedDialChild(
